@@ -4,25 +4,31 @@ Following Kitchenham & Charters, *Guidelines for performing Systematic Literatur
 
 ## Databases
 
-- ACM Digital Library
-- IEEE Xplore
-- Scopus
-- Semantic Web Journal (open archive)
-- Google Scholar (forward/backward snowballing only)
+- OpenAlex (API, title-and-abstract search, computer-science field filter) — run by `python -m ontostudy.slr`; covers ACM, IEEE, Springer and Elsevier metadata
+- ACM Digital Library and IEEE Xplore — manual runs of the same strings, to check OpenAlex coverage on a sample
+- Google Scholar — forward/backward snowballing from the included set only
+
+The automated run is the primary source so that hit counts and candidate lists are reproducible from the repository. The manual runs are a coverage check, not a second candidate source.
 
 ## Search strings
 
 | id | string | scope |
 |----|--------|-------|
-| S1 | ("ontology" OR "knowledge graph") AND ("quality" OR "evaluation" OR "metric") | RQ1 |
-| S2 | ("ontology engineering" OR "knowledge graph construction") AND ("industry" OR "enterprise" OR "lessons") | RQ2 |
-| S3 | ("graph query" OR "SPARQL" OR "Cypher") AND ("complexity" OR "schema design" OR "normalization") | RQ3 |
+| S1 | (ontology OR "knowledge graph") AND ("quality metric" OR "quality evaluation" OR "ontology evaluation" OR "quality assessment") | RQ1 |
+| S2 | ("ontology engineering" OR "knowledge graph construction" OR "enterprise knowledge graph") AND (industry OR enterprise OR "lessons learned") | RQ2 |
+| S3 | ("graph database" OR "graph query" OR SPARQL OR Cypher) AND ("query complexity" OR "schema design" OR "data model" OR normalization) | RQ3 |
 
-Record for every run: database, date, string, hit count.
+Revision note, 2026-09-20: a first run with broader strings over OpenAlex full text returned 260k hits for S1, dominated by bioinformatics papers that mention "ontology" in passing. The strings were narrowed to quoted phrases, the search restricted to title and abstract, and the field filter set to computer science. The strings above are the ones in force.
 
-| date | db | string | hits | after title screen | after abstract screen |
-|------|----|--------|------|--------------------|-----------------------|
-| | | | | | |
+Every run appends a row to [`search-log.csv`](search-log.csv). Candidate lists, sorted by relevance, are in [`slr/`](slr/) with empty `title_screen`, `abstract_screen`, `grade` and `note` columns to be filled during screening (values: include / exclude / maybe).
+
+## Screening record
+
+| string | hits | candidates | after title screen | after abstract screen |
+|--------|------|------------|--------------------|-----------------------|
+| S1 | 397 | 300 | | |
+| S2 | 225 | 225 | | |
+| S3 | 449 | 300 | | |
 
 ## Inclusion criteria
 

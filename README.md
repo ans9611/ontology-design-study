@@ -93,12 +93,17 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 
 ```
 docs/
-    protocol.md       SLR protocol and search log
+    protocol.md       SLR protocol
+    search-log.csv    every search run, dated
+    slr/              candidate lists per string, with screening columns
+    metrics-matrix.md RQ1 working table
     hypotheses.md     pre-registered hypotheses for RQ3
     cases/            one file per case, shared template
 references/
     references.bib    references with DOI
 src/ontostudy/
+    slr.py            OpenAlex search runner for the review protocol
+    check_refs.py     Crossref check of references.bib
     schemas/          flat / mid / normalized models
     queries/          twenty benchmark questions, one version per schema
     loader.py         LDBC SNB loader
@@ -111,6 +116,9 @@ tests/
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 pytest
+
+python -m ontostudy.slr          # run the protocol's searches against OpenAlex, log hits, write candidates
+python -m ontostudy.check_refs   # verify every DOI in references.bib against Crossref
 ```
 
 ## 8. Timeline

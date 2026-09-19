@@ -26,9 +26,15 @@ Every run appends a row to [`search-log.csv`](search-log.csv). Candidate lists, 
 
 | string | hits | candidates | after title screen | after abstract screen |
 |--------|------|------------|--------------------|-----------------------|
-| S1 | 397 | 300 | | |
-| S2 | 225 | 225 | | |
-| S3 | 449 | 300 | | |
+| S1 | 397 | 300 | 95 | 61 |
+| S2 | 225 | 225 | 63 | 39 |
+| S3 | 449 | 300 | 68 | 29 |
+| snowball (>= 3 links to the included set, 104 with >= 5 screened) | 372 | 104 | 67 | 59 |
+| **total** | | 929 | 293 | **188** |
+
+Title and abstract screening were done on 2026-09-20 in one pass by a single screener from the candidate CSVs; decisions and per-row notes are in the `title_screen`, `abstract_screen` and `note` columns. Duplicates across strings were removed at the title stage (marked `duplicate of row n`). Snowballing (`python -m ontostudy.snowball`) fetched references and citing works for the 129 papers included from S1-S3 and ranked unseen works by the number of included papers they are linked to; the 104 with at least 5 links were screened, the remaining 268 with 3-4 links are in the file unscreened.
+
+Known limitation: a single screener. A second screener on a 10% sample with Cohen's kappa is planned before the extraction stage.
 
 ## Inclusion criteria
 

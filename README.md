@@ -98,6 +98,7 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 docs/
     site/             static site for GitHub Pages; data.json is generated, index.html is hand-written
     guidelines.md     twelve design guidelines, each tied to its evidence and strength
+    schema-review.md  the three schemas checked against Neo4j's modeling checklist, finding by finding
     results/          RQ3 results, figures and raw CSVs
     protocol.md       SLR protocol
     search-log.csv    every search run, dated

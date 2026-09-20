@@ -77,7 +77,7 @@ def ols_multi(X, y):
     import numpy as np
     A = np.column_stack([np.array(X, dtype=float), np.ones(len(y))])
     coef, *_ = np.linalg.lstsq(A, np.array(y, dtype=float), rcond=None)
-    pred = A @ coef; yv = np.array(y, dtype=float)
+    pred = (A * coef).sum(axis=1); yv = np.array(y, dtype=float)   # elementwise: BLAS matmul emits spurious FP warnings on this platform
     r2 = 1 - ((yv - pred) ** 2).sum() / ((yv - yv.mean()) ** 2).sum()
     return coef.tolist(), float(r2)
 

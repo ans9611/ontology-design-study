@@ -122,7 +122,7 @@ src/ontostudy/
     engine_kuzu.py    the six diagnostic queries in Cypher on Kùzu, per schema
     report.py         regenerates every table in docs/results/RESULTS.md from the CSVs
     figures.py        regenerates docs/results/fig*.png from the CSVs
-    site.py           collects the RQ1/RQ2/RQ3 tables into docs/site/data.json
+    site.py           collects the RQ1/RQ2/RQ3 tables, and each schema as a graph, into docs/site/data.json
 notebooks/
 tests/
 ```

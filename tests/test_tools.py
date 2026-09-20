@@ -26,6 +26,10 @@ def test_site_data_matches_the_tables():
     assert len(d["rq3"]["queries"]) == 20 and len(d["rq3"]["bench"]) == len(d["rq3"]["scales"]) * 3 * 20
     assert [h["verdict"] for h in d["rq3"]["hypotheses"]] == ["supported", "supported", "refuted as stated", "partly refuted"]
     assert [g["id"] for g in d["guidelines"]] == [f"G{i}" for i in range(1, 13)]
+    sg = d["schemas"]
+    assert [len(sg[s]["types"]) for s in ("flat", "mid", "normalized")] == [4, 9, 22]
+    assert len(sg["flat"]["sample"]["nodes"]) < len(sg["mid"]["sample"]["nodes"]) < len(sg["normalized"]["sample"]["nodes"])
+    assert {n["id"] for n in sg["mid"]["sample"]["nodes"]} <= {n["id"] for n in sg["normalized"]["sample"]["nodes"]}
 
 
 def test_report_renders_every_marker_from_csvs():

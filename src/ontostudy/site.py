@@ -127,13 +127,78 @@ def rq3() -> dict:
     }
 
 
+SKIP_LABELS = {"likes", "liking", "liked", "replyOf", "reply", "parent"}   # kept out of the sample neighbourhood for size
+
+
+def schema_graphs(n: int = 300) -> dict:
+    """Each schema as a graph of types, plus one person's neighbourhood drawn in that schema.
+
+    kind is "entity" for a node type mid also has, "relation" for a reified relation
+    (normalized only); props lists the properties flat carries that mid stores as nodes.
+    """
+    from collections import Counter
+    from .schemas import SCHEMAS
+    from .synth import generate
+
+    D = generate(n)
+    graphs = {name: cls(D).G for name, cls in SCHEMAS.items()}
+    mid_types = set(graphs["mid"].node_type.values())
+    mid_props = {t: set(next(graphs["mid"].props[u] for u in graphs["mid"].nodes(t))) for t in mid_types}
+    p0 = D.persons[0]
+    friends = [v for u, v, _ in D.knows if u == p0["id"]][:2] + [u for u, v, _ in D.knows if v == p0["id"]][:2]
+    post = next(m for m in D.posts if m["creator"] == p0["id"])
+    country = next(c["countryId"] for c in D.cities if c["id"] == p0["cityId"])
+    org = next(o for pp, o, _ in D.work if pp == p0["id"])
+    sample_ids = [p0["id"], *friends[:2], p0["cityId"], country, org, post["id"], *post["tags"][:2], post["forum"]]
+    out = {}
+    for name, G in graphs.items():
+        counts = Counter(G.node_type.values())
+        edges = Counter()
+        for (u, label), lst in G.out.items():
+            for v, _ in lst:
+                edges[(G.node_type[u], label, G.node_type[v])] += 1
+        types = []
+        for t, c in counts.items():
+            props = sorted(set(G.props[G.nodes(t)[0]]) - mid_props.get(t, set())) if t in mid_props else []
+            types.append({"id": t, "count": c, "kind": "entity" if t in mid_types else "relation", "props": props})
+        # sample neighbourhood: the same entities in every schema (ids are shared), so only the schema differs
+        chosen = list(dict.fromkeys(sample_ids))
+        present = [v for v in chosen if v in G.node_type]
+        rel_nodes, sample_edges = [], []
+        for (u, label), lst in G.out.items():
+            if u in present:
+                for v, _ in lst:
+                    if v in present:
+                        sample_edges.append((u, v, label))
+                    elif name == "normalized" and G.node_type[v] not in mid_types:   # relation node: keep it if its other end is chosen too
+                        for (r, l2), lst2 in G.out.items():
+                            if r == v:
+                                for w, _ in lst2:
+                                    if w in present and w != u:
+                                        rel_nodes.append(v); sample_edges += [(u, v, label), (v, w, l2)]
+        order = present + list(dict.fromkeys(rel_nodes))
+        seen = set(order)
+        undirected = {}
+        for a, b, l in sample_edges:
+            if a in seen and b in seen:
+                undirected.setdefault((min(a, b), max(a, b), l), (a, b, l))   # knows and party are stored both ways; draw once
+        sample_edges = list(undirected.values())
+        def label_of(v):
+            pr = G.props[v]; return str(pr.get("name") or pr.get("firstName") or G.node_type[v])
+        sample = {"nodes": [{"id": v, "type": G.node_type[v], "kind": "entity" if G.node_type[v] in mid_types else "relation", "label": label_of(v),
+                             "props": {k: G.props[v][k] for k in (set(G.props[v]) - mid_props.get(G.node_type[v], set())) if G.node_type[v] in mid_props}} for v in order],
+                  "edges": [{"s": a, "t": b, "label": l} for a, b, l in sample_edges]}
+        out[name] = {"types": types, "edges": [{"s": a, "label": l, "t": b, "count": c} for (a, l, b), c in sorted(edges.items())], "sample": sample}
+    return out
+
+
 def guidelines() -> list[dict]:
     rows = md_tables((DOCS / "guidelines.md").read_text())[0][1:]
     return [{"id": r[0], "guideline": r[1], "evidence": r[2], "strength": r[3]} for r in rows]
 
 
 def build() -> dict:
-    return {"rq1": rq1(), "rq2": rq2(), "rq3": rq3(), "guidelines": guidelines()}
+    return {"rq1": rq1(), "rq2": rq2(), "rq3": rq3(), "guidelines": guidelines(), "schemas": schema_graphs()}
 
 
 if __name__ == "__main__":

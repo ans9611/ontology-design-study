@@ -11562,5 +11562,1134 @@
    "evidence": "Amazon's product graph treats schema discovery as a learning problem because product types and attributes change continuously (`schema-discovered-not-designed`). Grade B source: a keynote, no peer-reviewed system paper.",
    "strength": "association (grade B)"
   }
- ]
+ ],
+ "schemas": {
+  "flat": {
+   "types": [
+    {
+     "id": "Person",
+     "count": 300,
+     "kind": "entity",
+     "props": [
+      "city",
+      "country",
+      "employers"
+     ]
+    },
+    {
+     "id": "Forum",
+     "count": 60,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Post",
+     "count": 1160,
+     "kind": "entity",
+     "props": [
+      "tags"
+     ]
+    },
+    {
+     "id": "Comment",
+     "count": 2417,
+     "kind": "entity",
+     "props": [
+      "tags"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "s": "Comment",
+     "label": "hasCreator",
+     "t": "Person",
+     "count": 2417
+    },
+    {
+     "s": "Comment",
+     "label": "replyOf",
+     "t": "Comment",
+     "count": 931
+    },
+    {
+     "s": "Comment",
+     "label": "replyOf",
+     "t": "Post",
+     "count": 1486
+    },
+    {
+     "s": "Forum",
+     "label": "containerOf",
+     "t": "Post",
+     "count": 1160
+    },
+    {
+     "s": "Forum",
+     "label": "hasMember",
+     "t": "Person",
+     "count": 1351
+    },
+    {
+     "s": "Person",
+     "label": "knows",
+     "t": "Person",
+     "count": 2950
+    },
+    {
+     "s": "Person",
+     "label": "likes",
+     "t": "Comment",
+     "count": 3585
+    },
+    {
+     "s": "Person",
+     "label": "likes",
+     "t": "Post",
+     "count": 1757
+    },
+    {
+     "s": "Post",
+     "label": "hasCreator",
+     "t": "Person",
+     "count": 1160
+    }
+   ],
+   "sample": {
+    "nodes": [
+     {
+      "id": 137,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P0",
+      "props": {
+       "employers": [
+        [
+         "Company3_0",
+         "Country2",
+         2019
+        ],
+        [
+         "Company2_1",
+         "Country1",
+         2006
+        ]
+       ],
+       "country": "Country2",
+       "city": "City2_1"
+      }
+     },
+     {
+      "id": 142,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P5",
+      "props": {
+       "employers": [
+        [
+         "Company2_2",
+         "Country1",
+         2020
+        ],
+        [
+         "Company5_0",
+         "Country4",
+         2017
+        ]
+       ],
+       "country": "Country2",
+       "city": "City2_1"
+      }
+     },
+     {
+      "id": 143,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P6",
+      "props": {
+       "employers": [
+        [
+         "Company5_1",
+         "Country4",
+         2002
+        ]
+       ],
+       "country": "Country0",
+       "city": "City0_2"
+      }
+     },
+     {
+      "id": 497,
+      "type": "Post",
+      "kind": "entity",
+      "label": "Post",
+      "props": {
+       "tags": [
+        "Tag18",
+        "Tag41",
+        "Tag20"
+       ]
+      }
+     },
+     {
+      "id": 482,
+      "type": "Forum",
+      "kind": "entity",
+      "label": "Forum",
+      "props": {}
+     }
+    ],
+    "edges": [
+     {
+      "s": 137,
+      "t": 142,
+      "label": "knows"
+     },
+     {
+      "s": 137,
+      "t": 143,
+      "label": "knows"
+     },
+     {
+      "s": 142,
+      "t": 143,
+      "label": "knows"
+     },
+     {
+      "s": 482,
+      "t": 137,
+      "label": "hasMember"
+     },
+     {
+      "s": 497,
+      "t": 137,
+      "label": "hasCreator"
+     },
+     {
+      "s": 482,
+      "t": 497,
+      "label": "containerOf"
+     }
+    ]
+   }
+  },
+  "mid": {
+   "types": [
+    {
+     "id": "Country",
+     "count": 5,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "City",
+     "count": 20,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "TagClass",
+     "count": 41,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Tag",
+     "count": 50,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Organisation",
+     "count": 20,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Person",
+     "count": 300,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Forum",
+     "count": 60,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Post",
+     "count": 1160,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Comment",
+     "count": 2417,
+     "kind": "entity",
+     "props": []
+    }
+   ],
+   "edges": [
+    {
+     "s": "City",
+     "label": "isPartOf",
+     "t": "Country",
+     "count": 20
+    },
+    {
+     "s": "Comment",
+     "label": "hasCreator",
+     "t": "Person",
+     "count": 2417
+    },
+    {
+     "s": "Comment",
+     "label": "hasTag",
+     "t": "Tag",
+     "count": 2436
+    },
+    {
+     "s": "Comment",
+     "label": "replyOf",
+     "t": "Comment",
+     "count": 931
+    },
+    {
+     "s": "Comment",
+     "label": "replyOf",
+     "t": "Post",
+     "count": 1486
+    },
+    {
+     "s": "Forum",
+     "label": "containerOf",
+     "t": "Post",
+     "count": 1160
+    },
+    {
+     "s": "Forum",
+     "label": "hasMember",
+     "t": "Person",
+     "count": 1351
+    },
+    {
+     "s": "Organisation",
+     "label": "isLocatedIn",
+     "t": "Country",
+     "count": 20
+    },
+    {
+     "s": "Person",
+     "label": "isLocatedIn",
+     "t": "City",
+     "count": 300
+    },
+    {
+     "s": "Person",
+     "label": "knows",
+     "t": "Person",
+     "count": 2950
+    },
+    {
+     "s": "Person",
+     "label": "likes",
+     "t": "Comment",
+     "count": 3585
+    },
+    {
+     "s": "Person",
+     "label": "likes",
+     "t": "Post",
+     "count": 1757
+    },
+    {
+     "s": "Person",
+     "label": "workAt",
+     "t": "Organisation",
+     "count": 448
+    },
+    {
+     "s": "Post",
+     "label": "hasCreator",
+     "t": "Person",
+     "count": 1160
+    },
+    {
+     "s": "Post",
+     "label": "hasTag",
+     "t": "Tag",
+     "count": 2317
+    },
+    {
+     "s": "Tag",
+     "label": "hasType",
+     "t": "TagClass",
+     "count": 50
+    },
+    {
+     "s": "TagClass",
+     "label": "isSubclassOf",
+     "t": "TagClass",
+     "count": 40
+    }
+   ],
+   "sample": {
+    "nodes": [
+     {
+      "id": 137,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P0",
+      "props": {}
+     },
+     {
+      "id": 142,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P5",
+      "props": {}
+     },
+     {
+      "id": 143,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P6",
+      "props": {}
+     },
+     {
+      "id": 15,
+      "type": "City",
+      "kind": "entity",
+      "label": "City2_1",
+      "props": {}
+     },
+     {
+      "id": 3,
+      "type": "Country",
+      "kind": "entity",
+      "label": "Country2",
+      "props": {}
+     },
+     {
+      "id": 125,
+      "type": "Organisation",
+      "kind": "entity",
+      "label": "Company3_0",
+      "props": {}
+     },
+     {
+      "id": 497,
+      "type": "Post",
+      "kind": "entity",
+      "label": "Post",
+      "props": {}
+     },
+     {
+      "id": 85,
+      "type": "Tag",
+      "kind": "entity",
+      "label": "Tag18",
+      "props": {}
+     },
+     {
+      "id": 108,
+      "type": "Tag",
+      "kind": "entity",
+      "label": "Tag41",
+      "props": {}
+     },
+     {
+      "id": 482,
+      "type": "Forum",
+      "kind": "entity",
+      "label": "Forum",
+      "props": {}
+     }
+    ],
+    "edges": [
+     {
+      "s": 15,
+      "t": 3,
+      "label": "isPartOf"
+     },
+     {
+      "s": 125,
+      "t": 3,
+      "label": "isLocatedIn"
+     },
+     {
+      "s": 137,
+      "t": 15,
+      "label": "isLocatedIn"
+     },
+     {
+      "s": 142,
+      "t": 15,
+      "label": "isLocatedIn"
+     },
+     {
+      "s": 137,
+      "t": 142,
+      "label": "knows"
+     },
+     {
+      "s": 137,
+      "t": 143,
+      "label": "knows"
+     },
+     {
+      "s": 142,
+      "t": 143,
+      "label": "knows"
+     },
+     {
+      "s": 137,
+      "t": 125,
+      "label": "workAt"
+     },
+     {
+      "s": 482,
+      "t": 137,
+      "label": "hasMember"
+     },
+     {
+      "s": 497,
+      "t": 137,
+      "label": "hasCreator"
+     },
+     {
+      "s": 482,
+      "t": 497,
+      "label": "containerOf"
+     },
+     {
+      "s": 497,
+      "t": 85,
+      "label": "hasTag"
+     },
+     {
+      "s": 497,
+      "t": 108,
+      "label": "hasTag"
+     }
+    ]
+   }
+  },
+  "normalized": {
+   "types": [
+    {
+     "id": "Country",
+     "count": 5,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "City",
+     "count": 20,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "PartOf",
+     "count": 20,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "TagClass",
+     "count": 41,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Subclass",
+     "count": 40,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Tag",
+     "count": 50,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "TagType",
+     "count": 50,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Organisation",
+     "count": 20,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "OrgLocation",
+     "count": 20,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Person",
+     "count": 300,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Residence",
+     "count": 300,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Knows",
+     "count": 1475,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Employment",
+     "count": 448,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Forum",
+     "count": 60,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Membership",
+     "count": 1351,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Post",
+     "count": 1160,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Authorship",
+     "count": 3577,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Containment",
+     "count": 1160,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Tagging",
+     "count": 4753,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Comment",
+     "count": 2417,
+     "kind": "entity",
+     "props": []
+    },
+    {
+     "id": "Reply",
+     "count": 2417,
+     "kind": "relation",
+     "props": []
+    },
+    {
+     "id": "Like",
+     "count": 5342,
+     "kind": "relation",
+     "props": []
+    }
+   ],
+   "edges": [
+    {
+     "s": "Authorship",
+     "label": "author",
+     "t": "Person",
+     "count": 3577
+    },
+    {
+     "s": "City",
+     "label": "part",
+     "t": "PartOf",
+     "count": 20
+    },
+    {
+     "s": "Comment",
+     "label": "authored",
+     "t": "Authorship",
+     "count": 2417
+    },
+    {
+     "s": "Comment",
+     "label": "reply",
+     "t": "Reply",
+     "count": 2417
+    },
+    {
+     "s": "Comment",
+     "label": "tagging",
+     "t": "Tagging",
+     "count": 2436
+    },
+    {
+     "s": "Containment",
+     "label": "content",
+     "t": "Post",
+     "count": 1160
+    },
+    {
+     "s": "Employment",
+     "label": "employer",
+     "t": "Organisation",
+     "count": 448
+    },
+    {
+     "s": "Forum",
+     "label": "contains",
+     "t": "Containment",
+     "count": 1160
+    },
+    {
+     "s": "Forum",
+     "label": "membership",
+     "t": "Membership",
+     "count": 1351
+    },
+    {
+     "s": "Knows",
+     "label": "party",
+     "t": "Person",
+     "count": 2950
+    },
+    {
+     "s": "Like",
+     "label": "liked",
+     "t": "Comment",
+     "count": 3585
+    },
+    {
+     "s": "Like",
+     "label": "liked",
+     "t": "Post",
+     "count": 1757
+    },
+    {
+     "s": "Membership",
+     "label": "member",
+     "t": "Person",
+     "count": 1351
+    },
+    {
+     "s": "OrgLocation",
+     "label": "in",
+     "t": "Country",
+     "count": 20
+    },
+    {
+     "s": "Organisation",
+     "label": "located",
+     "t": "OrgLocation",
+     "count": 20
+    },
+    {
+     "s": "PartOf",
+     "label": "of",
+     "t": "Country",
+     "count": 20
+    },
+    {
+     "s": "Person",
+     "label": "employed",
+     "t": "Employment",
+     "count": 448
+    },
+    {
+     "s": "Person",
+     "label": "liking",
+     "t": "Like",
+     "count": 5342
+    },
+    {
+     "s": "Person",
+     "label": "party",
+     "t": "Knows",
+     "count": 2950
+    },
+    {
+     "s": "Person",
+     "label": "resides",
+     "t": "Residence",
+     "count": 300
+    },
+    {
+     "s": "Post",
+     "label": "authored",
+     "t": "Authorship",
+     "count": 1160
+    },
+    {
+     "s": "Post",
+     "label": "tagging",
+     "t": "Tagging",
+     "count": 2317
+    },
+    {
+     "s": "Reply",
+     "label": "parent",
+     "t": "Comment",
+     "count": 931
+    },
+    {
+     "s": "Reply",
+     "label": "parent",
+     "t": "Post",
+     "count": 1486
+    },
+    {
+     "s": "Residence",
+     "label": "in",
+     "t": "City",
+     "count": 300
+    },
+    {
+     "s": "Subclass",
+     "label": "super",
+     "t": "TagClass",
+     "count": 40
+    },
+    {
+     "s": "Tag",
+     "label": "typed",
+     "t": "TagType",
+     "count": 50
+    },
+    {
+     "s": "TagClass",
+     "label": "sub",
+     "t": "Subclass",
+     "count": 40
+    },
+    {
+     "s": "TagType",
+     "label": "type",
+     "t": "TagClass",
+     "count": 50
+    },
+    {
+     "s": "Tagging",
+     "label": "tag",
+     "t": "Tag",
+     "count": 4753
+    }
+   ],
+   "sample": {
+    "nodes": [
+     {
+      "id": 137,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P0",
+      "props": {}
+     },
+     {
+      "id": 142,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P5",
+      "props": {}
+     },
+     {
+      "id": 143,
+      "type": "Person",
+      "kind": "entity",
+      "label": "P6",
+      "props": {}
+     },
+     {
+      "id": 15,
+      "type": "City",
+      "kind": "entity",
+      "label": "City2_1",
+      "props": {}
+     },
+     {
+      "id": 3,
+      "type": "Country",
+      "kind": "entity",
+      "label": "Country2",
+      "props": {}
+     },
+     {
+      "id": 125,
+      "type": "Organisation",
+      "kind": "entity",
+      "label": "Company3_0",
+      "props": {}
+     },
+     {
+      "id": 497,
+      "type": "Post",
+      "kind": "entity",
+      "label": "Post",
+      "props": {}
+     },
+     {
+      "id": 85,
+      "type": "Tag",
+      "kind": "entity",
+      "label": "Tag18",
+      "props": {}
+     },
+     {
+      "id": 108,
+      "type": "Tag",
+      "kind": "entity",
+      "label": "Tag41",
+      "props": {}
+     },
+     {
+      "id": 482,
+      "type": "Forum",
+      "kind": "entity",
+      "label": "Forum",
+      "props": {}
+     },
+     {
+      "id": 4083,
+      "type": "PartOf",
+      "kind": "relation",
+      "label": "PartOf",
+      "props": {}
+     },
+     {
+      "id": 4192,
+      "type": "OrgLocation",
+      "kind": "relation",
+      "label": "OrgLocation",
+      "props": {}
+     },
+     {
+      "id": 4204,
+      "type": "Residence",
+      "kind": "relation",
+      "label": "Residence",
+      "props": {}
+     },
+     {
+      "id": 4209,
+      "type": "Residence",
+      "kind": "relation",
+      "label": "Residence",
+      "props": {}
+     },
+     {
+      "id": 4504,
+      "type": "Knows",
+      "kind": "relation",
+      "label": "Knows",
+      "props": {}
+     },
+     {
+      "id": 4505,
+      "type": "Knows",
+      "kind": "relation",
+      "label": "Knows",
+      "props": {}
+     },
+     {
+      "id": 4644,
+      "type": "Knows",
+      "kind": "relation",
+      "label": "Knows",
+      "props": {}
+     },
+     {
+      "id": 5979,
+      "type": "Employment",
+      "kind": "relation",
+      "label": "Employment",
+      "props": {}
+     },
+     {
+      "id": 7428,
+      "type": "Membership",
+      "kind": "relation",
+      "label": "Membership",
+      "props": {}
+     },
+     {
+      "id": 7778,
+      "type": "Authorship",
+      "kind": "relation",
+      "label": "Authorship",
+      "props": {}
+     },
+     {
+      "id": 7779,
+      "type": "Containment",
+      "kind": "relation",
+      "label": "Containment",
+      "props": {}
+     },
+     {
+      "id": 7780,
+      "type": "Tagging",
+      "kind": "relation",
+      "label": "Tagging",
+      "props": {}
+     },
+     {
+      "id": 7781,
+      "type": "Tagging",
+      "kind": "relation",
+      "label": "Tagging",
+      "props": {}
+     }
+    ],
+    "edges": [
+     {
+      "s": 15,
+      "t": 4083,
+      "label": "part"
+     },
+     {
+      "s": 4083,
+      "t": 3,
+      "label": "of"
+     },
+     {
+      "s": 125,
+      "t": 4192,
+      "label": "located"
+     },
+     {
+      "s": 4192,
+      "t": 3,
+      "label": "in"
+     },
+     {
+      "s": 137,
+      "t": 4204,
+      "label": "resides"
+     },
+     {
+      "s": 4204,
+      "t": 15,
+      "label": "in"
+     },
+     {
+      "s": 142,
+      "t": 4209,
+      "label": "resides"
+     },
+     {
+      "s": 4209,
+      "t": 15,
+      "label": "in"
+     },
+     {
+      "s": 137,
+      "t": 4504,
+      "label": "party"
+     },
+     {
+      "s": 4504,
+      "t": 142,
+      "label": "party"
+     },
+     {
+      "s": 137,
+      "t": 4505,
+      "label": "party"
+     },
+     {
+      "s": 4505,
+      "t": 143,
+      "label": "party"
+     },
+     {
+      "s": 142,
+      "t": 4644,
+      "label": "party"
+     },
+     {
+      "s": 4644,
+      "t": 143,
+      "label": "party"
+     },
+     {
+      "s": 137,
+      "t": 5979,
+      "label": "employed"
+     },
+     {
+      "s": 5979,
+      "t": 125,
+      "label": "employer"
+     },
+     {
+      "s": 482,
+      "t": 7428,
+      "label": "membership"
+     },
+     {
+      "s": 7428,
+      "t": 137,
+      "label": "member"
+     },
+     {
+      "s": 497,
+      "t": 7778,
+      "label": "authored"
+     },
+     {
+      "s": 7778,
+      "t": 137,
+      "label": "author"
+     },
+     {
+      "s": 482,
+      "t": 7779,
+      "label": "contains"
+     },
+     {
+      "s": 7779,
+      "t": 497,
+      "label": "content"
+     },
+     {
+      "s": 497,
+      "t": 7780,
+      "label": "tagging"
+     },
+     {
+      "s": 7780,
+      "t": 85,
+      "label": "tag"
+     },
+     {
+      "s": 497,
+      "t": 7781,
+      "label": "tagging"
+     },
+     {
+      "s": 7781,
+      "t": 108,
+      "label": "tag"
+     }
+    ]
+   }
+  }
+ }
 }

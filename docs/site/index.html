@@ -156,6 +156,18 @@ svg.chart .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
 .guide h4 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; max-width: 34ch; }
 .guide .ev { font-size: 14px; color: var(--ink-2); max-width: 64ch; }
 .guide .strength { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.graphs { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .graphs { grid-template-columns: 1fr 1fr 1fr; } .graphs.stack { grid-template-columns: 1fr; } }
+.graphs .panel { background: var(--sheet); border-top: 1px solid var(--rule); padding: 8px 8px 4px; }
+.graphs .panel h4 { margin: 0 0 2px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.graphs .panel h4 i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.graphs .panel .stat { font-size: 12.5px; color: var(--muted); margin: 0 0 4px; }
+.graphs svg { display: block; width: 100%; height: auto; }
+.graphs .node-label { font-size: 10.5px; fill: var(--ink); pointer-events: none; }
+.graphs .prop-chip { fill: var(--rule); }
+.graphs .prop-text { font-size: 8.5px; fill: var(--ink-2); pointer-events: none; }
+.graphs .edge { stroke: var(--rule); stroke-width: 1; fill: none; }
+.graphs .edge-label { font-size: 8px; fill: var(--muted); pointer-events: none; }
 details summary { cursor: pointer; color: var(--ink-2); margin: 20px 0 8px; }
 footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14px; color: var(--ink-2); }
 </style>
@@ -181,6 +193,7 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
 
 <div class="body">
   <nav class="rail" aria-label="Sections">
+    <a href="#graphs">Schemas</a>
     <a href="#fit">Short version</a>
     <a href="#guide">How to build one</a>
     <a href="#rq1"><span class="rq">RQ1</span>Metrics</a>
@@ -188,6 +201,16 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
     <a href="#rq3"><span class="rq">RQ3</span>Benchmark</a>
   </nav>
   <main>
+
+<section id="graphs">
+  <h2>The three schemas, as graphs</h2>
+  <p>Top row: every node type and relation type in each schema, from the data itself; circle area follows the instance count. A diamond is a relation that the schema stores as a node of its own. A grey tag under a node is a value that flat copies onto the node as a property instead of linking to it. Bottom row: one person's neighbourhood, the same entities in all three, drawn the way each schema stores it. Drag nodes; hover for counts.</p>
+  <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span><span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="var(--ink)"/></svg>entity type</span><span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="var(--s3)"/></svg>relation stored as a node</span><span><i style="border-radius:3px;background:var(--rule)"></i>value stored as a property</span></div>
+  <div class="graphs" id="type-graphs"></div>
+  <h3>One person's neighbourhood, three ways</h3>
+  <div class="graphs stack" id="sample-graphs"></div>
+  <p class="small" id="graphs-note"></p>
+</section>
 
 <section id="fit">
   <h2>The short version, for a design review</h2>
@@ -461,6 +484,94 @@ function init(D) {
   }
   renderRatio(); renderScaling(); renderTable();
   renderFollowups(rq3, qtext);
+  renderSchemaGraphs(D.schemas, rq3);
+}
+
+// ---------- schema graphs: type level and one neighbourhood, force layout run to rest before drawing ----------
+function renderSchemaGraphs(SG, rq3) {
+  if (!SG) return;
+  const n = Math.max(...rq3.scales);
+  const sizeOf = s => rq3.sizes.find(z => z.scale === n && z.schema === s);
+  const typeHost = $("#type-graphs"), sampleHost = $("#sample-graphs");
+  typeHost.innerHTML = ""; sampleHost.innerHTML = "";
+  for (const schema of rq3.schemas) {
+    const g = SG[schema]; const sz = sizeOf(schema);
+    const nodes = g.types.map(t => ({ id: t.id, kind: t.kind, count: t.count, props: t.props, r: 6 + 4 * Math.log10(t.count), tip: `<b>${t.id}</b>${fmt(t.count, 0)} instances at 300 persons; ${t.kind === "relation" ? "a relation stored as its own node" : "entity"}${t.props.length ? `<br>properties folded in: ${t.props.join(", ")}` : ""}` }));
+    const links = g.edges.map(e => ({ source: e.s, target: e.t, label: e.label, count: e.count, tip: `<b>${e.s} –${e.label}→ ${e.t}</b>${fmt(e.count, 0)} edges at 300 persons` }));
+    panel(typeHost, schema, `${g.types.length} node types, ${g.edges.length} edge types${sz ? `; ${fmt(sz.nodes, 0)} nodes, ${fmt(sz.edges, 0)} edges at ${fmt(n, 0)} persons` : ""}`, nodes, links, { labels: true, edgeLabels: false, W: 380, H: 340 });
+    const sm = g.sample;
+    const snodes = sm.nodes.map(v => ({ id: v.id, kind: v.kind, label: v.kind === "relation" ? v.type : `${v.type}${v.label && v.label !== v.type ? " " + v.label : ""}`, props: Object.entries(v.props || {}).map(([k, val]) => { const t = `${k}: ${Array.isArray(val) ? val.map(x => Array.isArray(x) ? x[0] : x).join(", ") : val}`; return t.length > 26 ? t.slice(0, 25) + "…" : t; }), r: v.kind === "relation" ? 5 : 7, tip: `<b>${v.type}</b>${v.label}${Object.keys(v.props || {}).length ? "<br>" + Object.entries(v.props).map(([k, val]) => `${k}: ${JSON.stringify(val)}`).join("<br>") : ""}` }));
+    const slinks = sm.edges.map(e => ({ source: e.s, target: e.t, label: e.label, tip: `<b>${e.label}</b>` }));
+    const hops = { flat: 1, mid: 2, normalized: 4 }[schema];
+    panel(sampleHost, schema, `${sm.nodes.length} nodes, ${sm.edges.length} edges; a friend's city is ${hops} hop${hops > 1 ? "s" : ""} away`, snodes, slinks, { labels: true, edgeLabels: false, W: 1000, H: 290, ring: sm.nodes[0].id });
+  }
+  $("#graphs-note").textContent = "Type graphs are read from a 300-person build of each schema; instance counts in the tooltips are from that build, the totals in the captions from the largest benchmark scale. The neighbourhood is the first person, two friends, their city and country, one employer, one post with its tags, and that post's forum.";
+}
+
+function panel(host, schema, stat, nodes, links, o) {
+  const div = document.createElement("div"); div.className = "panel";
+  div.innerHTML = `<h4><i style="background:${SERIES[schema]}"></i>${schema}</h4><p class="stat">${esc(stat)}</p>`;
+  host.append(div);
+  const svg = d3.select(div).append("svg").attr("viewBox", `0 0 ${o.W} ${o.H}`);
+  // deterministic start: nodes on a circle in data order, then the simulation is run to rest synchronously
+  nodes.forEach((d, i) => { const a = 2 * Math.PI * i / nodes.length; d.x = o.W / 2 + (o.W / 3) * Math.cos(a); d.y = o.H / 2 + (o.H / 3) * Math.sin(a); });
+  if (o.ring != null) {
+    // fixed layout: the person in the centre, the other entities on a ring by type, each relation node between its two ends
+    const byId = Object.fromEntries(nodes.map(d => [d.id, d]));
+    const ring = nodes.filter(d => d.id !== o.ring && d.kind !== "relation").sort((a, b) => (a.label || "").localeCompare(b.label || ""));
+    const rx = o.W * 0.36, ry = o.H * 0.30; const c = byId[o.ring]; c.x = o.W / 2; c.y = o.H / 2;   // an ellipse: wide panels, short
+    ring.forEach((d, i) => { const a = -Math.PI / 2 + 2 * Math.PI * i / ring.length; d.x = o.W / 2 + rx * Math.cos(a); d.y = o.H / 2 + ry * Math.sin(a); });
+    nodes.filter(d => d.kind === "relation").forEach(d => {
+      const ends = links.filter(l => l.source === d.id || l.target === d.id).map(l => byId[l.source === d.id ? l.target : l.source]).filter(Boolean);
+      d.x = ends.length ? ends.reduce((a, e) => a + e.x, 0) / ends.length : o.W / 2; d.y = ends.length ? ends.reduce((a, e) => a + e.y, 0) / ends.length : o.H / 2;
+      if (ends.length === 2) {   // sit slightly beside the straight line between the two ends, so lines through the centre stay readable
+        const dx = ends[1].x - ends[0].x, dy = ends[1].y - ends[0].y, len = Math.hypot(dx, dy) || 1;
+        d.x += -dy / len * 14; d.y += dx / len * 14;
+      }
+    });
+    links.forEach(l => { l.source = byId[l.source]; l.target = byId[l.target]; });
+  }
+  const sim = o.ring != null ? null : d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(l => 34 + (l.source.r || 6) + (l.target.r || 6)).strength(0.6))
+    .force("charge", d3.forceManyBody().strength(-220))
+    .force("collide", d3.forceCollide().radius(d => { const lab = String(d.label || d.id).length, pl = Math.max(0, ...(d.props || []).map(x => x.length)), pn = (d.props || []).length;
+      return Math.max(d.r + 8, 2.8 * lab * 0.5 + 10, pn * 6 + 10, 2.6 * pl * 0.5 + 8); }).iterations(2))
+    .force("center", d3.forceCenter(o.W / 2, o.H / 2))
+    .force("x", d3.forceX(o.W / 2).strength(0.05)).force("y", d3.forceY(o.H / 2).strength(0.07))
+    .stop();
+  if (sim) for (let i = 0; i < 300; i++) sim.tick();
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const link = svg.append("g").selectAll("path").data(links).join("path").attr("class", "edge");
+  const linkHit = svg.append("g").selectAll("path").data(links).join("path").attr("fill", "none").attr("stroke", "transparent").attr("stroke-width", 10).call(d3tips);
+  const elabel = o.edgeLabels ? svg.append("g").selectAll("text").data(links).join("text").attr("class", "edge-label").attr("text-anchor", "middle").text(d => d.label) : null;
+  const node = svg.append("g").selectAll("g").data(nodes).join("g").style("cursor", "grab").call(d3tips);
+  node.each(function (d) {
+    const g = d3.select(this);
+    if (d.kind === "relation") g.append("path").attr("d", `M0 ${-d.r - 2} L${d.r + 2} 0 L0 ${d.r + 2} L${-d.r - 2} 0 Z`).attr("fill", SERIES[schema]).attr("stroke", "var(--sheet)").attr("stroke-width", 1.5);
+    else g.append("circle").attr("r", d.r).attr("fill", "var(--ink)").attr("stroke", "var(--sheet)").attr("stroke-width", 1.5);
+    const left = o.ring != null && d.x < o.W / 2 - 1 && d.id !== o.ring;
+    const lx = left ? -(d.r + 4) : d.r + 4;
+    const vertical = o.ring != null && d.kind !== "relation" && (d.id === o.ring || Math.abs(d.x - o.W / 2) < 30);
+    if (o.labels && o.ring != null && d.kind === "relation") g.append("text").attr("class", "node-label").attr("x", 0).attr("y", -(d.r + 5)).attr("text-anchor", "middle").style("font-size", "8.5px").style("fill", "var(--ink-2)").text(d.label || d.id);
+    else if (o.labels && vertical) g.append("text").attr("class", "node-label").attr("x", 0).attr("y", d.y <= o.H / 2 ? -(d.r + 5) : d.r + 12).attr("text-anchor", "middle").style("font-weight", d.id === o.ring ? 600 : 400).text(d.label || d.id);
+    else if (o.labels) g.append("text").attr("class", "node-label").attr("x", lx).attr("y", 3.5).attr("text-anchor", left ? "end" : "start").text(d.label || d.id);
+    const py = vertical && d.y >= o.H / 2 ? 18 : 8;   // below a bottom-centred label
+    (d.props || []).forEach((pname, i) => {
+      const w = 5.2 * String(pname).length + 8;
+      g.append("rect").attr("class", "prop-chip").attr("x", left ? lx - w : lx).attr("y", py + i * 12).attr("width", w).attr("height", 10).attr("rx", 3);
+      g.append("text").attr("class", "prop-text").attr("x", left ? lx - 4 : lx + 4).attr("y", py + 7.5 + i * 12).attr("text-anchor", left ? "end" : "start").text(pname);
+    });
+  });
+  function place() {
+    if (!sim) nodes.forEach(d => { d.x = clamp(d.x, 14, o.W - 14); d.y = clamp(d.y, 14, o.H - 14); });
+    else nodes.forEach(d => { d.x = clamp(d.x, 14, o.W - 70); d.y = clamp(d.y, 14, o.H - 14 - ((d.props || []).length ? 24 : 0)); });
+    link.attr("d", d => d.source === d.target ? `M${d.source.x},${d.source.y} c 20 -30 40 0 0 20` : `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`);
+    linkHit.attr("d", d => `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`);
+    if (elabel) elabel.attr("x", d => (d.source.x + d.target.x) / 2).attr("y", d => (d.source.y + d.target.y) / 2 - 3);
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+  }
+  place();
+  node.call(d3.drag().on("start", (e, d) => { d.fx = d.x; d.fy = d.y; }).on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; if (sim) { sim.alpha(0.3).tick(); } else { d.x = e.x; d.y = e.y; } place(); }).on("end", (e, d) => { d.fx = null; d.fy = null; }));
 }
 
 // ---------- follow-up runs: index, skew, second engine, writes ----------

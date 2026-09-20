@@ -7,98 +7,128 @@
 <meta name="description" content="Structural design choices in enterprise ontologies and their engineering cost: metric coverage (RQ1), eight industry cases (RQ2), a three-schema benchmark (RQ3).">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
 :root {
   color-scheme: light;
-  --page: #edf0ec; --sheet: #f7f8f6; --ink: #12302b; --ink-2: #4b615a; --muted: #7d8f88;
-  --rule: #c6cfc9; --rule-soft: #d9e0dc; --grid: #dde3df;
+  --page: #ffffff; --sheet: #f6f6f7; --ink: #0a0a0a; --ink-2: #4b4b52; --muted: #7c7c85;
+  --rule: #e4e4e8; --rule-soft: #ededf0; --grid: #ececef; --border: #dcdce1;
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;                      /* flat / mid / normalized */
   --seq-1: #cde2fb; --seq-3: #3987e5;
   --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --band: #000000; --band-ink: #ffffff; --band-ink-2: rgba(255,255,255,.66); --band-rule: rgba(255,255,255,.14); --band-sheet: #121214;
+  --font: "Inter", "Noto Sans KR", system-ui, sans-serif; --display: "Inter Tight", "Inter", "Noto Sans KR", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --page: #0f1a17; --sheet: #16241f; --ink: #e9efec; --ink-2: #b7c5bf; --muted: #7f918a;
-    --rule: #2f423b; --rule-soft: #24352f; --grid: #24352f;
+    --page: #0a0a0a; --sheet: #141416; --ink: #f4f4f5; --ink-2: #b9b9c2; --muted: #85858f;
+    --rule: #26262b; --rule-soft: #1f1f24; --grid: #222227; --border: #2c2c32;
     --s1: #3987e5; --s2: #d95926; --s3: #199e70;
     --seq-1: #184f95; --seq-3: #5598e7;
+    --band: #000000; --band-sheet: #121214;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --page: #0f1a17; --sheet: #16241f; --ink: #e9efec; --ink-2: #b7c5bf; --muted: #7f918a;
-  --rule: #2f423b; --rule-soft: #24352f; --grid: #24352f;
+  --page: #0a0a0a; --sheet: #141416; --ink: #f4f4f5; --ink-2: #b9b9c2; --muted: #85858f;
+  --rule: #26262b; --rule-soft: #1f1f24; --grid: #222227; --border: #2c2c32;
   --s1: #3987e5; --s2: #d95926; --s3: #199e70;
   --seq-1: #184f95; --seq-3: #5598e7;
+  --band: #000000; --band-sheet: #121214;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .schema .trace { animation: none; stroke-dashoffset: 0; } }
-body { margin: 0; background: var(--page); color: var(--ink); font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 16px; line-height: 1.5; font-optical-sizing: auto; }
-a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); font-size: 15.5px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+html[lang="ko"] body { font-family: "Noto Sans KR", "Inter", system-ui, sans-serif; word-break: keep-all; }
+a { color: inherit; text-decoration-color: var(--border); text-underline-offset: 3px; }
 a:hover { text-decoration-color: var(--ink); }
 :focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
 code { font-family: inherit; font-weight: 500; }
 p { max-width: 68ch; margin: 0 0 1em; }
-h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.02; font-weight: 500; letter-spacing: -.02em; margin: 0; max-width: 16ch; }
-h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.15; font-weight: 500; letter-spacing: -.015em; margin: 0 0 12px; max-width: 30ch; }
-h3 { font-size: 18px; font-weight: 600; margin: 40px 0 10px; }
-.lede { font-size: 19px; line-height: 1.4; color: var(--ink-2); max-width: 58ch; }
+h1 { font-family: var(--display); font-size: clamp(38px, 6vw, 72px); line-height: .98; font-weight: 600; letter-spacing: -.035em; margin: 0; max-width: 14ch; }
+h2 { font-family: var(--display); font-size: clamp(26px, 3.4vw, 40px); line-height: 1.08; font-weight: 600; letter-spacing: -.03em; margin: 0 0 14px; max-width: 26ch; }
+h3 { font-family: var(--display); font-size: 20px; font-weight: 600; letter-spacing: -.015em; margin: 44px 0 10px; }
+html[lang="ko"] h1, html[lang="ko"] h2, html[lang="ko"] h3, html[lang="ko"] h4 { font-family: "Noto Sans KR", "Inter Tight", sans-serif; letter-spacing: -.02em; }
+html[lang="ko"] h1 { line-height: 1.12; } html[lang="ko"] h2 { line-height: 1.22; } html[lang="ko"] .hero-claim .claim { line-height: 1.45; }
+.lede { font-size: 18px; line-height: 1.5; color: var(--ink-2); max-width: 56ch; }
 .small { font-size: 13.5px; color: var(--muted); }
-.note { font-size: 13.5px; color: var(--ink-2); max-width: 60ch; border-left: 2px solid var(--rule); padding-left: 12px; margin: 14px 0; }
+.note { font-size: 13.5px; color: var(--ink-2); max-width: 62ch; border-left: 2px solid var(--border); padding-left: 12px; margin: 14px 0; }
+.kicker { font-size: 13px; color: var(--muted); margin: 0 0 10px; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
 
-/* frame */
-.frame { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
-.hero { padding: 56px 0 24px; }
-.hero-top { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 36px; }
-.hero-links { font-size: 14px; color: var(--ink-2); display: flex; gap: 20px; flex-wrap: wrap; }
-.schemas { display: grid; grid-template-columns: 1fr; gap: 12px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 20px 0; }
-@media (min-width: 760px) { .schemas { grid-template-columns: 1fr 1fr 1fr; gap: 24px; } }
+/* top bar */
+.topbar { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--page) 86%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); }
+.topbar .frame { display: flex; align-items: center; gap: 18px; height: 56px; }
+.brand { font-family: var(--display); font-weight: 600; letter-spacing: -.02em; text-decoration: none; white-space: nowrap; font-size: 15px; }
+.brand i { display: inline-block; width: 10px; height: 10px; background: var(--ink); margin-right: 9px; transform: rotate(45deg); vertical-align: 1px; }
+.topnav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.topnav::-webkit-scrollbar { display: none; }
+.topnav a { white-space: nowrap; padding: 6px 9px; font-size: 13px; color: var(--ink-2); text-decoration: none; border-radius: 999px; }
+.topnav a:hover { color: var(--ink); background: var(--sheet); }
+.topnav a[aria-current="true"] { color: var(--ink); background: var(--sheet); }
+.tools { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+.lang { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; padding: 2px; background: var(--page); }
+.lang button { font: inherit; font-size: 12.5px; font-weight: 500; padding: 4px 10px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500; padding: 8px 14px; border-radius: 999px; text-decoration: none; border: 1px solid var(--ink); background: var(--ink); color: var(--page); white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn:hover { opacity: .88; }
+@media (max-width: 760px) { .topbar .frame { gap: 10px; } .topnav { order: 3; flex-basis: 100%; padding-bottom: 8px; } .topbar .frame { flex-wrap: wrap; height: auto; padding-top: 8px; } .btn.repo { display: none; } }
+
+/* frame and bands */
+.frame { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.band { background: var(--band); color: var(--band-ink); --ink: var(--band-ink); --ink-2: var(--band-ink-2); --muted: rgba(255,255,255,.5); --sheet: var(--band-sheet); --rule: var(--band-rule); --rule-soft: rgba(255,255,255,.1); --border: rgba(255,255,255,.2); --page: #000; }
+.band .lede, .band .kicker { color: var(--band-ink-2); }
+.hero { padding: 72px 0 40px; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--band-rule) 1px, transparent 1px), linear-gradient(90deg, var(--band-rule) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 70% 0%, #000 0%, transparent 70%); opacity: .5; pointer-events: none; }
+.hero > .frame { position: relative; }
+.hero-top { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: end; margin-bottom: 44px; }
+@media (min-width: 900px) { .hero-top { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.hero-links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-start; }
+@media (min-width: 900px) { .hero-links { justify-content: flex-end; } }
+.band .btn { background: #fff; color: #000; border-color: #fff; }
+.band .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.35); }
+.schemas { display: grid; grid-template-columns: 1fr; gap: 12px; border-top: 1px solid var(--band-rule); border-bottom: 1px solid var(--band-rule); padding: 24px 0; }
+@media (min-width: 760px) { .schemas { grid-template-columns: 1fr 1fr 1fr; gap: 28px; } }
 .schema { display: flex; flex-direction: column; }
 .schema svg { margin-top: auto; }
-.schema h4 { margin: 0 0 4px; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.schema h4 i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-.schema .hops { font-size: 15px; color: var(--ink-2); margin: 0 0 8px; }
-.schema .hops b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.schema h4 { margin: 0 0 4px; font-family: var(--display); font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
+.schema h4 i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.schema .hops { font-size: 14px; color: var(--band-ink-2); margin: 0 0 10px; }
+.schema .hops b { color: var(--band-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .schema svg { width: 100%; height: auto; display: block; }
-.schema .node, .schema .rel { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.5; }
-.schema .edge { stroke: var(--ink-2); stroke-width: 1.5; fill: none; }
-.schema .lbl { fill: var(--ink); font-size: 13px; font-weight: 600; }
-.schema .rel-lbl { fill: var(--ink); font-size: 11.5px; font-weight: 600; }
-.schema .prop { fill: var(--ink-2); font-size: 12px; }
-.schema .elbl { fill: var(--ink-2); font-size: 11.5px; }
-.schema .trace { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: .9; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: trace 1.1s cubic-bezier(.4,0,.2,1) forwards; }
+.schema .node, .schema .rel { fill: var(--band-sheet); stroke: rgba(255,255,255,.7); stroke-width: 1.2; }
+.schema .edge { stroke: rgba(255,255,255,.55); stroke-width: 1.2; fill: none; }
+.schema .lbl { fill: #fff; font-size: 13px; font-weight: 600; }
+.schema .rel-lbl { fill: #fff; font-size: 11.5px; font-weight: 600; }
+.schema .prop { fill: rgba(255,255,255,.6); font-size: 12px; }
+.schema .elbl { fill: rgba(255,255,255,.6); font-size: 11.5px; }
+.schema .trace { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: .95; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: trace 1.1s cubic-bezier(.4,0,.2,1) forwards; }
 .schema:nth-child(2) .trace { animation-delay: .35s; } .schema:nth-child(3) .trace { animation-delay: .7s; }
 @keyframes trace { to { stroke-dashoffset: 0; } }
-.hero-claim { display: grid; gap: 20px; grid-template-columns: 1fr; padding: 24px 0 8px; }
+.hero-claim { display: grid; gap: 20px; grid-template-columns: 1fr; padding: 28px 0 8px; }
 @media (min-width: 900px) { .hero-claim { grid-template-columns: 2fr 1fr; align-items: start; } }
-.hero-claim .claim { font-size: 20px; line-height: 1.35; max-width: 40ch; margin: 0; }
-.hero-claim .claim b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hero-claim .claim { font-family: var(--display); font-size: 22px; line-height: 1.3; letter-spacing: -.015em; max-width: 40ch; margin: 0; font-weight: 500; }
+.hero-claim .claim b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.hero-claim .small { color: var(--band-ink-2); }
 
-/* body: rail + content */
-.body { display: grid; grid-template-columns: 1fr; gap: 0 40px; padding-top: 24px; }
-@media (min-width: 900px) { .body { grid-template-columns: 150px minmax(0, 1fr); } }
+/* sections */
 main { min-width: 0; }
-.rail { display: none; }
-@media (min-width: 900px) { .rail { display: block; position: sticky; top: 24px; align-self: start; font-size: 14px; } }
-.rail a { display: block; padding: 6px 0; color: var(--ink-2); text-decoration: none; border-top: 1px solid var(--rule-soft); }
-.rail a:first-child { border-top: 0; }
-.rail a[aria-current="true"] { color: var(--ink); font-weight: 600; }
-.rail .rq { font-variant-numeric: tabular-nums; margin-right: 8px; color: var(--muted); }
-.rail a[aria-current="true"] .rq { color: var(--ink); }
-main section { padding: 32px 0 48px; border-top: 1px solid var(--rule); scroll-margin-top: 16px; }
-main section:first-child { border-top: 0; padding-top: 8px; }
-.kicker { font-size: 15px; color: var(--muted); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+main section { padding: 64px 0 56px; border-top: 1px solid var(--rule); scroll-margin-top: 64px; }
+main section:first-child { border-top: 0; }
+main section:target { scroll-margin-top: 64px; }
+.sec-head { display: grid; grid-template-columns: 1fr; gap: 8px 40px; margin-bottom: 20px; }
+@media (min-width: 900px) { .sec-head { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: end; } .sec-head h2 { margin-bottom: 0; } .sec-head p { margin: 0; } }
 
 /* tables */
 table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
-th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
-thead th { color: var(--ink-2); font-weight: 500; border-bottom: 1px solid var(--rule); }
+th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+thead th { color: var(--muted); font-weight: 500; font-size: 12.5px; border-bottom: 1px solid var(--rule); }
 td.num, th.num { text-align: right; }
 .wrap { overflow-x: auto; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); margin: 8px 0 12px; }
+.card { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2); margin: 8px 0 14px; }
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .sw1 { background: var(--s1); } .sw2 { background: var(--s2); } .sw3 { background: var(--s3); }
@@ -107,13 +137,14 @@ td.num, th.num { text-align: right; }
 .st-good i { background: var(--good); } .st-warn i { background: var(--warn); } .st-crit i { background: var(--critical); } .st-ser i { background: var(--serious); }
 
 /* controls */
-.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0; font-size: 14px; color: var(--ink-2); }
-select, .seg button { font: inherit; font-size: 14px; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); padding: 4px 8px; max-width: 100%; }
-.seg { display: inline-flex; } .seg button { cursor: pointer; margin-left: -1px; } .seg button:first-child { margin-left: 0; }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); position: relative; }
+.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 14px 0; font-size: 13.5px; color: var(--ink-2); }
+select, .seg button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--page); border: 1px solid var(--border); padding: 6px 10px; max-width: 100%; border-radius: 8px; }
+.seg { display: inline-flex; background: var(--sheet); border: 1px solid var(--border); border-radius: 999px; padding: 2px; }
+.seg button { cursor: pointer; border: 0; background: transparent; border-radius: 999px; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); }
 
 /* charts */
-.fig { background: var(--sheet); border-top: 1px solid var(--rule); padding: 12px 8px 4px; }
+.fig { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 12px 6px; }
 svg.chart { display: block; width: 100%; height: auto; }
 svg.chart text { fill: var(--ink-2); font-size: 12px; font-family: inherit; }
 svg.chart .tick { fill: var(--muted); font-size: 11px; }
@@ -122,16 +153,16 @@ svg.chart .axis { stroke: var(--rule); stroke-width: 1; }
 svg.chart .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
 .hit { fill: transparent; }
 #rq1-bars { max-width: 720px; }
-.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); padding: 8px 10px; font-size: 13px; display: none; max-width: 320px; z-index: 10; line-height: 1.4; }
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); padding: 8px 10px; font-size: 13px; display: none; max-width: 320px; z-index: 40; line-height: 1.4; border-radius: 8px; }
 .tip b { display: block; margin-bottom: 2px; font-weight: 600; }
 .tip code { font-weight: 600; }
 
 /* matrices */
 .matrix { width: auto; }
 .matrix td.cell { padding: 0; width: 40px; min-width: 40px; }
-.matrix .dot { display: block; margin: 2px; height: 26px; }
+.matrix .dot { display: block; margin: 2px; height: 26px; border-radius: 4px; }
 .matrix .on { background: var(--seq-3); } .matrix .named { background: var(--seq-1); }
-.matrix th.rot { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; padding: 8px 4px; font-weight: 500; white-space: nowrap; color: var(--ink); }
+.matrix th.rot { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; padding: 8px 4px; font-weight: 500; white-space: nowrap; color: var(--ink); font-size: 13px; }
 .matrix th.rot a { text-decoration: none; }
 .matrix tbody th { font-weight: 500; color: var(--ink); }
 .matrix tbody th a { text-decoration: none; }
@@ -140,328 +171,305 @@ svg.chart .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
 .two > * { min-width: 0; }
 @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } .two.wide-left { grid-template-columns: 3fr 2fr; } }
 .detail { font-size: 14px; }
-.detail dt { color: var(--ink-2); margin-top: 10px; } .detail dd { margin: 0; }
-.readings { display: grid; gap: 20px 32px; grid-template-columns: 1fr; margin-top: 16px; }
+.detail dt { color: var(--muted); margin-top: 10px; font-size: 12.5px; } .detail dd { margin: 0; }
+.readings { display: grid; gap: 14px; grid-template-columns: 1fr; margin-top: 16px; }
 @media (min-width: 760px) { .readings { grid-template-columns: 1fr 1fr 1fr; } }
-.readings div { font-size: 14.5px; color: var(--ink-2); }
-.readings b { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 600; margin-bottom: 4px; font-size: 16px; }
+.readings div { font-size: 14px; color: var(--ink-2); background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; }
+.readings b { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 600; margin-bottom: 6px; font-size: 16px; font-family: var(--display); }
 .readings i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-.mix { display: grid; gap: 6px 24px; grid-template-columns: 1fr; margin: 12px 0; font-size: 14px; }
+.mix { display: grid; gap: 10px 28px; grid-template-columns: 1fr; margin: 14px 0; font-size: 14px; }
 @media (min-width: 760px) { .mix { grid-template-columns: 1fr 1fr; } }
 .mix label { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; color: var(--ink-2); }
 .mix label input { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); }
 .mix output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
-.gap { display: grid; gap: 4px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 12px; }
-.gap div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14.5px; }
-.gap div b { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.gap { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 12px; }
+.gap div { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; font-size: 13.5px; color: var(--ink-2); }
+.gap div b { font-family: var(--display); font-size: 26px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
 .guide { border-top: 1px solid var(--rule); }
-.guide article { display: grid; grid-template-columns: 1fr; gap: 4px 24px; padding: 16px 0; border-bottom: 1px solid var(--rule-soft); }
+.guide article { display: grid; grid-template-columns: 1fr; gap: 4px 24px; padding: 18px 0; border-bottom: 1px solid var(--rule-soft); }
 @media (min-width: 760px) { .guide article { grid-template-columns: 56px minmax(0, 3fr) minmax(0, 4fr); } }
-.guide .gid { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 15px; }
-.guide h4 { margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; max-width: 34ch; }
+.guide .gid { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 14px; }
+.guide h4 { margin: 0; font-family: var(--display); font-size: 17px; font-weight: 600; line-height: 1.3; max-width: 34ch; letter-spacing: -.01em; }
 .guide .ev { font-size: 14px; color: var(--ink-2); max-width: 64ch; }
-.guide .strength { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.guide .strength { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
 .graphs { display: grid; gap: 12px; grid-template-columns: 1fr; }
 @media (min-width: 760px) { .graphs { grid-template-columns: 1fr 1fr 1fr; } .graphs.stack { grid-template-columns: 1fr; } }
-.graphs .panel { background: var(--sheet); border-top: 1px solid var(--rule); padding: 8px 8px 4px; }
-.graphs .panel h4 { margin: 0 0 2px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.graphs .panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 12px 12px 6px; }
+.graphs .panel h4 { margin: 0 0 2px; font-family: var(--display); font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .graphs .panel h4 i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .graphs .panel .stat { font-size: 12.5px; color: var(--muted); margin: 0 0 4px; }
 .graphs svg { display: block; width: 100%; height: auto; }
 .graphs .node-label { font-size: 10.5px; fill: var(--ink); pointer-events: none; }
 .graphs .prop-chip { fill: var(--rule); }
 .graphs .prop-text { font-size: 8.5px; fill: var(--ink-2); pointer-events: none; }
-.graphs .edge { stroke: var(--rule); stroke-width: 1; fill: none; }
+.graphs .edge { stroke: var(--border); stroke-width: 1; fill: none; }
 .graphs .edge.on { stroke-width: 3.5; opacity: .9; }
 .graphs .node.scan circle { stroke-width: 3; }
 .graphs .hopcount { font-size: 13px; font-weight: 600; fill: var(--ink); }
 .graphs .edge-label { font-size: 8px; fill: var(--muted); pointer-events: none; }
-details summary { cursor: pointer; color: var(--ink-2); margin: 20px 0 8px; }
-footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14px; color: var(--ink-2); }
-/* entry points: skip link, compact nav below the rail breakpoint */
-.skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--page); padding: 8px 12px; z-index: 20; }
+details summary { cursor: pointer; color: var(--ink-2); margin: 20px 0 8px; font-size: 14px; }
+footer { background: var(--band); color: var(--band-ink-2); padding: 40px 0 64px; font-size: 14px; margin-top: 40px; }
+footer a { color: var(--band-ink); }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--page); padding: 8px 12px; z-index: 50; }
 .skip:focus { left: 8px; }
-.topnav { position: sticky; top: 0; z-index: 5; display: flex; gap: 4px; overflow-x: auto; padding: 10px 16px; background: color-mix(in srgb, var(--page) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); font-size: 14px; scrollbar-width: none; }
-.topnav::-webkit-scrollbar { display: none; }
-.topnav a { white-space: nowrap; padding: 4px 10px; color: var(--ink-2); text-decoration: none; border: 1px solid transparent; }
-.topnav a[aria-current="true"] { color: var(--ink); border-color: var(--rule); }
-@media (min-width: 900px) { .topnav { display: none; } }
 
-/* start here */
+/* start here, findings, glossary, method, limits, references */
 .paths { border-top: 1px solid var(--rule); }
 .path { padding: 14px 0; border-bottom: 1px solid var(--rule-soft); }
 .path b { display: block; font-weight: 600; margin-bottom: 4px; }
-.path p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
-.findings { display: grid; gap: 0; grid-template-columns: 1fr; border-top: 1px solid var(--rule); }
-.findings article { display: grid; grid-template-columns: 1fr; gap: 6px 24px; padding: 18px 0; border-bottom: 1px solid var(--rule-soft); }
-@media (min-width: 760px) { .findings article { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); } }
-.findings h4 { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.3; max-width: 30ch; }
-.findings .num { font-size: 15px; color: var(--ink-2); max-width: 64ch; }
+.path p { margin: 0; font-size: 14px; color: var(--ink-2); }
+.findings { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .findings { grid-template-columns: 1fr 1fr; } }
+.findings article { background: var(--sheet); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
+.findings h4 { margin: 0; font-family: var(--display); font-size: 19px; font-weight: 600; line-height: 1.25; letter-spacing: -.015em; }
+.findings .num { font-size: 14px; color: var(--ink-2); }
 .findings .num b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-.findings .src { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.findings .src { font-size: 12.5px; color: var(--muted); margin-top: auto; padding-top: 6px; }
 .gloss { display: grid; gap: 0 40px; grid-template-columns: 1fr; margin: 16px 0 0; border-top: 1px solid var(--rule); }
 @media (min-width: 760px) { .gloss { grid-template-columns: 1fr 1fr; } }
 .gloss > div { padding: 14px 0; border-bottom: 1px solid var(--rule-soft); }
 .gloss dt { font-weight: 600; margin-bottom: 4px; }
-.gloss dd { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+.gloss dd { margin: 0; font-size: 14px; color: var(--ink-2); }
 .gloss > div:target { background: color-mix(in srgb, var(--s1) 8%, transparent); box-shadow: 0 0 0 8px color-mix(in srgb, var(--s1) 8%, transparent); }
 .strands th:first-child { font-weight: 600; white-space: nowrap; }
-.strands td { font-size: 14.5px; max-width: 40ch; }
+.strands td { font-size: 14px; max-width: 40ch; }
 .limits dt { font-weight: 600; margin-top: 16px; }
-.limits dd { margin: 4px 0 0; font-size: 14.5px; color: var(--ink-2); max-width: 70ch; }
-.cmds { background: var(--sheet); border-top: 1px solid var(--rule); padding: 14px 16px; font-size: 13.5px; line-height: 1.55; overflow-x: auto; margin: 0 0 16px; }
+.limits dd { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); max-width: 70ch; }
+.cmds { background: var(--band); color: #e8e8ec; border-radius: 14px; padding: 16px 18px; font-size: 13px; line-height: 1.6; overflow-x: auto; margin: 0 0 16px; }
 .cmds code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-weight: 400; }
-.refs { margin: 0; padding-left: 0; list-style: none; counter-reset: ref; }
-.refs li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14.5px; scroll-margin-top: 60px; }
+.refs { margin: 0; padding-left: 0; list-style: none; }
+.refs li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14px; scroll-margin-top: 70px; }
 .refs li:target { background: color-mix(in srgb, var(--s1) 8%, transparent); }
 .refs .rn { color: var(--muted); font-variant-numeric: tabular-nums; }
 .refs .doi { display: inline-block; margin-top: 2px; font-size: 13px; color: var(--ink-2); }
-main section:target { scroll-margin-top: 56px; }
 a[href^="#ref-"] { text-decoration: none; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 a[href^="#ref-"]:hover { color: var(--ink); text-decoration: underline; }
 </style>
 </head>
 <body>
-<a class="skip" href="#start">Skip to the summary</a>
-<nav class="topnav" aria-label="Sections, compact">
-  <a href="#start">Start here</a><a href="#findings">Findings</a><a href="#glossary">Glossary</a><a href="#method">Method</a><a href="#fit">Results</a><a href="#graphs">Schemas</a><a href="#rq3">Benchmark</a><a href="#rq2">Cases</a><a href="#rq1">Metrics</a><a href="#guide">Guidelines</a><a href="#limits">Limits</a><a href="#reproduce">Reproduce</a><a href="#references">References</a>
-</nav>
-<div class="frame">
-<header class="hero">
-  <div class="hero-top">
-    <div>
-      <p class="kicker">Ontology Design Study, 2026. A literature review, eight cases, one benchmark.</p>
-      <h1>The schema sets the hops. The engine sets their price.</h1>
-      <p class="lede" style="margin-top:14px">How you model a knowledge graph decides how much work every question needs. This study measures that: what each modelling choice costs in hops, time and memory, and which choices the graphs that lasted had in common.</p>
+<a class="skip" href="#start" data-i18n>Skip to the summary</a>
+<header class="topbar">
+  <div class="frame">
+    <a class="brand" href="#top"><i></i><span data-i18n>Ontology Design Study</span></a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#start" data-i18n>Start here</a><a href="#findings" data-i18n>Findings</a><a href="#glossary" data-i18n>Glossary</a><a href="#method" data-i18n>Method</a><a href="#fit" data-i18n>Results</a><a href="#graphs" data-i18n>Schemas</a><a href="#rq3" data-i18n>Benchmark</a><a href="#rq2" data-i18n>Cases</a><a href="#rq1" data-i18n>Metrics</a><a href="#guide" data-i18n>Guidelines</a><a href="#limits" data-i18n>Limits</a><a href="#reproduce" data-i18n>Reproduce</a><a href="#references" data-i18n>References</a>
+    </nav>
+    <div class="tools">
+      <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ko" aria-pressed="false">한국어</button></div>
+      <a class="btn repo" href="https://github.com/ans9611/ontology-design-study" data-i18n>Repository</a>
     </div>
-    <div class="hero-links"><a href="#start">Start here</a><a href="https://github.com/ans9611/ontology-design-study">Repository</a><a href="https://github.com/ans9611/ontology-design-study#readme">Write-up</a><a href="data.json">data.json</a></div>
-  </div>
-
-  <div class="schemas" id="schemas"></div>
-
-  <div class="hero-claim">
-    <p class="claim" id="hero-claim"></p>
-    <p class="small" style="font-size:14px" id="hero-note"></p>
   </div>
 </header>
 
-<div class="body">
-  <nav class="rail" aria-label="Sections">
-    <a href="#start">Start here</a>
-    <a href="#findings">Findings</a>
-    <a href="#glossary">Glossary</a>
-    <a href="#method">Method</a>
-    <a href="#fit">Results in three tables</a>
-    <a href="#graphs">Schemas</a>
-    <a href="#rq3"><span class="rq">RQ3</span>Benchmark</a>
-    <a href="#rq2"><span class="rq">RQ2</span>Cases</a>
-    <a href="#rq1"><span class="rq">RQ1</span>Metrics</a>
-    <a href="#guide">Guidelines</a>
-    <a href="#limits">Limits</a>
-    <a href="#reproduce">Reproduce</a>
-    <a href="#references">References</a>
-  </nav>
-  <main>
+<section class="hero band" id="top">
+  <div class="frame">
+    <div class="hero-top">
+      <div>
+        <p class="kicker" data-i18n>Ontology Design Study, 2026. A literature review, eight cases, one benchmark.</p>
+        <h1 data-i18n>The schema sets the hops. The engine sets their price.</h1>
+        <p class="lede" style="margin-top:18px" data-i18n>How you model a knowledge graph decides how much work every question needs. This study measures that: what each modelling choice costs in hops, time and memory, and which choices the graphs that lasted had in common.</p>
+      </div>
+      <div class="hero-links"><a class="btn" href="#start" data-i18n>Start here</a><a class="btn ghost" href="https://github.com/ans9611/ontology-design-study#readme" data-i18n>Write-up</a><a class="btn ghost" href="data.json">data.json</a></div>
+    </div>
+    <div class="schemas" id="schemas"></div>
+    <div class="hero-claim">
+      <p class="claim" id="hero-claim"></p>
+      <p class="small" style="font-size:14px" id="hero-note"></p>
+    </div>
+  </div>
+</section>
+
+<div class="frame">
+<main>
 
 <section id="start">
-  <h2>Start here</h2>
+  <div class="sec-head"><h2 data-i18n>Start here</h2></div>
   <div class="two wide-left">
     <div>
-      <h3 style="margin-top:0">What this study is about</h3>
-      <p>An <a href="#g-ontology">ontology</a> is the shared vocabulary an organisation uses to describe its data: which kinds of things exist, and how they relate. Once applications depend on it, changing it is expensive. Yet the choices made while designing it, such as whether a relation becomes a node of its own or whether a place is a node or a text field, are rarely checked against what they will cost when the graph is queried at scale.</p>
-      <p>The study asks that question in three ways. A systematic review of the literature checks whether existing quality metrics measure cost at all (<a href="#rq1">RQ1</a>). A multiple-case study of eight industry knowledge graphs, two of them abandoned, records which design patterns each one used (<a href="#rq2">RQ2</a>). A controlled experiment models one dataset three ways and measures how the cost of twenty questions grows with the size of the graph (<a href="#rq3">RQ3</a>). Every number on this page is computed from the repository's tables when the page loads.</p>
+      <h3 style="margin-top:0" data-i18n>What this study is about</h3>
+      <p data-i18n>An <a href="#g-ontology">ontology</a> is the shared vocabulary an organisation uses to describe its data: which kinds of things exist, and how they relate. Once applications depend on it, changing it is expensive. Yet the choices made while designing it, such as whether a relation becomes a node of its own or whether a place is a node or a text field, are rarely checked against what they will cost when the graph is queried at scale.</p>
+      <p data-i18n>The study asks that question in three ways. A systematic review of the literature checks whether existing quality metrics measure cost at all (<a href="#rq1">RQ1</a>). A multiple-case study of eight industry knowledge graphs, two of them abandoned, records which design patterns each one used (<a href="#rq2">RQ2</a>). A controlled experiment models one dataset three ways and measures how the cost of twenty questions grows with the size of the graph (<a href="#rq3">RQ3</a>). Every number on this page is computed from the repository's tables when the page loads.</p>
     </div>
     <div class="paths">
-      <h3 style="margin-top:0">How to read this page</h3>
+      <h3 style="margin-top:0" data-i18n>How to read this page</h3>
       <div class="path">
-        <b>Five minutes</b>
-        <p>The <a href="#findings">findings</a>, then the three diagrams at the top, then the <a href="#guide">guidelines</a>.</p>
+        <b data-i18n>Five minutes</b>
+        <p data-i18n>The <a href="#findings">findings</a>, then the three diagrams at the top, then the <a href="#guide">guidelines</a>.</p>
       </div>
       <div class="path">
-        <b>Thirty minutes</b>
-        <p>Add the <a href="#glossary">glossary</a> if the terms are new, the <a href="#method">method</a>, the <a href="#fit">three result tables</a>, and the <a href="#rq3">benchmark charts</a>. Then read the <a href="#limits">limits</a> before quoting a number.</p>
+        <b data-i18n>Thirty minutes</b>
+        <p data-i18n>Add the <a href="#glossary">glossary</a> if the terms are new, the <a href="#method">method</a>, the <a href="#fit">three result tables</a>, and the <a href="#rq3">benchmark charts</a>. Then read the <a href="#limits">limits</a> before quoting a number.</p>
       </div>
       <div class="path">
-        <b>Reproduce or extend it</b>
-        <p>The <a href="#reproduce">commands</a>, the schemas and queries in the repository, and the <a href="#references">references</a>. The benchmark runs on a laptop in under an hour.</p>
+        <b data-i18n>Reproduce or extend it</b>
+        <p data-i18n>The <a href="#reproduce">commands</a>, the schemas and queries in the repository, and the <a href="#references">references</a>. The benchmark runs on a laptop in under an hour.</p>
       </div>
     </div>
   </div>
 </section>
 
 <section id="findings">
-  <h2>What was found</h2>
-  <p>Six findings, each with the number behind it. Measured numbers are from the benchmark at 10,000 persons unless stated; counts across the cases are associations, not causes.</p>
+  <div class="sec-head"><h2 data-i18n>What was found</h2><p data-i18n>Six findings, each with the number behind it. Measured numbers are from the benchmark at 10,000 persons unless stated; counts across the cases are associations, not causes.</p></div>
   <div class="findings" id="findings-list"></div>
 </section>
 
 <section id="glossary">
-  <h2>Terms used on this page</h2>
-  <p>The study uses a small vocabulary consistently. These are the definitions it uses; they are standard in the graph-database literature <a href="#ref-10">[10]</a> <a href="#ref-20">[20]</a>.</p>
+  <div class="sec-head"><h2 data-i18n>Terms used on this page</h2><p data-i18n>The study uses a small vocabulary consistently. These are the definitions it uses; they are standard in the graph-database literature <a href="#ref-10">[10]</a> <a href="#ref-20">[20]</a>.</p></div>
   <dl class="gloss">
-    <div id="g-ontology"><dt>Ontology, knowledge graph</dt><dd>An ontology is an explicit specification of the kinds of things in a domain and their relations <a href="#ref-1">[1]</a>. A knowledge graph is data organised under such a vocabulary, as nodes and edges <a href="#ref-20">[20]</a>. This page treats the ontology as the graph's schema.</dd></div>
-    <div id="g-schema"><dt>Schema</dt><dd>The set of node types, edge types and properties a graph uses. The experiment models one dataset under three schemas of increasing depth: flat, mid and normalized.</dd></div>
-    <div id="g-hop"><dt>Hop</dt><dd>One step from a record to a neighbouring record along an edge, or one record visited by an index lookup or a scan. The study counts hops because they are a property of the schema, not of the engine: the same query needs the same hops on any database.</dd></div>
-    <div id="g-reification"><dt>Reification (normalizing a relation)</dt><dd>Turning a relation into a node of its own, so that <em>Alice knows Bob since 2014</em> becomes a <em>Knows</em> node linked to both people and carrying the date. It allows a relation to have its own properties and provenance, and it adds one hop to every query that crosses it.</dd></div>
-    <div id="g-fold"><dt>Folding, denormalizing</dt><dd>The opposite move: storing a value such as a city name as a text property on each person instead of linking to a City node. Reading it is cheap; finding every person in a city then needs a scan or an index, and renaming the city rewrites every copy.</dd></div>
-    <div id="g-scan"><dt>Scan versus index</dt><dd>A scan reads every record of a type to find the ones that match; its cost grows with the graph. An index jumps to the matching records; its cost grows with the answer. A reverse lookup (from a city to its people) scans unless an index or an edge exists.</dd></div>
-    <div id="g-fanin"><dt>Fan-in, fan-out</dt><dd>How many edges enter or leave a node. A city with 10,000 residents has fan-in 10,000. Uniform fan-in spreads edges evenly; heavy-tailed (Zipf) fan-in concentrates them on a few nodes, which is what real data does.</dd></div>
-    <div id="g-slope"><dt>Latency exponent (slope)</dt><dd>The slope of log(time) against log(persons) across the six graph sizes. Near 0, the query's cost is set by its neighbourhood and does not move as the graph grows; near 1, it grows with the whole graph.</dd></div>
+    <div id="g-ontology"><dt data-i18n>Ontology, knowledge graph</dt><dd data-i18n>An ontology is an explicit specification of the kinds of things in a domain and their relations <a href="#ref-1">[1]</a>. A knowledge graph is data organised under such a vocabulary, as nodes and edges <a href="#ref-20">[20]</a>. This page treats the ontology as the graph's schema.</dd></div>
+    <div id="g-schema"><dt data-i18n>Schema</dt><dd data-i18n>The set of node types, edge types and properties a graph uses. The experiment models one dataset under three schemas of increasing depth: flat, mid and normalized.</dd></div>
+    <div id="g-hop"><dt data-i18n>Hop</dt><dd data-i18n>One step from a record to a neighbouring record along an edge, or one record visited by an index lookup or a scan. The study counts hops because they are a property of the schema, not of the engine: the same query needs the same hops on any database.</dd></div>
+    <div id="g-reification"><dt data-i18n>Reification (normalizing a relation)</dt><dd data-i18n>Turning a relation into a node of its own, so that <em>Alice knows Bob since 2014</em> becomes a <em>Knows</em> node linked to both people and carrying the date. It allows a relation to have its own properties and provenance, and it adds one hop to every query that crosses it.</dd></div>
+    <div id="g-fold"><dt data-i18n>Folding, denormalizing</dt><dd data-i18n>The opposite move: storing a value such as a city name as a text property on each person instead of linking to a City node. Reading it is cheap; finding every person in a city then needs a scan or an index, and renaming the city rewrites every copy.</dd></div>
+    <div id="g-scan"><dt data-i18n>Scan versus index</dt><dd data-i18n>A scan reads every record of a type to find the ones that match; its cost grows with the graph. An index jumps to the matching records; its cost grows with the answer. A reverse lookup (from a city to its people) scans unless an index or an edge exists.</dd></div>
+    <div id="g-fanin"><dt data-i18n>Fan-in, fan-out</dt><dd data-i18n>How many edges enter or leave a node. A city with 10,000 residents has fan-in 10,000. Uniform fan-in spreads edges evenly; heavy-tailed (Zipf) fan-in concentrates them on a few nodes, which is what real data does.</dd></div>
+    <div id="g-slope"><dt data-i18n>Latency exponent (slope)</dt><dd data-i18n>The slope of log(time) against log(persons) across the six graph sizes. Near 0, the query's cost is set by its neighbourhood and does not move as the graph grows; near 1, it grows with the whole graph.</dd></div>
   </dl>
 </section>
 
 <section id="method">
-  <h2>Method at a glance</h2>
-  <p>Three strands, each answering one research question, triangulated in the write-up. Protocols, case files, hypotheses and raw timings are all in the repository.</p>
+  <div class="sec-head"><h2 data-i18n>Method at a glance</h2><p data-i18n>Three strands, each answering one research question, triangulated in the write-up. Protocols, case files, hypotheses and raw timings are all in the repository.</p></div>
   <div class="wrap"><table class="strands">
-    <thead><tr><th></th><th>Question</th><th>What was done</th><th>Evidence produced</th></tr></thead>
+    <thead><tr><th></th><th data-i18n>Question</th><th data-i18n>What was done</th><th data-i18n>Evidence produced</th></tr></thead>
     <tbody>
-      <tr><th><a href="#rq1">RQ1</a></th><td>What do existing ontology quality metrics measure, and what do they leave out?</td><td>Systematic literature review following Kitchenham and Charters <a href="#ref-22">[22]</a>: five databases, three search strings, 929 candidates screened, 188 included. Seven quality frameworks coded against six property groups.</td><td>A metric coverage matrix. Operational cost is the gap.</td></tr>
-      <tr><th><a href="#rq2">RQ2</a></th><td>Which design patterns recur in industry-scale knowledge graphs that lasted, and in those that did not?</td><td>Multiple-case study following Yin <a href="#ref-23">[23]</a>: eight cases chosen for variation in outcome, governance and domain, one file each from a shared template, patterns coded with a published codebook.</td><td>A pattern-by-case matrix with outcomes. Associations, not causes.</td></tr>
-      <tr><th><a href="#rq3">RQ3</a></th><td>When the same data is modelled at three depths, how do hops, latency and memory scale with data size?</td><td>Controlled experiment: LDBC-SNB-shaped synthetic graphs <a href="#ref-8">[8]</a> at six sizes (1,000 to 20,000 persons), three schemas, twenty questions fixed before the schemas were written, four hypotheses registered before the run, five repeats, four follow-up runs including a second engine.</td><td>Per-query hops, latency, scaling exponent and memory; verdicts on H1–H4; a two-term cost model per engine.</td></tr>
+      <tr><th><a href="#rq1">RQ1</a></th><td data-i18n>What do existing ontology quality metrics measure, and what do they leave out?</td><td data-i18n>Systematic literature review following Kitchenham and Charters <a href="#ref-22">[22]</a>: five databases, three search strings, 929 candidates screened, 188 included. Seven quality frameworks coded against six property groups.</td><td data-i18n>A metric coverage matrix. Operational cost is the gap.</td></tr>
+      <tr><th><a href="#rq2">RQ2</a></th><td data-i18n>Which design patterns recur in industry-scale knowledge graphs that lasted, and in those that did not?</td><td data-i18n>Multiple-case study following Yin <a href="#ref-23">[23]</a>: eight cases chosen for variation in outcome, governance and domain, one file each from a shared template, patterns coded with a published codebook.</td><td data-i18n>A pattern-by-case matrix with outcomes. Associations, not causes.</td></tr>
+      <tr><th><a href="#rq3">RQ3</a></th><td data-i18n>When the same data is modelled at three depths, how do hops, latency and memory scale with data size?</td><td data-i18n>Controlled experiment: LDBC-SNB-shaped synthetic graphs <a href="#ref-8">[8]</a> at six sizes (1,000 to 20,000 persons), three schemas, twenty questions fixed before the schemas were written, four hypotheses registered before the run, five repeats, four follow-up runs including a second engine.</td><td data-i18n>Per-query hops, latency, scaling exponent and memory; verdicts on H1–H4; a two-term cost model per engine.</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <section id="fit">
-  <h2>The results in three tables</h2>
-  <p>One table per research question, in the order a design review would use them. Every number is computed in this page from the repository's data; the reading beside it is the study's, and stays within what the number shows.</p>
+  <div class="sec-head"><h2 data-i18n>The results in three tables</h2><p data-i18n>One table per research question, in the order a design review would use them. Every number is computed in this page from the repository's data; the reading beside it is the study's, and stays within what the number shows.</p></div>
 
-  <h3>How deep to normalize (RQ3)</h3>
+  <h3 data-i18n>How deep to normalize (RQ3)</h3>
   <div class="wrap"><table id="fit-schema"></table></div>
   <div class="readings" id="fit-reading"></div>
   <p class="note" id="fit-schema-note"></p>
 
-  <h3>Your workload</h3>
-  <p>The medians above assume every question matters equally. Set the mix your graph will actually serve, and how often a copied value is renamed, and the cost per thousand operations is recomputed from the measured numbers.</p>
+  <h3 data-i18n>Your workload</h3>
+  <p data-i18n>The medians above assume every question matters equally. Set the mix your graph will actually serve, and how often a copied value is renamed, and the cost per thousand operations is recomputed from the measured numbers.</p>
   <div class="mix" id="mix">
-    <label>Neighbourhood reads <span class="small">(Q01–Q12, Q15, Q16, Q20)</span> <output></output><input type="range" min="0" max="100" value="80" data-g="nbr"></label>
-    <label>Path searches <span class="small">(Q13, Q14)</span> <output></output><input type="range" min="0" max="100" value="5" data-g="path"></label>
-    <label>Reverse lookups <span class="small">(Q17–Q19: from a tag, a city, an employer)</span> <output></output><input type="range" min="0" max="100" value="15" data-g="rev"></label>
-    <label>Renames per 1,000 reads <output></output><input type="range" min="0" max="50" value="1" step="0.5" data-g="renames"></label>
-    <label>Records that copy a renamed value (fan-in) <output></output><input type="range" min="1" max="5" value="2" step="0.05" data-g="fanin"></label>
+    <label><span data-i18n>Neighbourhood reads <span class="small">(Q01–Q12, Q15, Q16, Q20)</span></span> <output></output><input type="range" min="0" max="100" value="80" data-g="nbr"></label>
+    <label><span data-i18n>Path searches <span class="small">(Q13, Q14)</span></span> <output></output><input type="range" min="0" max="100" value="5" data-g="path"></label>
+    <label><span data-i18n>Reverse lookups <span class="small">(Q17–Q19: from a tag, a city, an employer)</span></span> <output></output><input type="range" min="0" max="100" value="15" data-g="rev"></label>
+    <label><span data-i18n>Renames per 1,000 reads</span> <output></output><input type="range" min="0" max="50" value="1" step="0.5" data-g="renames"></label>
+    <label><span data-i18n>Records that copy a renamed value (fan-in)</span> <output></output><input type="range" min="1" max="5" value="2" step="0.05" data-g="fanin"></label>
   </div>
   <div class="fig"><svg class="chart" id="mix-chart"></svg></div>
   <p class="small" id="mix-note" style="margin-top:8px"></p>
 
-  <h3>Which patterns were seen where (RQ2)</h3>
+  <h3 data-i18n>Which patterns were seen where (RQ2)</h3>
   <div class="two wide-left">
     <div class="wrap"><table id="fit-patterns"></table></div>
     <div>
-      <p class="note" style="margin-top:0">A catalogue, not a tally: eight purposive cases, one coder, no controls, and survivorship in what gets published. Patterns from the two non-sustained cases, Freebase (abandoned) and Cyc (limited adoption), are marked; they are questions to ask in a design review, not evidence of cause. The codebook for a second coder is in <a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/CODEBOOK.md">docs/cases/CODEBOOK.md</a>.</p>
+      <p class="note" style="margin-top:0" data-i18n>A catalogue, not a tally: eight purposive cases, one coder, no controls, and survivorship in what gets published. Patterns from the two non-sustained cases, Freebase (abandoned) and Cyc (limited adoption), are marked; they are questions to ask in a design review, not evidence of cause. The codebook for a second coder is in <a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/CODEBOOK.md">docs/cases/CODEBOOK.md</a>.</p>
       <div id="fit-hyp"></div>
     </div>
   </div>
 
-  <h3>What the quality-metric literature does not measure (RQ1)</h3>
-  <p class="note">Quality-evaluation frameworks only. The benchmark literature (LUBM <a href="#ref-25">[25]</a>, SP²Bench <a href="#ref-26">[26]</a>, BSBM <a href="#ref-27">[27]</a>, LDBC <a href="#ref-8">[8]</a>) does measure latency and scale, but holds the schema fixed and varies the engine; neither literature connects a modelling choice to its cost.</p>
+  <h3 data-i18n>What the quality-metric literature does not measure (RQ1)</h3>
+  <p class="note" data-i18n>Quality-evaluation frameworks only. The benchmark literature (LUBM <a href="#ref-25">[25]</a>, SP²Bench <a href="#ref-26">[26]</a>, BSBM <a href="#ref-27">[27]</a>, LDBC <a href="#ref-8">[8]</a>) does measure latency and scale, but holds the schema fixed and varies the engine; neither literature connects a modelling choice to its cost.</p>
   <div class="gap" id="fit-rq1"></div>
 </section>
 
 <section id="graphs">
-  <h2>The three schemas, as graphs</h2>
-  <p>Top row: every node type and relation type in each schema, from the data itself; circle area follows the instance count. A diamond is a relation that the schema stores as a node of its own. A grey tag under a node is a value that flat copies onto the node as a property instead of linking to it. Bottom row: one person's neighbourhood, the same entities in all three, drawn the way each schema stores it. Drag nodes; hover for counts.</p>
-  <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span><span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="var(--ink)"/></svg>entity type</span><span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="var(--s3)"/></svg>relation stored as a node</span><span><i style="border-radius:3px;background:var(--rule)"></i>value stored as a property</span></div>
+  <div class="sec-head"><h2 data-i18n>The three schemas, as graphs</h2><p data-i18n>Top row: every node type and relation type in each schema, from the data itself; circle area follows the instance count. A diamond is a relation that the schema stores as a node of its own. A grey tag under a node is a value that flat copies onto the node as a property instead of linking to it. Bottom row: one person's neighbourhood, the same entities in all three, drawn the way each schema stores it. Drag nodes; hover for counts.</p></div>
+  <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span><span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="var(--ink)"/></svg><span data-i18n>entity type</span></span><span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="var(--s3)"/></svg><span data-i18n>relation stored as a node</span></span><span><i style="border-radius:3px;background:var(--rule)"></i><span data-i18n>value stored as a property</span></span></div>
   <div class="graphs" id="type-graphs"></div>
-  <h3>One person's neighbourhood, three ways</h3>
-  <div class="controls"><span>Trace a question</span><select id="trace-q"></select><span class="small">The path is drawn in the schema's colour; a scan lights every record it reads.</span></div>
+  <h3 data-i18n>One person's neighbourhood, three ways</h3>
+  <div class="controls"><span data-i18n>Trace a question</span><select id="trace-q"></select><span class="small" data-i18n>The path is drawn in the schema's colour; a scan lights every record it reads.</span></div>
   <div class="graphs stack" id="sample-graphs"></div>
   <p class="small" id="graphs-note"></p>
 </section>
 
 <section id="rq3">
-  <p class="kicker">RQ3, controlled experiment</p>
-  <h2>Query cost under three normalization depths</h2>
-  <p id="rq3-intro"></p>
+  <p class="kicker" data-i18n>RQ3, controlled experiment</p>
+  <div class="sec-head"><h2 data-i18n>Query cost under three normalization depths</h2><p id="rq3-intro"></p></div>
   <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span></div>
 
-  <h3>What each question costs, relative to the mid schema</h3>
+  <h3 data-i18n>What each question costs, relative to the mid schema</h3>
   <div class="controls">
-    <span>Metric</span>
-    <div class="seg" id="rq3-metric"><button aria-pressed="true" data-v="hops">hops</button><button aria-pressed="false" data-v="ms">latency</button></div>
-    <span>Persons</span>
+    <span data-i18n>Metric</span>
+    <div class="seg" id="rq3-metric"><button aria-pressed="true" data-v="hops" data-i18n>hops</button><button aria-pressed="false" data-v="ms" data-i18n>latency</button></div>
+    <span data-i18n>Persons</span>
     <select id="rq3-scale"></select>
   </div>
   <div class="fig"><svg class="chart" id="rq3-ratio"></svg></div>
-  <p class="small" style="margin-top:8px">Log axis; the vertical rule is mid's own cost. A dot left of it is cheaper than mid, right of it dearer. Questions are ordered as in the LDBC workload.</p>
+  <p class="small" style="margin-top:8px" data-i18n>Log axis; the vertical rule is mid's own cost. A dot left of it is cheaper than mid, right of it dearer. Questions are ordered as in the LDBC workload.</p>
 
-  <h3>How each question grows with the graph</h3>
+  <h3 data-i18n>How each question grows with the graph</h3>
   <div class="fig"><svg class="chart" id="rq3-slope"></svg></div>
-  <p class="small" style="margin-top:8px">Slope of log(latency) against log(persons). Near 0 the cost is set by the neighbourhood and does not move with n; near 1 it grows with the whole graph. Select a row to see the fitted line.</p>
+  <p class="small" style="margin-top:8px" data-i18n>Slope of log(latency) against log(persons). Near 0 the cost is set by the neighbourhood and does not move with n; near 1 it grows with the whole graph. Select a row to see the fitted line.</p>
 
   <div class="two">
     <div>
-      <h3 id="rq3-scaling-title">Latency against scale</h3>
+      <h3 id="rq3-scaling-title"></h3>
       <div class="fig"><svg class="chart" id="rq3-scaling"></svg></div>
     </div>
     <div>
-      <h3>Resident size against scale</h3>
+      <h3 data-i18n>Resident size against scale</h3>
       <div class="fig"><svg class="chart" id="rq3-memory"></svg></div>
       <p class="small" style="margin-top:8px" id="rq3-memory-note"></p>
     </div>
   </div>
 
-  <h3>What a hop costs, per engine</h3>
-  <p>A hop count is work, not cost: the same 117k-record scan is about 500× mid on the in-memory engine and 5× on Kùzu. Splitting the count into random accesses (edge traversals and index hits) and sequentially scanned records, and fitting each engine's time to the two, turns it into a cost model.</p>
+  <h3 data-i18n>What a hop costs, per engine</h3>
+  <p data-i18n>A hop count is work, not cost: the same 117k-record scan is about 500× mid on the in-memory engine and 5× on Kùzu. Splitting the count into random accesses (edge traversals and index hits) and sequentially scanned records, and fitting each engine's time to the two, turns it into a cost model.</p>
   <div id="cost-model"></div>
 
-  <h3>Hypotheses, written before the run</h3>
+  <h3 data-i18n>Hypotheses, written before the run</h3>
   <div class="wrap"><table id="rq3-hyp"></table></div>
 
   <div id="rq3-followups"></div>
 
-  <details><summary>Table view: every question at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
+  <details><summary data-i18n>Table view: every question at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
 </section>
 
 <section id="rq2">
-  <p class="kicker">RQ2, multiple-case study</p>
-  <h2>Patterns across eight industry-scale knowledge graphs</h2>
-  <p>Columns are cases, grouped by outcome. Rows are design patterns coded from the primary sources <a href="#ref-15">[15]</a> <a href="#ref-16">[16]</a> <a href="#ref-11">[11]</a> <a href="#ref-17">[17]</a> <a href="#ref-18">[18]</a> <a href="#ref-19">[19]</a>. Select a case for its profile, or a pattern for the cases that share it.</p>
+  <p class="kicker" data-i18n>RQ2, multiple-case study</p>
+  <div class="sec-head"><h2 data-i18n>Patterns across eight industry-scale knowledge graphs</h2><p data-i18n>Columns are cases, grouped by outcome. Rows are design patterns coded from the primary sources <a href="#ref-15">[15]</a> <a href="#ref-16">[16]</a> <a href="#ref-11">[11]</a> <a href="#ref-17">[17]</a> <a href="#ref-18">[18]</a> <a href="#ref-19">[19]</a>. Select a case for its profile, or a pattern for the cases that share it.</p></div>
   <div class="controls">
-    <span>Outcome</span>
+    <span data-i18n>Outcome</span>
     <div class="seg" id="rq2-filter">
-      <button aria-pressed="true" data-v="all">All</button>
-      <button aria-pressed="false" data-v="sustained">Sustained</button>
-      <button aria-pressed="false" data-v="other">Abandoned or limited</button>
+      <button aria-pressed="true" data-v="all" data-i18n>All</button>
+      <button aria-pressed="false" data-v="sustained" data-i18n>Sustained</button>
+      <button aria-pressed="false" data-v="other" data-i18n>Abandoned or limited</button>
     </div>
   </div>
   <div class="two wide-left">
     <div class="wrap"><table class="matrix" id="rq2-matrix"></table></div>
-    <div class="detail" id="rq2-detail"><span class="small">Nothing selected yet. Choose a case or a pattern in the table.</span></div>
+    <div class="detail" id="rq2-detail"><span class="small" data-i18n>Nothing selected yet. Choose a case or a pattern in the table.</span></div>
   </div>
 </section>
 
 <section id="rq1">
-  <p class="kicker">RQ1, systematic literature review</p>
-  <h2>What existing quality metrics measure</h2>
-  <p>Seven quality-evaluation frameworks <a href="#ref-5">[5]</a> <a href="#ref-6">[6]</a> <a href="#ref-7">[7]</a> <a href="#ref-13">[13]</a> <a href="#ref-14">[14]</a> against six property groups. A filled cell means the framework has a metric for that property. A light cell means it names the property but derives it from structural proxies rather than measuring it. Hover a cell for its text. Performance benchmarks (LUBM, SP²Bench, BSBM, LDBC) are not in this table: they measure query time and scale but treat the schema as given.</p>
+  <p class="kicker" data-i18n>RQ1, systematic literature review</p>
+  <div class="sec-head"><h2 data-i18n>What existing quality metrics measure</h2><p data-i18n>Seven quality-evaluation frameworks <a href="#ref-5">[5]</a> <a href="#ref-6">[6]</a> <a href="#ref-7">[7]</a> <a href="#ref-13">[13]</a> <a href="#ref-14">[14]</a> against six property groups. A filled cell means the framework has a metric for that property. A light cell means it names the property but derives it from structural proxies rather than measuring it. Hover a cell for its text. Performance benchmarks (LUBM, SP²Bench, BSBM, LDBC) are not in this table: they measure query time and scale but treat the schema as given.</p></div>
   <div class="wrap"><table class="matrix" id="rq1-matrix"></table></div>
-  <h3>Frameworks covering each property</h3>
+  <h3 data-i18n>Frameworks covering each property</h3>
   <div class="fig"><svg class="chart" id="rq1-bars"></svg></div>
-  <details><summary>Table view</summary><div class="wrap"><table id="rq1-table"></table></div></details>
+  <details><summary data-i18n>Table view</summary><div class="wrap"><table id="rq1-table"></table></div></details>
 </section>
 
 <section id="guide">
-  <h2>Guidelines for building one that stays cheap and stays in use</h2>
-  <p>Twelve guidelines, each with the evidence behind it and how strong that evidence is. <em>Measured</em> comes from the controlled experiment; <em>association</em> from the eight cases, which is a reason to ask in a design review, not a cause; <em>literature</em> from a cited source. The same list is in <a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/guidelines.md">docs/guidelines.md</a>.</p>
+  <div class="sec-head"><h2 data-i18n>Guidelines for building one that stays cheap and stays in use</h2><p data-i18n>Twelve guidelines, each with the evidence behind it and how strong that evidence is. <em>Measured</em> comes from the controlled experiment; <em>association</em> from the eight cases, which is a reason to ask in a design review, not a cause; <em>literature</em> from a cited source. The same list is in <a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/guidelines.md">docs/guidelines.md</a>.</p></div>
   <div class="guide" id="guide-list"></div>
 </section>
 
 <section id="limits">
-  <h2>What the evidence does not show</h2>
-  <p>Read these before quoting a number from this page.</p>
+  <div class="sec-head"><h2 data-i18n>What the evidence does not show</h2><p data-i18n>Read these before quoting a number from this page.</p></div>
   <dl class="limits">
-    <dt>One engine for the twenty questions, one dataset</dt><dd>The main run is an in-memory Python property graph on synthetic LDBC-SNB-shaped data. Hop counts transfer to other engines because they are the schema's; latency and memory constants do not. Six of the questions were re-run on Kùzu to show how far the constants move; no other engine was tried.</dd>
-    <dt>Fan-in is a construction</dt><dd>The main run uses uniform fan-in. The Zipf run shows what heavy-tailed fan-in does, but no real distribution was measured. Results that depend on the head of the distribution (reverse lookups, renames) will differ on real data.</dd>
-    <dt>Writes were measured narrowly</dt><dd>Four update types, one thread, no transactions, no permission checks. In an enterprise ontology with action types those often dominate.</dd>
-    <dt>Eight cases give associations</dt><dd>A purposive sample, one coder, and survivorship in what organisations publish. A pattern that co-occurs with a sustained graph is a reason to ask about it in a design review, not a cause. Grade B and C sources are evidence of practice, not of effect. "Adoption" is inferred from published accounts.</dd>
-    <dt>The review is screened, not yet extracted</dt><dd>929 candidates were screened and 188 included; the metric matrix is built from the seven frameworks. Data extraction from the full included set is the next step of the write-up.</dd>
+    <dt data-i18n>One engine for the twenty questions, one dataset</dt><dd data-i18n>The main run is an in-memory Python property graph on synthetic LDBC-SNB-shaped data. Hop counts transfer to other engines because they are the schema's; latency and memory constants do not. Six of the questions were re-run on Kùzu to show how far the constants move; no other engine was tried.</dd>
+    <dt data-i18n>Fan-in is a construction</dt><dd data-i18n>The main run uses uniform fan-in. The Zipf run shows what heavy-tailed fan-in does, but no real distribution was measured. Results that depend on the head of the distribution (reverse lookups, renames) will differ on real data.</dd>
+    <dt data-i18n>Writes were measured narrowly</dt><dd data-i18n>Four update types, one thread, no transactions, no permission checks. In an enterprise ontology with action types those often dominate.</dd>
+    <dt data-i18n>Eight cases give associations</dt><dd data-i18n>A purposive sample, one coder, and survivorship in what organisations publish. A pattern that co-occurs with a sustained graph is a reason to ask about it in a design review, not a cause. Grade B and C sources are evidence of practice, not of effect. "Adoption" is inferred from published accounts.</dd>
+    <dt data-i18n>The review is screened, not yet extracted</dt><dd data-i18n>929 candidates were screened and 188 included; the metric matrix is built from the seven frameworks. Data extraction from the full included set is the next step of the write-up.</dd>
   </dl>
 </section>
 
 <section id="reproduce">
-  <h2>Reproduce it</h2>
-  <p>Everything on this page is generated from the repository. The main benchmark takes under an hour on a laptop; the tests take seconds.</p>
+  <div class="sec-head"><h2 data-i18n>Reproduce it</h2><p data-i18n>Everything on this page is generated from the repository. The main benchmark takes under an hour on a laptop; the tests take seconds.</p></div>
   <pre class="cmds"><code>git clone https://github.com/ans9611/ontology-design-study
 cd ontology-design-study
 python -m venv .venv &amp;&amp; source .venv/bin/activate
@@ -476,23 +484,22 @@ pip install -e ".[engine]" &amp;&amp; python -m ontostudy.engine_kuzu   # second
 python -m ontostudy.report              # regenerate the tables in docs/results/RESULTS.md
 python -m ontostudy.figures             # regenerate the figures
 python -m ontostudy.site                # rebuild data.json for this page</code></pre>
-  <p class="small">The schemas are in <code>src/ontostudy/schemas/</code>, the twenty questions in <code>src/ontostudy/queries/</code>, the pre-registered hypotheses in <code>docs/hypotheses.md</code>, and the review protocol in <code>docs/protocol.md</code>. To add a schema, implement the accessor interface in <code>schemas/base.py</code>; the queries and the harness need no change.</p>
+  <p class="small" data-i18n>The schemas are in <code>src/ontostudy/schemas/</code>, the twenty questions in <code>src/ontostudy/queries/</code>, the pre-registered hypotheses in <code>docs/hypotheses.md</code>, and the review protocol in <code>docs/protocol.md</code>. To add a schema, implement the accessor interface in <code>schemas/base.py</code>; the queries and the harness need no change.</p>
 </section>
 
 <section id="references">
-  <h2>References</h2>
-  <p>Numbered as in the write-up, so a citation such as [15] means the same source here, in the README and in the case files. Entries with a DOI link to the publisher.</p>
+  <div class="sec-head"><h2 data-i18n>References</h2><p data-i18n>Numbered as in the write-up, so a citation such as [15] means the same source here, in the README and in the case files. Entries with a DOI link to the publisher.</p></div>
   <ol class="refs" id="ref-list"></ol>
 </section>
 
-  </main>
+</main>
 </div>
-<footer>Yechan Moon, 2026. Method, protocol, case files and raw timings are in the <a href="https://github.com/ans9611/ontology-design-study">repository</a>; this page is rebuilt from them by <code>python -m ontostudy.site</code>. Cite as: Y. Moon, <em>Structural design choices in enterprise ontologies and their cost</em>, 2026, <a href="https://ans9611.github.io/ontology-design-study/">ans9611.github.io/ontology-design-study</a>.</footer>
-</div>
+<footer><div class="frame" data-i18n>Yechan Moon, 2026. Method, protocol, case files and raw timings are in the <a href="https://github.com/ans9611/ontology-design-study">repository</a>; this page is rebuilt from them by <code>python -m ontostudy.site</code>. Cite as: Y. Moon, <em>Structural design choices in enterprise ontologies and their cost</em>, 2026, <a href="https://ans9611.github.io/ontology-design-study/">ans9611.github.io/ontology-design-study</a>.</div></footer>
 <div class="tip" id="tip" role="tooltip"></div>
 
 <script type="module">
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { KO } from "./ko.js";
 const $ = (s, el = document) => el.querySelector(s);
 const fmt = (x, d = 2) => Number(x).toLocaleString("en-US", { maximumFractionDigits: d });
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -502,28 +509,55 @@ const slope = pts => { const n = pts.length, mx = pts.reduce((a, p) => a + p[0],
 const SERIES = { flat: "var(--s1)", mid: "var(--s2)", normalized: "var(--s3)" };
 const isSustained = o => o.startsWith("sustained");
 
+// ---------- language ----------
+// English lives in the markup and in the templates below; Korean is looked up by the English text (ko.js).
+let LANG = "en";
+try { LANG = localStorage.getItem("lang") || (navigator.language.startsWith("ko") ? "ko" : "en"); } catch {}
+const norm = s => s.replace(/\s+/g, " ").trim();
+const t = (key, vars = {}) => (LANG === "ko" && KO.t[key] ? KO.t[key] : key).replace(/\{(\w+)\}/g, (_, k) => k in vars ? vars[k] : `{${k}}`);
+const td = (kind, id, field, fallback) => (LANG === "ko" && KO.data[kind] && KO.data[kind][id] && KO.data[kind][id][field]) || fallback;
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    if (el.dataset.en == null) el.dataset.en = el.innerHTML;
+    const k = norm(el.dataset.en);
+    el.innerHTML = LANG === "ko" && KO.s[k] ? KO.s[k] : el.dataset.en;
+  });
+  document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === LANG));
+  document.title = LANG === "ko" ? "온톨로지 설계 연구" : "Ontology Design Study";
+}
+let DATA = null;
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => {
+  if (b.dataset.lang === LANG) return;
+  LANG = b.dataset.lang; try { localStorage.setItem("lang", LANG); } catch {}
+  applyStatic(); if (DATA) init(DATA);
+}));
+applyStatic();
+
 // tooltip
 const tip = $("#tip");
 function showTip(e, html) { tip.innerHTML = html; tip.style.display = "block"; moveTip(e); }
 function moveTip(e) { const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(e.clientY + 14, innerHeight - tip.offsetHeight - 8); tip.style.left = x + "px"; tip.style.top = y + "px"; }
 function hideTip() { tip.style.display = "none"; }
 function bindTips(root) { root.querySelectorAll("[data-tip]").forEach(el => { el.addEventListener("mouseenter", e => showTip(e, el.dataset.tip)); el.addEventListener("mousemove", moveTip); el.addEventListener("mouseleave", hideTip); }); }
+// a control that is re-bound on every render: replace it with a clone first so old listeners go away
+function fresh(sel) { const el = $(sel); const c = el.cloneNode(true); el.replaceWith(c); return c; }
 function seg(el, onChange) { el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); onChange(b.dataset.v); })); return () => el.querySelector("[aria-pressed=true]").dataset.v; }
 
-// rail: mark the section in view
-const railLinks = [...document.querySelectorAll(".rail a, .topnav a")];
-const railObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) railLinks.forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "-15% 0px -75% 0px" });
-document.querySelectorAll("main section").forEach(s => railObs.observe(s));
+// top nav: mark the section in view
+const navLinks = [...document.querySelectorAll(".topnav a")];
+const navObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) navLinks.forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "-15% 0px -75% 0px" });
+document.querySelectorAll("main section").forEach(s => navObs.observe(s));
 
-fetch("data.json").then(r => r.json()).then(init).catch(e => { console.error(e); $("main").insertAdjacentHTML("afterbegin", `<p class="note">Something failed while drawing this page (${esc(e.message)}). If you opened the file directly, serve the folder over HTTP: <code>python -m http.server</code> inside <code>docs/site</code>.</p>`); });
+fetch("data.json").then(r => r.json()).then(D => { DATA = D; init(D); }).catch(e => { console.error(e); $("main").insertAdjacentHTML("afterbegin", `<p class="note">${esc(t("Something failed while drawing this page ({m}). If you opened the file directly, serve the folder over HTTP: python -m http.server inside docs/site.", { m: e.message }))}</p>`); });
 
 // ---------- hero: one relation, drawn three ways ----------
 function schemaDiagram(kind) {
   // Q01: a person's friend and that friend's city. The trace is the path the query walks.
-  const N = (x, y, w, label, props) => `<rect class="node" x="${x}" y="${y}" width="${w}" height="${props ? 46 : 30}" rx="2"/><text class="lbl" x="${x + 8}" y="${y + 19}">${label}</text>${props ? `<text class="prop" x="${x + 8}" y="${y + 36}">${props}</text>` : ""}`;
+  const N = (x, y, w, label, props) => `<rect class="node" x="${x}" y="${y}" width="${w}" height="${props ? 46 : 30}" rx="3"/><text class="lbl" x="${x + 8}" y="${y + 19}">${label}</text>${props ? `<text class="prop" x="${x + 8}" y="${y + 36}">${props}</text>` : ""}`;
   const R = (cx, cy, label) => `<path class="rel" d="M${cx},${cy - 15} L${cx + 36},${cy} L${cx},${cy + 15} L${cx - 36},${cy} Z"/><text class="rel-lbl" x="${cx}" y="${cy + 4}" text-anchor="middle">${label}</text>`;
   const E = (d, label, lx, ly) => `<path class="edge" d="${d}" marker-end="url(#arr-${kind})"/>${label ? `<text class="elbl" x="${lx}" y="${ly}" text-anchor="middle">${label}</text>` : ""}`;
-  const defs = `<defs><marker id="arr-${kind}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="var(--ink-2)"/></marker></defs>`;
+  const defs = `<defs><marker id="arr-${kind}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="rgba(255,255,255,.6)"/></marker></defs>`;
   if (kind === "flat") return `<svg viewBox="0 0 340 100" role="img" aria-label="flat: Person knows Person; city stored as a property">${defs}
     ${E("M96,42 L166,42", "knows", 131, 34)}${N(10, 27, 86, "Person", "name")}${N(168, 19, 160, "Person", "name, city, country")}
     <path class="trace" style="stroke:var(--s1)" d="M53,80 L53,88 L248,88 L248,72"/></svg>`;
@@ -543,6 +577,8 @@ function init(D) {
   const maxScale = Math.max(...rq3.scales);
   const refScale = rq3.scales.includes(10000) ? 10000 : maxScale;     // the scale every run shares
   const qids = rq3.queries.map(q => q.id);
+  const qtext = Object.fromEntries(rq3.queries.map(q => [q.id, td("questions", q.id, "q", q.question)]));
+  const qkind = Object.fromEntries(rq3.queries.map(q => [q.id, td("questions", q.id, "kind", q.kind)]));
   const exponent = (schema, q) => slope(rq3.scales.map(s => [Math.log(s), Math.log(get(s, schema, q).ms)]));
   const stats = {};
   for (const sc of rq3.schemas) {
@@ -558,25 +594,25 @@ function init(D) {
 
   // hero
   const hopsPerFriend = { flat: 1, mid: 2, normalized: 4 };
-  $("#schemas").innerHTML = rq3.schemas.map(sc => `<div class="schema"><h4><i style="background:${SERIES[sc]}"></i>${sc}</h4><p class="hops">A friend's city: <b>${hopsPerFriend[sc]} hop${hopsPerFriend[sc] > 1 ? "s" : ""}</b>. Q01 at n = ${fmt(refScale, 0)}: <b>${fmt(get(refScale, sc, "Q01").hops, 0)}</b> traversals.</p>${schemaDiagram(sc)}</div>`).join("");
+  $("#schemas").innerHTML = rq3.schemas.map(sc => `<div class="schema"><h4><i style="background:${SERIES[sc]}"></i>${sc}</h4><p class="hops">${t("A friend's city: <b>{h} hop{s}</b>. Q01 at n = {n}: <b>{hops}</b> traversals.", { h: hopsPerFriend[sc], s: hopsPerFriend[sc] > 1 ? "s" : "", n: fmt(refScale, 0), hops: fmt(get(refScale, sc, "Q01").hops, 0) })}</p>${schemaDiagram(sc)}</div>`).join("");
   const kz = (rq3.followups || {}).kuzu;
   const kzRatio = kz ? (() => { const n = Math.max(...kz.scales); const r = kz.bench.filter(b => b.scale === n && b.schema === "normalized").map(b => b.ms / kz.bench.find(x => x.scale === n && x.schema === "mid" && x.query === b.query).ms); return [Math.min(...r), Math.max(...r)]; })() : null;
-  $("#hero-claim").innerHTML = `Reifying a relation costs one hop per relation, on every query: the normalized schema needs <b>${fmt(stats.normalized.hopRatio)}×</b> the hops of mid across twenty questions, and that ratio is the schema's. What a hop costs is the engine's: <b>${fmt(stats.normalized.msRatio, 1)}×</b> the time on an in-memory graph${kzRatio ? `, <b>${fmt(kzRatio[0], 1)}–${fmt(kzRatio[1], 1)}×</b> on Kùzu` : ""}; storage is <b>${fmt(stats.normalized.size.mbytes / midSize, 1)}×</b> on both.`;
-  $("#hero-note").textContent = `Medians at ${fmt(refScale, 0)} persons, best of five runs, synthetic LDBC-SNB-shaped data. Above, the same relation is drawn the way each schema stores it; the coloured line is the path Q01 walks.`;
+  $("#hero-claim").innerHTML = t("Reifying a relation costs one hop per relation, on every query: the normalized schema needs <b>{hop}×</b> the hops of mid across twenty questions, and that ratio is the schema's. What a hop costs is the engine's: <b>{ms}×</b> the time on an in-memory graph{kz}; storage is <b>{mb}×</b> on both.", { hop: fmt(stats.normalized.hopRatio), ms: fmt(stats.normalized.msRatio, 1), kz: kzRatio ? t(", <b>{lo}–{hi}×</b> on Kùzu", { lo: fmt(kzRatio[0], 1), hi: fmt(kzRatio[1], 1) }) : "", mb: fmt(stats.normalized.size.mbytes / midSize, 1) });
+  $("#hero-note").textContent = t("Medians at {n} persons, best of five runs, synthetic LDBC-SNB-shaped data. Above, the same relation is drawn the way each schema stores it; the coloured line is the path Q01 walks.", { n: fmt(refScale, 0) });
 
-  // ---------- short version ----------
+  // ---------- results in three tables ----------
   const fu = rq3.followups || {};
   const idx = fu.indexed ? (() => { const n = Math.max(...fu.indexed.scales); const at = (sc, q) => fu.indexed.bench.find(b => b.scale === n && b.schema === sc && b.query === q);
     return { within: qids.filter(q => at("flat_indexed", q).ms <= 1.2 * Math.min(...fu.indexed.schemas.map(x => at(x, q).ms))).length, mb: fu.indexed.sizes.find(z => z.scale === n && z.schema === "flat_indexed").mbytes - fu.indexed.sizes.find(z => z.scale === n && z.schema === "flat").mbytes }; })() : null;
   const verdict = {
-    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(refScale, "flat", q).hops <= get(refScale, "mid", q).hops).length} of 20 queries. Without a reverse index on the folded entities, ${stats.flat.steep.join(", ")} scan the graph (latency slope above 0.5).${idx ? ` Three reverse indexes costing ${fmt(idx.mb, 0)} MB remove that: with them flat is within 20% of the best schema on ${idx.within} of 20.` : ""} The price is paid on writes: a renamed city or tag is rewritten on every record that copied it.`,
-    mid: `Never the fastest, never the slowest, as long as no index is allowed. Within 20% of the best schema on ${stats.mid.within.length} of 20; up to ${fmt(Math.max(...qids.map(q => get(refScale, "mid", q).ms / get(refScale, "flat", q).ms)), 1)}× slower where flat answers from a property; one to three orders of magnitude faster than unindexed flat on reverse lookups. One record per fact, so a rename touches one node.`,
-    normalized: `One extra hop per relation, everywhere: median hop ratio ${fmt(stats.normalized.hopRatio)}, latency ${fmt(stats.normalized.msRatio, 1)}×, memory ${fmt(stats.normalized.size.mbytes / midSize, 1)}× at every scale in this engine. A constant factor, not a higher order (H3 refuted); on Kùzu the latency constant is larger (up to 7.6× on multi-hop joins) while the storage ratio is the same. It buys per-relation provenance and qualifiers; the price is paid on every query.`,
+    flat: t("Cheapest on forward reads: at or below mid on {k} of 20 queries. Without a reverse index on the folded entities, {steep} scan the graph (latency slope above 0.5).{idx} The price is paid on writes: a renamed city or tag is rewritten on every record that copied it.", { k: qids.filter(q => get(refScale, "flat", q).hops <= get(refScale, "mid", q).hops).length, steep: stats.flat.steep.join(", "), idx: idx ? t(" Three reverse indexes costing {mb} MB remove that: with them flat is within 20% of the best schema on {w} of 20.", { mb: fmt(idx.mb, 0), w: idx.within }) : "" }),
+    mid: t("Never the fastest, never the slowest, as long as no index is allowed. Within 20% of the best schema on {w} of 20; up to {x}× slower where flat answers from a property; one to three orders of magnitude faster than unindexed flat on reverse lookups. One record per fact, so a rename touches one node.", { w: stats.mid.within.length, x: fmt(Math.max(...qids.map(q => get(refScale, "mid", q).ms / get(refScale, "flat", q).ms)), 1) }),
+    normalized: t("One extra hop per relation, everywhere: median hop ratio {hop}, latency {ms}×, memory {mb}× at every scale in this engine. A constant factor, not a higher order (H3 refuted); on Kùzu the latency constant is larger (up to 7× on multi-hop joins) while the storage ratio is the same. It buys per-relation provenance and qualifiers; the price is paid on every query.", { hop: fmt(stats.normalized.hopRatio), ms: fmt(stats.normalized.msRatio, 1), mb: fmt(stats.normalized.size.mbytes / midSize, 1) }),
   };
-  $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">hops, median ratio to mid</th><th class="num">latency, median ratio</th><th class="num">size at n = ${fmt(refScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with slope above 0.5</th><th>worst query against mid</th></tr></thead><tbody>` +
-    rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${s.within.length} of 20</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "" : `${s.worst}, ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
+  $("#fit-schema").innerHTML = `<thead><tr><th>${t("schema")}</th><th class="num">${t("hops, median ratio to mid")}</th><th class="num">${t("latency, median ratio")}</th><th class="num">${t("size at n = {n}", { n: fmt(refScale, 0) })}</th><th class="num">${t("queries within 20% of best")}</th><th class="num">${t("queries with slope above 0.5")}</th><th>${t("worst query against mid")}</th></tr></thead><tbody>` +
+    rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${t("{k} of 20", { k: s.within.length })}</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "" : `${s.worst}, ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
   $("#fit-reading").innerHTML = rq3.schemas.map(sc => `<div><b><i style="background:${SERIES[sc]}"></i>${sc}</b>${verdict[sc]}</div>`).join("");
-  $("#fit-schema-note").textContent = `Computed from bench.csv at n = ${fmt(refScale, 0)} persons (the scale every run shares), best of five runs, twenty parameter sets per query. Slope is log(latency) against log(persons) over ${rq3.scales.join(" / ")}. One engine, an in-memory property graph: hop counts transfer to other engines, constant factors do not.`;
+  $("#fit-schema-note").textContent = t("Computed from bench.csv at n = {n} persons (the scale every run shares), best of five runs, twenty parameter sets per query. Slope is log(latency) against log(persons) over {scales}. One engine, an in-memory property graph: hop counts transfer to other engines, constant factors do not.", { n: fmt(refScale, 0), scales: rq3.scales.join(" / ") });
 
   // ---------- your workload: weighted cost per 1,000 operations, read from the same rows ----------
   (function workload() {
@@ -589,7 +625,7 @@ function init(D) {
     const readMs = {}; for (const sc of schemas) readMs[sc] = Object.fromEntries(Object.entries(groups).map(([g, qs]) => [g, qs.reduce((a, q) => a + msAt(sc, q), 0) / qs.length]));
     const W = (rq3.writes || []).filter(w => w.scale === refScale && w.update === "rename_city");
     const rename = Object.fromEntries(W.map(w => [w.schema, { us: w.us, records: w.records }]));
-    const inputs = [...document.querySelectorAll("#mix input")];
+    const inputs = [...document.querySelectorAll("#mix input")].map(i => { const c = i.cloneNode(true); i.replaceWith(c); return c; });
     function compute() {
       const v = Object.fromEntries(inputs.map(i => [i.dataset.g, +i.value]));
       const fanin = Math.round(10 ** v.fanin);
@@ -606,11 +642,11 @@ function init(D) {
       const { rows, fanin, v } = compute();
       barsMs($("#mix-chart"), rows);
       const fi = rows.find(r => r.sc === "flat_indexed"), md = rows.find(r => r.sc === "mid");
-      let note = `ms per 1,000 operations at ${fmt(refScale, 0)} persons; read costs are the mean measured latency of each group, weighted by your mix; a rename costs the measured rename time, scaled to ${fmt(fanin, 0)} copies for the schemas that copy values.`;
+      let note = t("ms per 1,000 operations at {n} persons; read costs are the mean measured latency of each group, weighted by your mix; a rename costs the measured rename time, scaled to {f} copies for the schemas that copy values.", { n: fmt(refScale, 0), f: fmt(fanin, 0) });
       if (fi && md) {
         const dRead = md.read - fi.read, dWrite = (fi.write - md.write) / (v.renames || 1);
-        if (dRead > 0 && dWrite > 0) { const be = dRead / dWrite; note += ` At this fan-in, copying values (flat with indexes) stays cheaper than linking (mid) up to ${fmt(be, be < 10 ? 1 : 0)} renames per 1,000 reads${be > 50 ? ", far beyond this slider: in this engine a rename is microseconds and a read is milliseconds, so the write path only matters when renames are frequent or fan-in is in the tens of thousands" : ""}.`; }
-        else if (dRead <= 0) note += ` With this mix, mid is already cheaper on reads than flat with indexes.`;
+        if (dRead > 0 && dWrite > 0) { const be = dRead / dWrite; note += " " + t("At this fan-in, copying values (flat with indexes) stays cheaper than linking (mid) up to {be} renames per 1,000 reads{far}.", { be: fmt(be, be < 10 ? 1 : 0), far: be > 50 ? t(", far beyond this slider: in this engine a rename is microseconds and a read is milliseconds, so the write path only matters when renames are frequent or fan-in is in the tens of thousands") : "" }); }
+        else if (dRead <= 0) note += " " + t("With this mix, mid is already cheaper on reads than flat with indexes.");
       }
       $("#mix-note").textContent = note;
     }
@@ -621,14 +657,17 @@ function init(D) {
   const patRows = rq2.patterns.map(p => { const cs = rq2.matrix[p]; const sus = cs.filter(id => isSustained(rq2.cases.find(c => c.id === id).outcome)); return { p, cs, sus: sus.length, non: cs.length - sus.length }; })
     .sort((a, b) => b.non - a.non || b.sus - a.sus || a.p.localeCompare(b.p));
   const outcomeOf = id => rq2.cases.find(c => c.id === id).outcome;
-  $("#fit-patterns").innerHTML = `<thead><tr><th>pattern</th><th>seen in</th></tr></thead><tbody>` +
-    patRows.map(r => `<tr><td><code>${r.p}</code></td><td class="small">${r.cs.map(id => isSustained(outcomeOf(id)) ? id : `<span class="chip st-ser"><i></i>${id}, ${esc(outcomeOf(id))}</span>`).join(", ")}</td></tr>`).join("") + "</tbody>";
+  const outcomeText = o => td("outcomes", o, "t", o);
+  $("#fit-patterns").innerHTML = `<thead><tr><th>${t("pattern")}</th><th>${t("seen in")}</th></tr></thead><tbody>` +
+    patRows.map(r => `<tr><td><code>${r.p}</code></td><td class="small">${r.cs.map(id => isSustained(outcomeOf(id)) ? id : `<span class="chip st-ser"><i></i>${id}, ${esc(outcomeText(outcomeOf(id)))}</span>`).join(", ")}</td></tr>`).join("") + "</tbody>";
   const chipClass = v => /^supported/.test(v) ? "st-good" : /^partly/.test(v) ? "st-warn" : "st-crit";
-  $("#fit-hyp").innerHTML = `<p style="margin:18px 0 6px;font-weight:600">Pre-registered hypotheses</p>` + rq3.hypotheses.map(h => `<div style="margin-top:8px;font-size:14px"><span class="chip ${chipClass(h.verdict)}"><i></i>${h.id}, ${esc(h.verdict)}</span><br><span class="small">${esc(h.statement)}</span></div>`).join("");
+  const hyp = h => ({ statement: td("hypotheses", h.id, "statement", h.statement), verdict: td("hypotheses", h.id, "verdict", h.verdict), note: td("hypotheses", h.id, "note", h.note) });
+  $("#fit-hyp").innerHTML = `<p style="margin:18px 0 6px;font-weight:600">${t("Pre-registered hypotheses")}</p>` + rq3.hypotheses.map(h => { const x = hyp(h); return `<div style="margin-top:8px;font-size:14px"><span class="chip ${chipClass(h.verdict)}"><i></i>${h.id}, ${esc(x.verdict)}</span><br><span class="small">${esc(x.statement)}</span></div>`; }).join("");
 
-  const proxy = t => /not measured|proxies/i.test(t);
+  const proxy = x => /not measured|proxies/i.test(x);
+  const colText = c => td("rq1cols", c, "t", c);
   const coverage = rq1.columns.map((c, i) => ({ c, n: rq1.rows.filter(r => r.cells[i] && !proxy(r.cells[i])).length, named: rq1.rows.filter(r => r.cells[i] && proxy(r.cells[i])).length }));
-  $("#fit-rq1").innerHTML = coverage.map(({ c, n, named }) => `<div><span>${esc(c)}</span><b>${n} of ${rq1.rows.length}${named ? ` <span class="small">(+${named} names it)</span>` : ""}</b></div>`).join("");
+  $("#fit-rq1").innerHTML = coverage.map(({ c, n, named }) => `<div><span>${esc(colText(c))}</span><b>${t("{n} of {m}", { n, m: rq1.rows.length })}${named ? ` <span class="small">${t("(+{k} names it)", { k: named })}</span>` : ""}</b></div>`).join("");
 
   // ---------- findings: six statements, each with its number, computed here ----------
   (function findings() {
@@ -639,39 +678,39 @@ function init(D) {
     const cost = coverage.find(c => /cost/i.test(c.c));
     const prov = rq2.matrix["provenance-per-statement"] || [], provSus = prov.filter(id => isSustained(outcomeOf(id)));
     const items = [
-      ["Reifying a relation costs a constant factor on every query that crosses it.", `Normalized needs <b>${fmt(nz.hopRatio)}×</b> the hops of mid (median over twenty questions), <b>${fmt(nz.msRatio, 1)}×</b> the time and <b>${fmt(nz.size.mbytes / midSize, 1)}×</b> the memory, and the ratio is the same at every graph size. It is a constant, not a higher order: H1 supported, H3 refuted as stated.`, "RQ3, measured"],
-      ["Folding an entity into a property, with no index, turns reverse lookups into scans.", `Flat stores city, employer and tag as text on the record. Asking from the other end (Q18, messages with a tag) then reads <b>${fmt(hopX("flat", "Q18"), 0)}×</b> the records mid does, and its latency exponent is <b>${fmt(exponent("flat", "Q18"), 2)}</b>: it grows with the whole graph. On the other seventeen questions flat is at or below mid.`, "RQ3, measured"],
-      ["A small index removes that penalty entirely.", idx ? `Three reverse indexes cost <b>${fmt(idx.mb, 0)} MB</b> on ${fmt(fl.size.mbytes, 0)} MB. With them, flat is within 20% of the best schema on <b>${idx.within} of 20</b> questions. The choice that matters is index or no index, not how many node types there are.` : `See the indexed follow-up run below.`, "RQ3, follow-up run"],
-      ["Copying values wins reads and loses writes, in proportion to fan-in.", rec("flat", "rename_city") ? `Renaming a city rewrites <b>${fmt(rec("flat", "rename_city"), 0)}</b> person records on flat and <b>${fmt(rec("mid", "rename_city"), 0)}</b> node on mid; renaming a tag, <b>${fmt(rec("flat", "rename_tag"), 0)}</b> messages against <b>${fmt(rec("mid", "rename_tag"), 0)}</b>. Under heavy-tailed fan-in the copies sit on thousands of records. Set your own mix in <a href="#fit">Your workload</a>.` : `See the write-path run below.`, "RQ3, write path"],
-      ["No ontology quality framework measures what a design costs to run.", cost ? `Of the <b>${rq1.rows.length}</b> frameworks reviewed, <b>${cost.n}</b> have a metric for operational cost (hops, latency, memory)${cost.named ? `; <b>${cost.named}</b> names it but scores it from structural proxies` : ""}. The benchmark literature measures cost but holds the schema fixed.` : ``, "RQ1, literature"],
-      ["The graphs that lasted recorded provenance per statement and checked quality with soft constraints.", `<code>provenance-per-statement</code> appears in <b>${provSus.length}</b> sustained cases (${provSus.join(", ")}) and in neither of the two that did not last; Freebase lost a large share of its facts at migration for want of a source per statement <a href="#ref-11">[11]</a>. An association across eight cases, not a cause.`, "RQ2, association"],
+      [t("Reifying a relation costs a constant factor on every query that crosses it."), t("Normalized needs <b>{hop}×</b> the hops of mid (median over twenty questions), <b>{ms}×</b> the time and <b>{mb}×</b> the memory, and the ratio is the same at every graph size. It is a constant, not a higher order: H1 supported, H3 refuted as stated.", { hop: fmt(nz.hopRatio), ms: fmt(nz.msRatio, 1), mb: fmt(nz.size.mbytes / midSize, 1) }), t("RQ3, measured")],
+      [t("Folding an entity into a property, with no index, turns reverse lookups into scans."), t("Flat stores city, employer and tag as text on the record. Asking from the other end (Q18, messages with a tag) then reads <b>{x}×</b> the records mid does, and its latency exponent is <b>{e}</b>: it grows with the whole graph. On the other seventeen questions flat is at or below mid.", { x: fmt(hopX("flat", "Q18"), 0), e: fmt(exponent("flat", "Q18"), 2) }), t("RQ3, measured")],
+      [t("A small index removes that penalty entirely."), idx ? t("Three reverse indexes cost <b>{mb} MB</b> on {flat} MB. With them, flat is within 20% of the best schema on <b>{w} of 20</b> questions. The choice that matters is index or no index, not how many node types there are.", { mb: fmt(idx.mb, 0), flat: fmt(fl.size.mbytes, 0), w: idx.within }) : t("See the indexed follow-up run below."), t("RQ3, follow-up run")],
+      [t("Copying values wins reads and loses writes, in proportion to fan-in."), rec("flat", "rename_city") ? t("Renaming a city rewrites <b>{a}</b> person records on flat and <b>{b}</b> node on mid; renaming a tag, <b>{c}</b> messages against <b>{d}</b>. Under heavy-tailed fan-in the copies sit on thousands of records. Set your own mix in <a href=\"#fit\">Your workload</a>.", { a: fmt(rec("flat", "rename_city"), 0), b: fmt(rec("mid", "rename_city"), 0), c: fmt(rec("flat", "rename_tag"), 0), d: fmt(rec("mid", "rename_tag"), 0) }) : t("See the write-path run below."), t("RQ3, write path")],
+      [t("No ontology quality framework measures what a design costs to run."), cost ? t("Of the <b>{n}</b> frameworks reviewed, <b>{k}</b> have a metric for operational cost (hops, latency, memory){named}. The benchmark literature measures cost but holds the schema fixed.", { n: rq1.rows.length, k: cost.n, named: cost.named ? t("; <b>{k}</b> names it but scores it from structural proxies", { k: cost.named }) : "" }) : "", t("RQ1, literature")],
+      [t("The graphs that lasted recorded provenance per statement and checked quality with soft constraints."), t("<code>provenance-per-statement</code> appears in <b>{n}</b> sustained cases ({cases}) and in neither of the two that did not last; Freebase lost a large share of its facts at migration for want of a source per statement <a href=\"#ref-11\">[11]</a>. An association across eight cases, not a cause.", { n: provSus.length, cases: provSus.join(", ") }), t("RQ2, association")],
     ];
-    $("#findings-list").innerHTML = items.map(([h, n, src]) => `<article><h4>${h}</h4><div><div class="num">${n}</div><div class="src">${src}</div></div></article>`).join("");
+    $("#findings-list").innerHTML = items.map(([h, n, src]) => `<article><h4>${h}</h4><div class="num">${n}</div><div class="src">${src}</div></article>`).join("");
   })();
 
   // ---------- references ----------
   $("#ref-list").innerHTML = (D.references || []).map(r => `<li id="ref-${r.n}"><span class="rn">[${r.n}]</span><span>${esc(r.text).replace(/\*([^*]+)\*/g, "<em>$1</em>")}${r.doi ? `<br><a class="doi" href="https://doi.org/${esc(r.doi)}">doi:${esc(r.doi)}</a>` : ""}</span></li>`).join("");
 
   // ---------- guidelines ----------
-  const md = t => esc(t).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[(\d+)\]/g, '<a href="#ref-$1">[$1]</a>');
-  $("#guide-list").innerHTML = D.guidelines.map(g => `<article><div class="gid">${g.id}</div><h4>${esc(g.guideline)}</h4><div><div class="ev">${md(g.evidence)}</div><div class="strength">${esc(g.strength)}</div></div></article>`).join("");
+  const md = x => esc(x).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\[(\d+)\]/g, '<a href="#ref-$1">[$1]</a>');
+  $("#guide-list").innerHTML = D.guidelines.map(g => `<article><div class="gid">${g.id}</div><h4>${esc(td("guidelines", g.id, "guideline", g.guideline))}</h4><div><div class="ev">${md(td("guidelines", g.id, "evidence", g.evidence))}</div><div class="strength">${esc(td("guidelines", g.id, "strength", g.strength))}</div></div></article>`).join("");
 
   // ---------- RQ1 ----------
-  $("#rq1-matrix").innerHTML = `<thead><tr><th></th>${rq1.columns.map(c => `<th class="rot">${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
-    rq1.rows.map(r => `<tr><th>${esc(r.framework)}</th>${r.cells.map((t, i) => `<td class="cell"><span class="dot ${t ? (proxy(t) ? "named" : "on") : ""}" data-tip="<b>${esc(r.framework)}: ${esc(rq1.columns[i])}</b>${t ? esc(t) : "no metric"}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
-  $("#rq1-table").innerHTML = `<thead><tr><th>framework</th>${rq1.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>` + rq1.rows.map(r => `<tr><td>${esc(r.framework)}</td>${r.cells.map(t => `<td>${esc(t)}</td>`).join("")}</tr>`).join("") + "</tbody>";
-  barChart($("#rq1-bars"), coverage.map(x => ({ label: x.c, value: x.n, extra: x.named })), rq1.rows.length);
+  $("#rq1-matrix").innerHTML = `<thead><tr><th></th>${rq1.columns.map(c => `<th class="rot">${esc(colText(c))}</th>`).join("")}</tr></thead><tbody>` +
+    rq1.rows.map(r => `<tr><th>${esc(r.framework)}</th>${r.cells.map((x, i) => `<td class="cell"><span class="dot ${x ? (proxy(x) ? "named" : "on") : ""}" data-tip="<b>${esc(r.framework)}: ${esc(colText(rq1.columns[i]))}</b>${x ? esc(x) : t("no metric")}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
+  $("#rq1-table").innerHTML = `<thead><tr><th>${t("framework")}</th>${rq1.columns.map(c => `<th>${esc(colText(c))}</th>`).join("")}</tr></thead><tbody>` + rq1.rows.map(r => `<tr><td>${esc(r.framework)}</td>${r.cells.map(x => `<td>${esc(x)}</td>`).join("")}</tr>`).join("") + "</tbody>";
+  barChart($("#rq1-bars"), coverage.map(x => ({ label: colText(x.c), value: x.n, extra: x.named })), rq1.rows.length);
   bindTips($("#rq1-matrix"));
 
   // ---------- RQ2 ----------
   const outcomeOrder = c => isSustained(c.outcome) ? 0 : c.outcome === "limited adoption" ? 1 : 2;
-  const getFilter = seg($("#rq2-filter"), renderRq2);
+  const getFilter = seg(fresh("#rq2-filter"), renderRq2);
   function renderRq2() {
     const f = getFilter();
     const cases = rq2.cases.filter(c => f === "all" || (f === "sustained") === isSustained(c.outcome)).sort((a, b) => outcomeOrder(a) - outcomeOrder(b));
     $("#rq2-matrix").innerHTML = `<thead><tr><th></th>${cases.map(c => `<th class="rot"><a href="#rq2" data-case="${c.id}">${esc(c.id)}</a></th>`).join("")}</tr>` +
-      `<tr><th class="small" style="font-weight:400">outcome</th>${cases.map(c => `<td class="small" style="text-align:center;padding-right:0">${isSustained(c.outcome) ? "kept" : c.outcome === "abandoned" ? "ended" : "limited"}</td>`).join("")}</tr></thead><tbody>` +
-      rq2.patterns.map(p => `<tr><th><a href="#rq2" data-pattern="${p}"><code>${p}</code></a></th>${cases.map(c => `<td class="cell"><span class="dot ${rq2.matrix[p].includes(c.id) ? "on" : ""}" data-tip="<b>${esc(c.name)}</b>${rq2.matrix[p].includes(c.id) ? `<code>${p}</code> observed` : "not observed"}. Outcome: ${esc(c.outcome)}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
+      `<tr><th class="small" style="font-weight:400">${t("outcome")}</th>${cases.map(c => `<td class="small" style="text-align:center;padding-right:0">${isSustained(c.outcome) ? t("kept") : c.outcome === "abandoned" ? t("ended") : t("limited")}</td>`).join("")}</tr></thead><tbody>` +
+      rq2.patterns.map(p => `<tr><th><a href="#rq2" data-pattern="${p}"><code>${p}</code></a></th>${cases.map(c => `<td class="cell"><span class="dot ${rq2.matrix[p].includes(c.id) ? "on" : ""}" data-tip="<b>${esc(c.name)}</b>${rq2.matrix[p].includes(c.id) ? t("<code>{p}</code> observed", { p }) : t("not observed")}. ${t("Outcome")}: ${esc(outcomeText(c.outcome))}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
     bindTips($("#rq2-matrix"));
     $("#rq2-matrix").querySelectorAll("a[data-case]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); showCase(a.dataset.case); }));
     $("#rq2-matrix").querySelectorAll("a[data-pattern]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); showPattern(a.dataset.pattern); }));
@@ -679,62 +718,63 @@ function init(D) {
   function showCase(id) {
     const c = rq2.cases.find(x => x.id === id);
     $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:17px">${esc(c.name)}</div><dl>
-      <dt>Outcome</dt><dd>${esc(c.outcome)}</dd><dt>Organization</dt><dd>${esc(c.organization)}</dd><dt>Domain</dt><dd>${esc(c.domain)}</dd><dt>Period</dt><dd>${esc(c.period)}</dd><dt>Source grade</dt><dd>${esc(c.grade)}</dd>
-      <dt>Patterns</dt><dd>${c.patterns.map(p => `<code>${p}</code>`).join(", ")}</dd></dl>
-      <p class="small" style="margin-top:12px"><a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/${id === "amazon" ? "amazon-product-graph" : id}.md">Read the case file</a></p>`;
+      <dt>${t("Outcome")}</dt><dd>${esc(outcomeText(c.outcome))}</dd><dt>${t("Organization")}</dt><dd>${esc(c.organization)}</dd><dt>${t("Domain")}</dt><dd>${esc(c.domain)}</dd><dt>${t("Period")}</dt><dd>${esc(c.period)}</dd><dt>${t("Source grade")}</dt><dd>${esc(c.grade)}</dd>
+      <dt>${t("Patterns")}</dt><dd>${c.patterns.map(p => `<code>${p}</code>`).join(", ")}</dd></dl>
+      <p class="small" style="margin-top:12px"><a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/${id === "amazon" ? "amazon-product-graph" : id}.md">${t("Read the case file")}</a></p>`;
   }
   function showPattern(p) {
     const cs = rq2.matrix[p].map(id => rq2.cases.find(c => c.id === id));
-    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:17px"><code>${p}</code></div><p class="small">Observed in ${cs.length} of ${rq2.cases.length} cases.</p><table>${cs.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.outcome)}</td></tr>`).join("")}</table>`;
+    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:17px"><code>${p}</code></div><p class="small">${t("Observed in {n} of {m} cases.", { n: cs.length, m: rq2.cases.length })}</p><table>${cs.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(outcomeText(c.outcome))}</td></tr>`).join("")}</table>`;
   }
   renderRq2();
 
   // ---------- RQ3 ----------
-  const qtext = Object.fromEntries(rq3.queries.map(q => [q.id, q.question])); window.__qtext = qtext;
-  $("#rq3-intro").textContent = `Synthetic LDBC-SNB-shaped graphs at ${rq3.scales.map(s => fmt(s, 0)).join(", ")} persons. Three schemas of the same data: flat folds place, organisation and tag into properties; mid keeps entity nodes and direct edges; normalized reifies every relation as a node. Twenty questions were fixed before the schemas were written, and all three schemas returned identical answers on every check.`;
-  $("#rq3-scale").innerHTML = rq3.scales.map(s => `<option value="${s}" ${s === maxScale ? "selected" : ""}>${fmt(s, 0)}</option>`).join("");
-  const getMetric = seg($("#rq3-metric"), renderRatio);
-  $("#rq3-scale").addEventListener("change", () => { renderRatio(); renderTable(); });
+  window.__qtext = qtext;
+  $("#rq3-intro").textContent = t("Synthetic LDBC-SNB-shaped graphs at {scales} persons. Three schemas of the same data: flat folds place, organisation and tag into properties; mid keeps entity nodes and direct edges; normalized reifies every relation as a node. Twenty questions were fixed before the schemas were written, and all three schemas returned identical answers on every check.", { scales: rq3.scales.map(s => fmt(s, 0)).join(", ") });
+  const scaleSel = fresh("#rq3-scale");
+  scaleSel.innerHTML = rq3.scales.map(s => `<option value="${s}" ${s === maxScale ? "selected" : ""}>${fmt(s, 0)}</option>`).join("");
+  const getMetric = seg(fresh("#rq3-metric"), renderRatio);
+  scaleSel.addEventListener("change", () => { renderRatio(); renderTable(); });
   let selectedQ = "Q18";
 
   function renderRatio() {
-    const m = getMetric(), sc = +$("#rq3-scale").value;
+    const m = getMetric(), sc = +scaleSel.value;
     const pts = rq3.schemas.flatMap(schema => qids.map(q => {
       const v = get(sc, schema, q), mid = get(sc, "mid", q);
-      return { q, series: schema, x: v[m] / mid[m], tip: `<b>${q}, ${schema}</b>${esc(qtext[q])}<br>${m === "hops" ? `${fmt(v.hops, 0)} hops (mid ${fmt(mid.hops, 0)})` : `${fmt(v.ms, 3)} ms (mid ${fmt(mid.ms, 3)} ms)`}, ${fmt(v[m] / mid[m], 2)}× mid` };
+      return { q, series: schema, x: v[m] / mid[m], tip: `<b>${q}, ${schema}</b>${esc(qtext[q])}<br>${m === "hops" ? t("{a} hops (mid {b})", { a: fmt(v.hops, 0), b: fmt(mid.hops, 0) }) : t("{a} ms (mid {b} ms)", { a: fmt(v.ms, 3), b: fmt(mid.ms, 3) })}, ${fmt(v[m] / mid[m], 2)}× mid` };
     }));
-    rowDots($("#rq3-ratio"), qids, pts, { log: true, ref: 1, label: m === "hops" ? "hop ratio to mid" : "latency ratio to mid", ticks: [0.25, 0.5, 1, 2, 4, 10, 100, 1000], fmtX: d => `${d >= 10 ? fmt(d, 0) : fmt(d, 2)}×` });
+    rowDots($("#rq3-ratio"), qids, pts, { log: true, ref: 1, label: m === "hops" ? t("hop ratio to mid") : t("latency ratio to mid"), ticks: [0.25, 0.5, 1, 2, 4, 10, 100, 1000], fmtX: d => `${d >= 10 ? fmt(d, 0) : fmt(d, 2)}×` });
   }
   function renderSlope() {
-    const pts = rq3.schemas.flatMap(s => qids.map(q => ({ q, series: s, x: exponent(s, q), tip: `<b>${q}, ${s}</b>${esc(qtext[q])}<br>slope ${fmt(exponent(s, q), 2)}; ${rq3.scales.map(sc => `${fmt(get(sc, s, q).ms, 3)} ms at ${fmt(sc, 0)}`).join(", ")}` })));
-    rowDots($("#rq3-slope"), qids, pts, { log: false, ref: 0.5, refs: [0, 1], label: "latency slope", ticks: [0, 0.5, 1, 1.5], fmtX: d => fmt(d, 1), onSelect: q => { selectedQ = q; renderScaling(); }, selected: () => selectedQ });
+    const pts = rq3.schemas.flatMap(s => qids.map(q => ({ q, series: s, x: exponent(s, q), tip: `<b>${q}, ${s}</b>${esc(qtext[q])}<br>${t("slope")} ${fmt(exponent(s, q), 2)}; ${rq3.scales.map(sc => t("{ms} ms at {n}", { ms: fmt(get(sc, s, q).ms, 3), n: fmt(sc, 0) })).join(", ")}` })));
+    rowDots($("#rq3-slope"), qids, pts, { log: false, ref: 0.5, refs: [0, 1], label: t("latency slope"), ticks: [0, 0.5, 1, 1.5], fmtX: d => fmt(d, 1), onSelect: q => { selectedQ = q; renderScaling(); }, selected: () => selectedQ });
   }
   function renderScaling() {
     const q = selectedQ;
-    $("#rq3-scaling-title").textContent = `Latency against scale: ${q}, ${qtext[q]}`;
+    $("#rq3-scaling-title").textContent = t("Latency against scale: {q}, {text}", { q, text: qtext[q] });
     const lines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: get(sc, s, q).ms })), exp: exponent(s, q) }));
-    lineChart($("#rq3-scaling"), lines, "ms per query", "persons", l => fmt(l.exp, 2));
+    lineChart($("#rq3-scaling"), lines, t("ms per query"), t("persons"), l => fmt(l.exp, 2));
     renderSlope();
   }
   const memLines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes })), exp: slope(rq3.scales.map(sc => [Math.log(sc), Math.log(rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes)])) }));
-  lineChart($("#rq3-memory"), memLines, "MB", "persons", l => fmt(l.exp, 2));
-  $("#rq3-memory-note").textContent = `All three grow linearly (slope about 1). Normalized over mid is ${rq3.scales.map(sc => fmt(rq3.sizes.find(z => z.scale === sc && z.schema === "normalized").mbytes / rq3.sizes.find(z => z.scale === sc && z.schema === "mid").mbytes, 2)).join(", ")} at ${rq3.scales.map(s => fmt(s, 0)).join(", ")} persons.`;
+  lineChart($("#rq3-memory"), memLines, "MB", t("persons"), l => fmt(l.exp, 2));
+  $("#rq3-memory-note").textContent = t("All three grow linearly (slope about 1). Normalized over mid is {r} at {scales} persons.", { r: rq3.scales.map(sc => fmt(rq3.sizes.find(z => z.scale === sc && z.schema === "normalized").mbytes / rq3.sizes.find(z => z.scale === sc && z.schema === "mid").mbytes, 2)).join(", "), scales: rq3.scales.map(s => fmt(s, 0)).join(", ") });
   const cm = rq3.cost_model;
-  $("#cost-model").innerHTML = cm ? `<div class="wrap"><table><thead><tr><th>engine</th><th class="num">a: random access</th><th class="num">b: scanned record</th><th class="num">c: fixed</th><th class="num">R²</th><th class="num">rows</th></tr></thead><tbody>${Object.entries(cm).map(([e, m]) => `<tr><td>${e}</td><td class="num">${fmt(m.a, 2)}</td><td class="num">${fmt(m.b, 2)}</td><td class="num">${fmt(m.c, 2)}</td><td class="num">${fmt(m.r2, 2)}</td><td class="num">${m.n}</td></tr>`).join("")}</tbody></table></div>
-    <p class="small" style="margin-top:8px">log(ms) = a·log(1 + random accesses) + b·log(1 + scanned records) + c. Doubling the random accesses multiplies time by ${Object.entries(cm).map(([e, m]) => `${fmt(2 ** m.a, 2)} on ${e}`).join(" and ")}; doubling the scanned records by ${Object.entries(cm).map(([e, m]) => `${fmt(2 ** m.b, 2)} on ${e}`).join(" and ")}. Counts are the schema's, from the in-memory engine; each engine supplies its own times.</p>` : `<p class="small">Available once the main run records the scan split.</p>`;
-  $("#rq3-hyp").innerHTML = `<thead><tr><th></th><th>statement</th><th>verdict</th></tr></thead><tbody>` + rq3.hypotheses.map(h => `<tr><td>${h.id}</td><td>${esc(h.statement)}</td><td><span class="chip ${chipClass(h.verdict)}"><i></i>${esc(h.verdict)}</span> <span class="small">${esc(h.note)}</span></td></tr>`).join("") + "</tbody>";
+  $("#cost-model").innerHTML = cm ? `<div class="wrap"><table><thead><tr><th>${t("engine")}</th><th class="num">${t("a: random access")}</th><th class="num">${t("b: scanned record")}</th><th class="num">${t("c: fixed")}</th><th class="num">R²</th><th class="num">${t("rows")}</th></tr></thead><tbody>${Object.entries(cm).map(([e, m]) => `<tr><td>${e}</td><td class="num">${fmt(m.a, 2)}</td><td class="num">${fmt(m.b, 2)}</td><td class="num">${fmt(m.c, 2)}</td><td class="num">${fmt(m.r2, 2)}</td><td class="num">${m.n}</td></tr>`).join("")}</tbody></table></div>
+    <p class="small" style="margin-top:8px">${t("log(ms) = a·log(1 + random accesses) + b·log(1 + scanned records) + c. Doubling the random accesses multiplies time by {a}; doubling the scanned records by {b}. Counts are the schema's, from the in-memory engine; each engine supplies its own times.", { a: Object.entries(cm).map(([e, m]) => t("{x} on {e}", { x: fmt(2 ** m.a, 2), e })).join(t(" and ")), b: Object.entries(cm).map(([e, m]) => t("{x} on {e}", { x: fmt(2 ** m.b, 2), e })).join(t(" and ")) })}</p>` : `<p class="small">${t("Available once the main run records the scan split.")}</p>`;
+  $("#rq3-hyp").innerHTML = `<thead><tr><th></th><th>${t("statement")}</th><th>${t("verdict")}</th></tr></thead><tbody>` + rq3.hypotheses.map(h => { const x = hyp(h); return `<tr><td>${h.id}</td><td>${esc(x.statement)}</td><td><span class="chip ${chipClass(h.verdict)}"><i></i>${esc(x.verdict)}</span> <span class="small">${esc(x.note)}</span></td></tr>`; }).join("") + "</tbody>";
   function renderTable() {
-    const sc = +$("#rq3-scale").value;
-    $("#rq3-table").innerHTML = `<thead><tr><th>query</th><th>question</th><th>kind</th>${rq3.schemas.map(s => `<th class="num">hops ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">ms ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">slope ${s}</th>`).join("")}</tr></thead><tbody>` +
-      rq3.queries.map(q => `<tr><td>${q.id}</td><td>${esc(q.question)}</td><td class="small">${esc(q.kind)}</td>${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).hops, 0)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).ms, 3)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(exponent(s, q.id), 2)}</td>`).join("")}</tr>`).join("") + "</tbody>";
+    const sc = +scaleSel.value;
+    $("#rq3-table").innerHTML = `<thead><tr><th>${t("query")}</th><th>${t("question")}</th><th>${t("kind")}</th>${rq3.schemas.map(s => `<th class="num">${t("hops")} ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">ms ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">${t("slope")} ${s}</th>`).join("")}</tr></thead><tbody>` +
+      rq3.queries.map(q => `<tr><td>${q.id}</td><td>${esc(qtext[q.id])}</td><td class="small">${esc(qkind[q.id])}</td>${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).hops, 0)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).ms, 3)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(exponent(s, q.id), 2)}</td>`).join("")}</tr>`).join("") + "</tbody>";
   }
   renderRatio(); renderScaling(); renderTable();
   renderFollowups(rq3, qtext);
-  renderSchemaGraphs(D.schemas, rq3);
+  renderSchemaGraphs(D.schemas, rq3, qtext);
 }
 
 // ---------- schema graphs: type level and one neighbourhood, force layout run to rest before drawing ----------
-function renderSchemaGraphs(SG, rq3) {
+function renderSchemaGraphs(SG, rq3, qtext) {
   if (!SG) return;
   const n = Math.max(...rq3.scales);
   const sizeOf = s => rq3.sizes.find(z => z.scale === n && z.schema === s);
@@ -742,21 +782,20 @@ function renderSchemaGraphs(SG, rq3) {
   typeHost.innerHTML = ""; sampleHost.innerHTML = "";
   for (const schema of rq3.schemas) {
     const g = SG[schema]; const sz = sizeOf(schema);
-    const nodes = g.types.map(t => ({ id: t.id, kind: t.kind, count: t.count, props: t.props, r: 6 + 4 * Math.log10(t.count), tip: `<b>${t.id}</b>${fmt(t.count, 0)} instances at 300 persons; ${t.kind === "relation" ? "a relation stored as its own node" : "entity"}${t.props.length ? `<br>properties folded in: ${t.props.join(", ")}` : ""}` }));
-    const links = g.edges.map(e => ({ source: e.s, target: e.t, label: e.label, count: e.count, tip: `<b>${e.s} –${e.label}→ ${e.t}</b>${fmt(e.count, 0)} edges at 300 persons` }));
-    panel(typeHost, schema, `${g.types.length} node types, ${g.edges.length} edge types${sz ? `; ${fmt(sz.nodes, 0)} nodes, ${fmt(sz.edges, 0)} edges at ${fmt(n, 0)} persons` : ""}`, nodes, links, { labels: true, edgeLabels: false, W: 380, H: 340 });
+    const nodes = g.types.map(x => ({ id: x.id, kind: x.kind, count: x.count, props: x.props, r: 6 + 4 * Math.log10(x.count), tip: `<b>${x.id}</b>${t("{n} instances at 300 persons; {kind}", { n: fmt(x.count, 0), kind: x.kind === "relation" ? t("a relation stored as its own node") : t("entity") })}${x.props.length ? `<br>${t("properties folded in: {p}", { p: x.props.join(", ") })}` : ""}` }));
+    const links = g.edges.map(e => ({ source: e.s, target: e.t, label: e.label, count: e.count, tip: `<b>${e.s} –${e.label}→ ${e.t}</b>${t("{n} edges at 300 persons", { n: fmt(e.count, 0) })}` }));
+    panel(typeHost, schema, t("{a} node types, {b} edge types", { a: g.types.length, b: g.edges.length }) + (sz ? t("; {n} nodes, {e} edges at {p} persons", { n: fmt(sz.nodes, 0), e: fmt(sz.edges, 0), p: fmt(n, 0) }) : ""), nodes, links, { labels: true, edgeLabels: false, W: 380, H: 340 });
     const sm = g.sample;
-    const snodes = sm.nodes.map(v => ({ id: v.id, kind: v.kind, label: v.kind === "relation" ? v.type : `${v.type}${v.label && v.label !== v.type ? " " + v.label : ""}`, props: Object.entries(v.props || {}).map(([k, val]) => { const t = `${k}: ${Array.isArray(val) ? val.map(x => Array.isArray(x) ? x[0] : x).join(", ") : val}`; return t.length > 26 ? t.slice(0, 25) + "…" : t; }), r: v.kind === "relation" ? 5 : 7, tip: `<b>${v.type}</b>${v.label}${Object.keys(v.props || {}).length ? "<br>" + Object.entries(v.props).map(([k, val]) => `${k}: ${JSON.stringify(val)}`).join("<br>") : ""}` }));
+    const snodes = sm.nodes.map(v => ({ id: v.id, kind: v.kind, label: v.kind === "relation" ? v.type : `${v.type}${v.label && v.label !== v.type ? " " + v.label : ""}`, props: Object.entries(v.props || {}).map(([k, val]) => { const s = `${k}: ${Array.isArray(val) ? val.map(x => Array.isArray(x) ? x[0] : x).join(", ") : val}`; return s.length > 26 ? s.slice(0, 25) + "…" : s; }), r: v.kind === "relation" ? 5 : 7, tip: `<b>${v.type}</b>${v.label}${Object.keys(v.props || {}).length ? "<br>" + Object.entries(v.props).map(([k, val]) => `${k}: ${JSON.stringify(val)}`).join("<br>") : ""}` }));
     const slinks = sm.edges.map(e => ({ source: e.s, target: e.t, label: e.label, tip: `<b>${e.label}</b>` }));
-    PANELS[schema] = panel(sampleHost, schema, `${sm.nodes.length} nodes, ${sm.edges.length} edges`, snodes, slinks, { labels: true, edgeLabels: false, W: 1000, H: sm.nodes.length > 20 ? 380 : 290, ring: sm.nodes[0].id });
+    PANELS[schema] = panel(sampleHost, schema, t("{n} nodes, {e} edges", { n: sm.nodes.length, e: sm.edges.length }), snodes, slinks, { labels: true, edgeLabels: false, W: 1000, H: sm.nodes.length > 20 ? 380 : 290, ring: sm.nodes[0].id });
     PANELS[schema].types = Object.fromEntries(sm.nodes.map(v => [v.id, v.type]));
   }
-  const sel = $("#trace-q");
-  const qtext2 = Object.fromEntries(rq3.queries.map(q => [q.id, q.question]));
-  sel.innerHTML = Object.entries(TRACES).map(([q, t]) => `<option value="${q}">${q}: ${esc(qtext2[q] || t.text)}</option>`).join("");
+  const sel = fresh("#trace-q");
+  sel.innerHTML = Object.entries(TRACES).map(([q, x]) => `<option value="${q}">${q}: ${esc(qtext[q] || x.text)}</option>`).join("");
   sel.addEventListener("change", () => traceAll(rq3.schemas));
   traceAll(rq3.schemas);
-  $("#graphs-note").textContent = "Type graphs are read from a 300-person build of each schema; instance counts in the tooltips are from that build, the totals in the captions from the largest benchmark scale. The neighbourhood is the first person, two friends, their city and country, one employer, one post with its tags, and that post's forum.";
+  $("#graphs-note").textContent = t("Type graphs are read from a 300-person build of each schema; instance counts in the tooltips are from that build, the totals in the captions from the largest benchmark scale. The neighbourhood is the first person, two friends, their city and country, one employer, one post with its tags, and that post's forum.");
 }
 
 const PANELS = {};
@@ -776,7 +815,7 @@ function traceAll(schemas) {
     // start: the centre person, or every node of the start type (a scan) when the start type is not in this schema
     let frontier = [];
     if (spec.types[0] === "Person") frontier = [P.center];
-    else { const starts = P.nodes.filter(d => typeOf(d.id) === spec.types[0]).map(d => d.id); if (starts.length) frontier = starts; else { const alt = P.nodes.filter(d => typeOf(d.id) === spec.types[1]).map(d => d.id); alt.forEach(id => scanNodes.add(id)); hops += alt.length; note.push(`${spec.types[0]} is a property here: scan every ${spec.types[1]} (${alt.length} in this sample)`); frontier = alt; spec._skip = 1; } }
+    else { const starts = P.nodes.filter(d => typeOf(d.id) === spec.types[0]).map(d => d.id); if (starts.length) frontier = starts; else { const alt = P.nodes.filter(d => typeOf(d.id) === spec.types[1]).map(d => d.id); alt.forEach(id => scanNodes.add(id)); hops += alt.length; note.push(t("{a} is a property here: scan every {b} ({n} in this sample)", { a: spec.types[0], b: spec.types[1], n: alt.length })); frontier = alt; spec._skip = 1; } }
     let k = spec._skip ? 2 : 1; delete spec._skip;
     const used = new Set(frontier);
     for (; k < spec.types.length; k++) {
@@ -787,14 +826,15 @@ function traceAll(schemas) {
         while (q2.length && !found) { const [x, path] = q2.shift(); for (const [y, l] of adj[x] || []) { if (seen.has(y)) continue; seen.add(y); const p2 = [...path, l]; if (typeOf(y) === want && !used.has(y)) { found = [y, p2]; break; } if (isRel(y)) q2.push([y, p2]); } }
         if (found) { found[1].forEach(l => onEdges.add(l)); hops += found[1].length; used.add(found[0]); next.push(found[0]); }
       }
-      if (!next.length) { const have = P.nodes.some(d => typeOf(d.id) === want); note.push(have ? `no ${want} reachable in this sample` : `${want} is a property here: read it, no hop`); break; }
+      if (!next.length) { const have = P.nodes.some(d => typeOf(d.id) === want); note.push(have ? t("no {w} reachable in this sample", { w: want }) : t("{w} is a property here: read it, no hop", { w: want })); break; }
       frontier = next;
     }
     P.linkSel.classed("on", l => onEdges.has(l)).style("stroke", l => onEdges.has(l) ? SERIES[schema] : null);
     P.nodeSel.classed("scan", d => scanNodes.has(d.id)).select("circle").style("stroke", d => scanNodes.has(d.id) ? SERIES[schema] : null);
-    P.svg.selectAll("text.hopcount").data([0]).join("text").attr("class", "hopcount").attr("x", 12).attr("y", 20).text(`${q}: ${hops} hop${hops === 1 ? "" : "s"}${note.length ? " · " + note.join("; ") : ""}`);
+    P.svg.selectAll("text.hopcount").data([0]).join("text").attr("class", "hopcount").attr("x", 12).attr("y", 20).text(`${q}: ${t("{n} hop{s}", { n: hops, s: hops === 1 ? "" : "s" })}${note.length ? " · " + note.join("; ") : ""}`);
   }
 }
+
 
 function panel(host, schema, stat, nodes, links, o) {
   const div = document.createElement("div"); div.className = "panel";
@@ -864,34 +904,36 @@ function panel(host, schema, stat, nodes, links, o) {
   return { svg, nodes, links, nodeSel: node, linkSel: link, center: o.ring };
 }
 
+
 // ---------- follow-up runs: index, skew, second engine, writes ----------
 const DIAG = ["Q02", "Q11", "Q13", "Q17", "Q18", "Q19"];
-const RUN_TEXT = {
-  indexed: ["Flat with reverse indexes", "Same flat schema plus three dictionaries (city, employer, tag) built after load. The index lookup is charged one hop per result, like a reverse edge.", "Verdict: the reverse-lookup penalty was the missing index, not the flat layout. Three indexes cost 2 MB and put flat within 20% of the best schema on every question."],
-  skew: ["Heavy-tailed fan-in", "Cities, employers and tags drawn from a Zipf distribution (exponent 1) so a few carry most of the persons and messages; query parameters drawn in proportion, so the head is asked about as often as it is populated.", "Verdict: with supernodes, reverse lookups grow with n on every schema; the schema sets the constant, not the exponent."],
-  kuzu: ["Second engine: Kùzu", "The same data loaded into an embedded graph database three ways, the six diagnostic questions written in Cypher once per schema, engine execution time best of five. Kùzu has no secondary property indexes, so flat's reverse lookups scan here too.", "Verdict: storage ratios transfer, latency ratios do not. Reification costs more on a join engine (up to 7×); an unindexed scan costs far less on a columnar one (5× instead of 500×)."],
-};
+const RUN_TEXT = () => ({
+  indexed: [t("Flat with reverse indexes"), t("Same flat schema plus three dictionaries (city, employer, tag) built after load. The index lookup is charged one hop per result, like a reverse edge."), t("Verdict: the reverse-lookup penalty was the missing index, not the flat layout. Three indexes cost 2 MB and put flat within 20% of the best schema on every question.")],
+  skew: [t("Heavy-tailed fan-in"), t("Cities, employers and tags drawn from a Zipf distribution (exponent 1) so a few carry most of the persons and messages; query parameters drawn in proportion, so the head is asked about as often as it is populated."), t("Verdict: with supernodes, reverse lookups grow with n on every schema; the schema sets the constant, not the exponent.")],
+  kuzu: [t("Second engine: Kùzu"), t("The same data loaded into an embedded graph database three ways, the six diagnostic questions written in Cypher once per schema, engine execution time best of five. Kùzu has no secondary property indexes, so flat's reverse lookups scan here too."), t("Verdict: storage ratios transfer, latency ratios do not. Reification costs more on a join engine (up to 7×); an unindexed scan costs far less on a columnar one (5× instead of 500×).")],
+});
 function renderFollowups(rq3, qtext) {
   const host = $("#rq3-followups"); const parts = [];
   const slopeOf = (run, s, q) => slope(run.scales.map(n => [Math.log(n), Math.log(run.bench.find(b => b.scale === n && b.schema === s && b.query === q).ms)]));
   for (const [tag, run] of Object.entries(rq3.followups || {})) {
-    const [title, text, verdict] = RUN_TEXT[tag] || [tag, "", ""]; const n = Math.max(...run.scales);
+    const [title, text, verdict] = RUN_TEXT()[tag] || [tag, "", ""]; const n = Math.max(...run.scales);
     const at = (s, q) => run.bench.find(b => b.scale === n && b.schema === s && b.query === q);
     const hasHops = "hops" in run.bench[0];
     const sizes = run.sizes.filter(z => z.scale === n);
     const rows = DIAG.filter(q => run.bench.some(b => b.query === q)).map(q => `<tr><td>${q}</td><td class="small">${esc(qtext[q])}</td>${run.schemas.map(s => `<td class="num">${hasHops ? fmt(at(s, q).hops, 0) : fmt(at(s, q).ms, 3)}</td>`).join("")}${run.schemas.map(s => `<td class="num">${fmt(slopeOf(run, s, q), 2)}</td>`).join("")}</tr>`).join("");
-    parts.push(`<h3>${esc(title)}</h3>${verdict ? `<p style="font-weight:500;max-width:70ch">${esc(verdict)}</p>` : ""}<p class="small" style="color:var(--ink-2)">${esc(text)} Persons: ${run.scales.map(x => fmt(x, 0)).join(", ")}.${sizes.length ? ` Size at ${fmt(n, 0)}: ${sizes.map(z => `${z.schema} ${fmt(z.mbytes, 0)} MB`).join(", ")}.` : ""}</p>
-      <div class="wrap"><table><thead><tr><th>query</th><th></th>${run.schemas.map(s => `<th class="num">${hasHops ? "hops" : "ms"} ${s}</th>`).join("")}${run.schemas.map(s => `<th class="num">slope ${s}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`);
+    parts.push(`<h3>${esc(title)}</h3>${verdict ? `<p style="font-weight:500;max-width:70ch">${esc(verdict)}</p>` : ""}<p class="small" style="color:var(--ink-2)">${esc(text)} ${t("Persons: {s}.", { s: run.scales.map(x => fmt(x, 0)).join(", ") })}${sizes.length ? " " + t("Size at {n}: {list}.", { n: fmt(n, 0), list: sizes.map(z => `${z.schema} ${fmt(z.mbytes, 0)} MB`).join(", ") }) : ""}</p>
+      <div class="wrap"><table><thead><tr><th>${t("query")}</th><th></th>${run.schemas.map(s => `<th class="num">${hasHops ? t("hops") : "ms"} ${s}</th>`).join("")}${run.schemas.map(s => `<th class="num">${t("slope")} ${s}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`);
   }
   if (rq3.writes && rq3.writes.length) {
     const n = Math.max(...rq3.writes.map(w => w.scale)); const W = rq3.writes.filter(w => w.scale === n);
     const schemas = [...new Set(W.map(w => w.schema))], updates = [...new Set(W.map(w => w.update))];
     const at = (s, u) => W.find(w => w.schema === s && w.update === u);
-    parts.push(`<h3>The write path</h3><p style="font-weight:500;max-width:70ch">Verdict: denormalisation pays on reads and charges on writes in proportion to fan-in; a rename touches every record that copied the value.</p><p class="small" style="color:var(--ink-2)">Records touched by one update at ${fmt(n, 0)} persons: property writes plus edge insertions and deletions. Flat pays here for what it saved on reads: a renamed city or tag is rewritten on every record that copied it.</p>
-      <div class="wrap"><table><thead><tr><th>update</th>${schemas.map(s => `<th class="num">${s} records</th>`).join("")}${schemas.map(s => `<th class="num">${s} µs</th>`).join("")}</tr></thead><tbody>${updates.map(u => `<tr><td>${u.replace(/_/g, " ")}</td>${schemas.map(s => `<td class="num">${fmt(at(s, u).records, 0)}</td>`).join("")}${schemas.map(s => `<td class="num">${fmt(at(s, u).us, 1)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+    parts.push(`<h3>${t("The write path")}</h3><p style="font-weight:500;max-width:70ch">${t("Verdict: denormalisation pays on reads and charges on writes in proportion to fan-in; a rename touches every record that copied the value.")}</p><p class="small" style="color:var(--ink-2)">${t("Records touched by one update at {n} persons: property writes plus edge insertions and deletions. Flat pays here for what it saved on reads: a renamed city or tag is rewritten on every record that copied it.", { n: fmt(n, 0) })}</p>
+      <div class="wrap"><table><thead><tr><th>${t("update")}</th>${schemas.map(s => `<th class="num">${s} ${t("records")}</th>`).join("")}${schemas.map(s => `<th class="num">${s} µs</th>`).join("")}</tr></thead><tbody>${updates.map(u => `<tr><td>${td("updates", u, "t", u.replace(/_/g, " "))}</td>${schemas.map(s => `<td class="num">${fmt(at(s, u).records, 0)}</td>`).join("")}${schemas.map(s => `<td class="num">${fmt(at(s, u).us, 1)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
   }
-  host.innerHTML = parts.length ? `<h3 style="margin-top:48px">Follow-up runs</h3><p>Each of these answers one objection to the main run. They are reported separately because the main run's hypotheses were registered before they existed.</p>` + parts.join("") : "";
+  host.innerHTML = parts.length ? `<h3 style="margin-top:48px">${t("Follow-up runs")}</h3><p>${t("Each of these answers one objection to the main run. They are reported separately because the main run's hypotheses were registered before they existed.")}</p>` + parts.join("") : "";
 }
+
 
 // ---------- charts (D3) ----------
 const SERIES_ORDER = ["flat", "mid", "normalized"];
@@ -908,8 +950,8 @@ function barChart(svg, rows, max) {
   g.append("text").attr("x", L - 10).attr("y", 19).attr("text-anchor", "end").text(d => d.label);
   g.filter(d => d.value > 0).append("rect").attr("x", x(0)).attr("y", 5).attr("height", 20).attr("width", d => x(d.value) - x(0)).attr("rx", 4).attr("fill", "var(--s1)");
   g.filter(d => d.extra > 0).append("rect").attr("x", d => x(d.value) + (d.value ? 2 : 0)).attr("y", 5).attr("height", 20).attr("width", d => x(d.extra) - x(0) - (d.value ? 2 : 0)).attr("rx", 4).attr("fill", "var(--seq-1)");
-  g.append("text").attr("class", "lbl").attr("x", d => x(d.value + (d.extra || 0)) + 6).attr("y", 19).text(d => d.extra ? `${d.value} (+${d.extra} named only)` : d.value);
-  g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${esc(d.label)}</b>${d.value} of ${max} frameworks measure it${d.extra ? `; ${d.extra} name${d.extra > 1 ? "" : "s"} it without measuring` : ""}`; }).call(d3tips);
+  g.append("text").attr("class", "lbl").attr("x", d => x(d.value + (d.extra || 0)) + 6).attr("y", 19).text(d => d.extra ? t("{v} (+{e} named only)", { v: d.value, e: d.extra }) : d.value);
+  g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${esc(d.label)}</b>${t("{v} of {m} frameworks measure it", { v: d.value, m: max })}${d.extra ? t("; {e} name it without measuring", { e: d.extra }) : ""}`; }).call(d3tips);
 }
 
 // Horizontal bars: total ms per 1,000 operations per schema, read and write parts stacked
@@ -918,13 +960,13 @@ function barsMs(svg, rows) {
   const root = d3.select(svg).attr("viewBox", `0 0 ${W} ${H}`); root.selectAll("*").remove();
   const x = d3.scaleLinear().domain([0, d3.max(rows, r => r.total) * 1.05 || 1]).range([L, W - R]).nice();
   root.append("g").attr("transform", `translate(0,${H - 24})`).call(d3.axisBottom(x).ticks(5).tickSize(-(H - T - 24)).tickFormat(d3.format(",~g"))).call(axisStyle).select(".domain").remove();
-  root.append("text").attr("class", "tick").attr("x", L, 0).attr("y", H - 4).text("ms per 1,000 operations");
+  root.append("text").attr("class", "tick").attr("x", L, 0).attr("y", H - 4).text(t("ms per 1,000 operations"));
   const g = root.selectAll("g.row").data(rows).join("g").attr("class", "row").attr("transform", (d, i) => `translate(0,${T + i * rowH})`);
   g.append("text").attr("x", L - 10).attr("y", 20).attr("text-anchor", "end").text(d => d.sc.replace("_indexed", " + index"));
   g.append("rect").attr("x", x(0)).attr("y", 7).attr("height", 20).attr("width", d => Math.max(0, x(d.read) - x(0))).attr("fill", d => seriesColor(d.sc.startsWith("flat") ? "flat" : d.sc)).attr("opacity", d => d.sc === "flat_indexed" ? 0.55 : 1);
   g.append("rect").attr("x", d => x(d.read) + (d.read ? 2 : 0)).attr("y", 7).attr("height", 20).attr("width", d => Math.max(0, x(d.total) - x(d.read) - (d.read ? 2 : 0))).attr("fill", "var(--rule)");
-  g.append("text").attr("class", "lbl").attr("x", d => x(d.total) + 6).attr("y", 21).text(d => `${fmt(d.total, 0)}${d.write > 0.02 * d.total ? ` (${fmt(d.write, 0)} on writes)` : ""}`);
-  g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${d.sc}</b>reads ${fmt(d.read, 1)} ms + writes ${fmt(d.write, 1)} ms per 1,000 operations`; }).call(d3tips);
+  g.append("text").attr("class", "lbl").attr("x", d => x(d.total) + 6).attr("y", 21).text(d => `${fmt(d.total, 0)}${d.write > 0.02 * d.total ? t(" ({w} on writes)", { w: fmt(d.write, 0) }) : ""}`);
+  g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${d.sc}</b>${t("reads {r} ms + writes {w} ms per 1,000 operations", { r: fmt(d.read, 1), w: fmt(d.write, 1) })}`; }).call(d3tips);
 }
 
 // One row per question, one dot per schema on a shared x axis. opts: log, ref (emphasised rule), refs (other rules), ticks, fmtX, label, onSelect, selected
@@ -965,17 +1007,21 @@ function lineChart(svg, lines, yLabel, xLabel, endLabel) {
   const yt = d3.range(Math.floor(Math.log10(ylo)), Math.ceil(Math.log10(yhi)) + 1).flatMap(e => (decades < 2 ? [1, 2, 5] : [1]).map(m => m * 10 ** e)).filter(v => v >= ylo && v <= yhi);
   root.append("g").attr("transform", `translate(${L},0)`).call(d3.axisLeft(y).tickValues(yt).tickFormat(d3.format("~g")).tickSize(-(W - L - R))).call(axisStyle).select(".domain").remove();
   root.append("g").attr("transform", `translate(0,${H - Bt})`).call(d3.axisBottom(x).tickValues(lines[0].pts.map(p => p.x)).tickFormat(d3.format(",")).tickSize(4)).call(axisStyle);
-  root.append("text").attr("class", "tick").attr("x", L).attr("y", H - 4).text(`${yLabel} against ${xLabel}, log-log`);
+  root.append("text").attr("class", "tick").attr("x", L).attr("y", H - 4).text(t("{y} against {x}, log-log", { y: yLabel, x: xLabel }));
   const line = d3.line().x(p => x(p.x)).y(p => y(p.y));
   const g = root.selectAll("g.series").data(lines).join("g").attr("class", "series");
   g.append("path").attr("d", l => line(l.pts)).attr("fill", "none").attr("stroke", l => seriesColor(l.series)).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round");
-  const dots = g.selectAll("g.pt").data(l => l.pts.map(p => ({ ...p, series: l.series, tip: `<b>${l.series}, ${fmt(p.x, 0)} persons</b>${fmt(p.y, 3)} ${yLabel}` }))).join("g").attr("class", "pt").attr("transform", p => `translate(${x(p.x)},${y(p.y)})`);
+  const dots = g.selectAll("g.pt").data(l => l.pts.map(p => ({ ...p, series: l.series, tip: `<b>${l.series}, ${fmt(p.x, 0)} ${t("persons")}</b>${fmt(p.y, 3)} ${yLabel}` }))).join("g").attr("class", "pt").attr("transform", p => `translate(${x(p.x)},${y(p.y)})`);
   dots.append("circle").attr("r", 4).attr("fill", p => seriesColor(p.series)).attr("stroke", "var(--sheet)").attr("stroke-width", 2);
   dots.append("circle").attr("r", 9).attr("class", "hit").call(d3tips);
   const ends = lines.map(l => ({ l, yy: y(l.pts[l.pts.length - 1].y) })).sort((a, b) => a.yy - b.yy);
   for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < 14) ends[i].yy = ends[i - 1].yy + 14;
   root.selectAll("text.end").data(ends).join("text").attr("class", "lbl end").attr("x", W - R + 8).attr("y", e => e.yy + 4).text(e => `${e.l.series} ${endLabel(e.l)}`);
 }
+</script>
+</body>
+</html>
+
 </script>
 </body>
 </html>

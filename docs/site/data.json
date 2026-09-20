@@ -1,0 +1,2130 @@
+{
+ "rq1": {
+  "columns": [
+   "structural (depth, breadth, richness)",
+   "instance completeness / correctness",
+   "formal soundness (taxonomy)",
+   "usability / fitness for task",
+   "operational cost (hops, latency, memory)",
+   "adoption / maintenance"
+  ],
+  "rows": [
+   {
+    "framework": "OntoQA [5]",
+    "cells": [
+     "schema metrics: relationship richness, attribute richness, inheritance richness; knowledge-base metrics: class richness, cohesion",
+     "instance distribution across classes (\"class connectivity\", \"class importance\")",
+     "",
+     "",
+     "",
+     ""
+    ]
+   },
+   {
+    "framework": "OQuaRE [6]",
+    "cells": [
+     "structural sub-characteristics mapped onto ISO/IEC 25000 (SQuaRE)",
+     "",
+     "",
+     "functional adequacy, reliability, operability, maintainability, compatibility, transferability, all as SQuaRE characteristics",
+     "\"performance efficiency\" appears as a SQuaRE characteristic but is scored from structural proxies, not measured",
+     "maintainability sub-characteristics (modularity, reusability, analysability, changeability)"
+    ]
+   },
+   {
+    "framework": "Vrandečić [7]",
+    "cells": [
+     "covers structure as one of several aspects (vocabulary, syntax, structure, semantics, representation, context)",
+     "gold-standard and data-driven evaluation",
+     "",
+     "application-based evaluation: does the ontology work in the application it was built for",
+     "",
+     ""
+    ]
+   },
+   {
+    "framework": "OntoClean [13]",
+    "cells": [
+     "",
+     "",
+     "rigidity, identity, unity, dependence constraints on the subsumption hierarchy",
+     "",
+     "",
+     ""
+    ]
+   },
+   {
+    "framework": "Paulheim [14]",
+    "cells": [
+     "",
+     "completeness and correctness of KG instances; refinement methods evaluated by precision/recall",
+     "",
+     "",
+     "",
+     ""
+    ]
+   },
+   {
+    "framework": "Noy et al. [15]",
+    "cells": [
+     "",
+     "entity resolution and provenance as recurring challenges",
+     "",
+     "schema must be populated to be useful; \"the schema is what people will actually fill in\"",
+     "",
+     "schema evolution, governance, tooling named as open challenges"
+    ]
+   },
+   {
+    "framework": "Wikidata [16]",
+    "cells": [
+     "",
+     "property constraints checked continuously",
+     "",
+     "",
+     "",
+     "community process as quality control"
+    ]
+   }
+  ]
+ },
+ "rq2": {
+  "cases": [
+   {
+    "id": "google-kg",
+    "name": "Google Knowledge Graph and peers (Microsoft, Facebook, eBay, IBM)",
+    "organization": "Google, Microsoft (Bing / Satori), Facebook, eBay, IBM (Watson Discovery)",
+    "domain": "general knowledge, product, social, enterprise documents",
+    "period": "Google KG launched 2012; the account is from 2019",
+    "grade": "A",
+    "outcome": "sustained",
+    "patterns": [
+     "action-first",
+     "entity-resolution-core",
+     "provenance-per-statement",
+     "editorial-governance"
+    ]
+   },
+   {
+    "id": "amazon",
+    "name": "Amazon Product Graph",
+    "organization": "Amazon",
+    "domain": "products, attributes, brands, categories",
+    "period": "account from 2018",
+    "grade": "B (keynote abstract and slides; no peer-reviewed system paper)",
+    "outcome": "sustained (internal)",
+    "patterns": [
+     "schema-discovered-not-designed"
+    ]
+   },
+   {
+    "id": "wikidata",
+    "name": "Wikidata",
+    "organization": "Wikimedia Deutschland / Wikimedia Foundation, community edited",
+    "domain": "general knowledge",
+    "period": "2012–present",
+    "grade": "A",
+    "outcome": "sustained",
+    "patterns": [
+     "provenance-per-statement",
+     "constraint-based-qc",
+     "community-schema",
+     "n-ary-via-qualifiers"
+    ]
+   },
+   {
+    "id": "freebase",
+    "name": "Freebase",
+    "organization": "Metaweb (2007), acquired by Google (2010), shut down 2016 with migration to Wikidata",
+    "domain": "general knowledge",
+    "period": "2007–2016",
+    "grade": "A",
+    "outcome": "abandoned",
+    "patterns": [
+     "provenance-weak",
+     "n-ary-via-reification",
+     "platform-dependency"
+    ]
+   },
+   {
+    "id": "schema-org",
+    "name": "Schema.org",
+    "organization": "founded by Google, Microsoft, Yahoo, Yandex (2011); W3C community group",
+    "domain": "web page markup: organizations, products, events, recipes, articles, etc.",
+    "period": "2011–present",
+    "grade": "A",
+    "outcome": "sustained",
+    "patterns": [
+     "action-first",
+     "community-schema",
+     "minimal-schema"
+    ]
+   },
+   {
+    "id": "gene-ontology",
+    "name": "Gene Ontology (GO)",
+    "organization": "Gene Ontology Consortium",
+    "domain": "molecular function, biological process, cellular component",
+    "period": "1998–present",
+    "grade": "A",
+    "outcome": "sustained",
+    "patterns": [
+     "provenance-per-statement",
+     "editorial-governance",
+     "dl-with-classifier",
+     "obsolete-not-delete"
+    ]
+   },
+   {
+    "id": "snomed-ct",
+    "name": "SNOMED CT",
+    "organization": "SNOMED International (formerly IHTSDO)",
+    "domain": "clinical terminology",
+    "period": "SNOMED CT formed 2002 from SNOMED RT and Clinical Terms Version 3; ongoing",
+    "grade": "B for scale and process (official documentation); A for the description-logic and quality literature (collect from S1: Schulz, Cornet, Rector and others)",
+    "outcome": "sustained",
+    "patterns": [
+     "editorial-governance",
+     "dl-with-classifier",
+     "expressivity-capped-for-tractability",
+     "subset-for-use"
+    ]
+   },
+   {
+    "id": "cyc",
+    "name": "Cyc",
+    "organization": "MCC (1984), then Cycorp (1994–)",
+    "domain": "common-sense knowledge",
+    "period": "1984–present; OpenCyc released 2002, discontinued 2017",
+    "grade": "A for [19]; B/C for later scale figures",
+    "outcome": "limited adoption",
+    "patterns": [
+     "editorial-governance",
+     "high-expressivity",
+     "upper-ontology-first"
+    ]
+   }
+  ],
+  "patterns": [
+   "action-first",
+   "entity-resolution-core",
+   "provenance-per-statement",
+   "provenance-weak",
+   "constraint-based-qc",
+   "editorial-governance",
+   "community-schema",
+   "minimal-schema",
+   "n-ary-via-reification",
+   "n-ary-via-qualifiers",
+   "dl-with-classifier",
+   "expressivity-capped-for-tractability",
+   "high-expressivity",
+   "upper-ontology-first",
+   "schema-discovered-not-designed",
+   "subset-for-use",
+   "platform-dependency",
+   "obsolete-not-delete"
+  ],
+  "matrix": {
+   "action-first": [
+    "google-kg",
+    "schema-org"
+   ],
+   "entity-resolution-core": [
+    "google-kg"
+   ],
+   "provenance-per-statement": [
+    "google-kg",
+    "wikidata",
+    "gene-ontology"
+   ],
+   "provenance-weak": [
+    "freebase"
+   ],
+   "constraint-based-qc": [
+    "wikidata"
+   ],
+   "editorial-governance": [
+    "google-kg",
+    "gene-ontology",
+    "snomed-ct",
+    "cyc"
+   ],
+   "community-schema": [
+    "wikidata",
+    "schema-org"
+   ],
+   "minimal-schema": [
+    "schema-org"
+   ],
+   "n-ary-via-reification": [
+    "freebase"
+   ],
+   "n-ary-via-qualifiers": [
+    "wikidata"
+   ],
+   "dl-with-classifier": [
+    "gene-ontology",
+    "snomed-ct"
+   ],
+   "expressivity-capped-for-tractability": [
+    "snomed-ct"
+   ],
+   "high-expressivity": [
+    "cyc"
+   ],
+   "upper-ontology-first": [
+    "cyc"
+   ],
+   "schema-discovered-not-designed": [
+    "amazon"
+   ],
+   "subset-for-use": [
+    "snomed-ct"
+   ],
+   "platform-dependency": [
+    "freebase"
+   ],
+   "obsolete-not-delete": [
+    "gene-ontology"
+   ]
+  }
+ },
+ "rq3": {
+  "run_date": "2026-09-20",
+  "scales": [
+   1000,
+   3000,
+   10000
+  ],
+  "schemas": [
+   "flat",
+   "mid",
+   "normalized"
+  ],
+  "queries": [
+   {
+    "id": "Q01",
+    "question": "Given a person, list their friends' names and cities",
+    "kind": "2-hop lookup"
+   },
+   {
+    "id": "Q02",
+    "question": "Given a person, list friends of friends who live in the same country",
+    "kind": "3-hop with filter"
+   },
+   {
+    "id": "Q03",
+    "question": "Given a person, the 10 most recent posts by their friends",
+    "kind": "neighborhood + sort"
+   },
+   {
+    "id": "Q04",
+    "question": "Given a person and a date range, the tags most used in their friends' posts",
+    "kind": "aggregation over neighborhood"
+   },
+   {
+    "id": "Q05",
+    "question": "Given a person, the forums their friends joined after a date, ranked by number of posts from those friends",
+    "kind": "join-heavy"
+   },
+   {
+    "id": "Q06",
+    "question": "Given a person and a tag, other tags that co-occur on posts by friends-of-friends",
+    "kind": "4-hop co-occurrence"
+   },
+   {
+    "id": "Q07",
+    "question": "Given a person, who liked their posts recently and whether they are a friend",
+    "kind": "reverse edge + membership test"
+   },
+   {
+    "id": "Q08",
+    "question": "Given a person, the latest comments replying to their posts",
+    "kind": "reverse 2-hop"
+   },
+   {
+    "id": "Q09",
+    "question": "Given a person, recent messages by friends-of-friends before a date",
+    "kind": "3-hop with filter"
+   },
+   {
+    "id": "Q10",
+    "question": "Given a person, friends with a birthday in a month, scored by common interests",
+    "kind": "scoring over neighborhood"
+   },
+   {
+    "id": "Q11",
+    "question": "Given a person and a country, friends who work at companies in that country",
+    "kind": "3-hop across entity types"
+   },
+   {
+    "id": "Q12",
+    "question": "Given a person and a tag class, friends who commented on posts about that class",
+    "kind": "hierarchy traversal + 3-hop"
+   },
+   {
+    "id": "Q13",
+    "question": "Shortest path length between two persons",
+    "kind": "variable-length path"
+   },
+   {
+    "id": "Q14",
+    "question": "Weighted shortest paths between two persons where weight depends on reply counts",
+    "kind": "variable-length with computed weights"
+   },
+   {
+    "id": "Q15",
+    "question": "For a given post, its full comment thread",
+    "kind": "recursive descent"
+   },
+   {
+    "id": "Q16",
+    "question": "For a given forum, members grouped by country with post counts",
+    "kind": "group-by over 2 hops"
+   },
+   {
+    "id": "Q17",
+    "question": "For a given organisation, the tag distribution of posts by its employees",
+    "kind": "3-hop aggregation"
+   },
+   {
+    "id": "Q18",
+    "question": "For a given tag, the number of posts per month over the last year",
+    "kind": "time-bucketed count"
+   },
+   {
+    "id": "Q19",
+    "question": "For a given place, the people located there and their employers",
+    "kind": "2-hop across types"
+   },
+   {
+    "id": "Q20",
+    "question": "For a given person, the ego network to depth 2 with PPR scores (uses `PPRMatrix`)",
+    "kind": "centrality over neighborhood"
+   }
+  ],
+  "bench": [
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q01",
+    "hops": 8,
+    "prop_reads": 26,
+    "ms": 0.0052,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q01",
+    "hops": 17,
+    "prop_reads": 26,
+    "ms": 0.0073,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q01",
+    "hops": 44,
+    "prop_reads": 35,
+    "ms": 0.0136,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q02",
+    "hops": 149,
+    "prop_reads": 127,
+    "ms": 0.0399,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q02",
+    "hops": 405,
+    "prop_reads": 127,
+    "ms": 0.0926,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q02",
+    "hops": 961,
+    "prop_reads": 277,
+    "ms": 0.2243,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q03",
+    "hops": 131,
+    "prop_reads": 52,
+    "ms": 0.0216,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q03",
+    "hops": 131,
+    "prop_reads": 52,
+    "ms": 0.0212,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q03",
+    "hops": 271,
+    "prop_reads": 61,
+    "ms": 0.0543,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q04",
+    "hops": 131,
+    "prop_reads": 66,
+    "ms": 0.0293,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q04",
+    "hops": 160,
+    "prop_reads": 81,
+    "ms": 0.0365,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q04",
+    "hops": 329,
+    "prop_reads": 90,
+    "ms": 0.0805,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q05",
+    "hops": 1000,
+    "prop_reads": 0,
+    "ms": 0.1428,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q05",
+    "hops": 1000,
+    "prop_reads": 0,
+    "ms": 0.1385,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q05",
+    "hops": 2008,
+    "prop_reads": 49,
+    "ms": 0.4365,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q06",
+    "hops": 1862,
+    "prop_reads": 1463,
+    "ms": 0.4858,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q06",
+    "hops": 3329,
+    "prop_reads": 2198,
+    "ms": 0.8068,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q06",
+    "hops": 6809,
+    "prop_reads": 2348,
+    "ms": 1.8767,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q07",
+    "hops": 26,
+    "prop_reads": 3,
+    "ms": 0.0042,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q07",
+    "hops": 26,
+    "prop_reads": 3,
+    "ms": 0.0042,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q07",
+    "hops": 61,
+    "prop_reads": 17,
+    "ms": 0.0127,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q08",
+    "hops": 16,
+    "prop_reads": 7,
+    "ms": 0.0038,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q08",
+    "hops": 16,
+    "prop_reads": 7,
+    "ms": 0.0038,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q08",
+    "hops": 32,
+    "prop_reads": 7,
+    "ms": 0.0084,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q09",
+    "hops": 3574,
+    "prop_reads": 1712,
+    "ms": 0.7298,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q09",
+    "hops": 3574,
+    "prop_reads": 1712,
+    "ms": 0.7369,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q09",
+    "hops": 7299,
+    "prop_reads": 1862,
+    "ms": 2.0686,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q10",
+    "hops": 29,
+    "prop_reads": 32,
+    "ms": 0.0109,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q10",
+    "hops": 44,
+    "prop_reads": 39,
+    "ms": 0.0139,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q10",
+    "hops": 97,
+    "prop_reads": 48,
+    "ms": 0.0273,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q11",
+    "hops": 8,
+    "prop_reads": 8,
+    "ms": 0.003,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q11",
+    "hops": 35,
+    "prop_reads": 26,
+    "ms": 0.0102,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q11",
+    "hops": 80,
+    "prop_reads": 49,
+    "ms": 0.0234,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q12",
+    "hops": 201,
+    "prop_reads": 140,
+    "ms": 0.0717,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q12",
+    "hops": 754,
+    "prop_reads": 506,
+    "ms": 0.2342,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q12",
+    "hops": 1401,
+    "prop_reads": 514,
+    "ms": 0.4428,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q13",
+    "hops": 4754,
+    "prop_reads": 0,
+    "ms": 0.4181,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q13",
+    "hops": 4754,
+    "prop_reads": 0,
+    "ms": 0.4277,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q13",
+    "hops": 14262,
+    "prop_reads": 4754,
+    "ms": 2.3042,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q14",
+    "hops": 143969,
+    "prop_reads": 36175,
+    "ms": 32.6165,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q14",
+    "hops": 143969,
+    "prop_reads": 36175,
+    "ms": 31.1824,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q14",
+    "hops": 292538,
+    "prop_reads": 40774,
+    "ms": 86.8755,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q15",
+    "hops": 3,
+    "prop_reads": 1,
+    "ms": 0.0015,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q15",
+    "hops": 3,
+    "prop_reads": 1,
+    "ms": 0.0015,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q15",
+    "hops": 5,
+    "prop_reads": 1,
+    "ms": 0.0021,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q16",
+    "hops": 59,
+    "prop_reads": 22,
+    "ms": 0.0134,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q16",
+    "hops": 104,
+    "prop_reads": 22,
+    "ms": 0.0236,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q16",
+    "hops": 209,
+    "prop_reads": 45,
+    "ms": 0.0555,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q17",
+    "hops": 2181,
+    "prop_reads": 1786,
+    "ms": 0.6315,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q17",
+    "hops": 2073,
+    "prop_reads": 1183,
+    "ms": 0.5266,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q17",
+    "hops": 4147,
+    "prop_reads": 1183,
+    "ms": 1.1655,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q18",
+    "hops": 11650,
+    "prop_reads": 11809,
+    "ms": 1.7481,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q18",
+    "hops": 159,
+    "prop_reads": 159,
+    "ms": 0.0448,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q18",
+    "hops": 318,
+    "prop_reads": 159,
+    "ms": 0.0861,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q19",
+    "hops": 1000,
+    "prop_reads": 1048,
+    "ms": 0.1496,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q19",
+    "hops": 193,
+    "prop_reads": 144,
+    "ms": 0.0635,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q19",
+    "hops": 386,
+    "prop_reads": 216,
+    "ms": 0.1266,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "query": "Q20",
+    "hops": 2114,
+    "prop_reads": 0,
+    "ms": 2.0438,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "query": "Q20",
+    "hops": 2114,
+    "prop_reads": 0,
+    "ms": 1.8381,
+    "correct": true
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "query": "Q20",
+    "hops": 6344,
+    "prop_reads": 2114,
+    "ms": 2.6566,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q01",
+    "hops": 9,
+    "prop_reads": 29,
+    "ms": 0.0058,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q01",
+    "hops": 19,
+    "prop_reads": 29,
+    "ms": 0.0082,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q01",
+    "hops": 49,
+    "prop_reads": 39,
+    "ms": 0.0169,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q02",
+    "hops": 175,
+    "prop_reads": 157,
+    "ms": 0.0511,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q02",
+    "hops": 490,
+    "prop_reads": 157,
+    "ms": 0.1208,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q02",
+    "hops": 1155,
+    "prop_reads": 332,
+    "ms": 0.2802,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q03",
+    "hops": 144,
+    "prop_reads": 60,
+    "ms": 0.0261,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q03",
+    "hops": 144,
+    "prop_reads": 60,
+    "ms": 0.0256,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q03",
+    "hops": 298,
+    "prop_reads": 70,
+    "ms": 0.0649,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q04",
+    "hops": 144,
+    "prop_reads": 78,
+    "ms": 0.037,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q04",
+    "hops": 180,
+    "prop_reads": 96,
+    "ms": 0.0454,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q04",
+    "hops": 369,
+    "prop_reads": 106,
+    "ms": 0.0998,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q05",
+    "hops": 1183,
+    "prop_reads": 0,
+    "ms": 0.1753,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q05",
+    "hops": 1183,
+    "prop_reads": 0,
+    "ms": 0.1767,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q05",
+    "hops": 2375,
+    "prop_reads": 56,
+    "ms": 0.5694,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q06",
+    "hops": 2471,
+    "prop_reads": 2088,
+    "ms": 0.6471,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q06",
+    "hops": 4559,
+    "prop_reads": 3132,
+    "ms": 1.2362,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q06",
+    "hops": 9293,
+    "prop_reads": 3307,
+    "ms": 3.3213,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q07",
+    "hops": 28,
+    "prop_reads": 3,
+    "ms": 0.0048,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q07",
+    "hops": 28,
+    "prop_reads": 3,
+    "ms": 0.005,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q07",
+    "hops": 64,
+    "prop_reads": 19,
+    "ms": 0.0145,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q08",
+    "hops": 16,
+    "prop_reads": 8,
+    "ms": 0.0041,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q08",
+    "hops": 16,
+    "prop_reads": 8,
+    "ms": 0.0041,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q08",
+    "hops": 32,
+    "prop_reads": 8,
+    "ms": 0.0087,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q09",
+    "hops": 4767,
+    "prop_reads": 2296,
+    "ms": 1.1401,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q09",
+    "hops": 4767,
+    "prop_reads": 2296,
+    "ms": 1.1044,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q09",
+    "hops": 9709,
+    "prop_reads": 2471,
+    "ms": 3.0671,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q10",
+    "hops": 31,
+    "prop_reads": 38,
+    "ms": 0.0134,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q10",
+    "hops": 50,
+    "prop_reads": 48,
+    "ms": 0.0184,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q10",
+    "hops": 111,
+    "prop_reads": 58,
+    "ms": 0.0345,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q11",
+    "hops": 9,
+    "prop_reads": 9,
+    "ms": 0.0034,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q11",
+    "hops": 38,
+    "prop_reads": 28,
+    "ms": 0.0113,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q11",
+    "hops": 87,
+    "prop_reads": 53,
+    "ms": 0.0261,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q12",
+    "hops": 218,
+    "prop_reads": 147,
+    "ms": 0.0804,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q12",
+    "hops": 797,
+    "prop_reads": 530,
+    "ms": 0.2572,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q12",
+    "hops": 1482,
+    "prop_reads": 540,
+    "ms": 0.4945,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q13",
+    "hops": 16990,
+    "prop_reads": 0,
+    "ms": 1.6723,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q13",
+    "hops": 16990,
+    "prop_reads": 0,
+    "ms": 1.6727,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q13",
+    "hops": 50971,
+    "prop_reads": 16990,
+    "ms": 8.9367,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q14",
+    "hops": 587679,
+    "prop_reads": 146394,
+    "ms": 164.2206,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q14",
+    "hops": 587679,
+    "prop_reads": 146394,
+    "ms": 165.5077,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q14",
+    "hops": 1193773,
+    "prop_reads": 164810,
+    "ms": 488.6163,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q15",
+    "hops": 3,
+    "prop_reads": 2,
+    "ms": 0.0017,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q15",
+    "hops": 3,
+    "prop_reads": 2,
+    "ms": 0.0019,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q15",
+    "hops": 6,
+    "prop_reads": 2,
+    "ms": 0.0025,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q16",
+    "hops": 55,
+    "prop_reads": 20,
+    "ms": 0.0143,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q16",
+    "hops": 96,
+    "prop_reads": 20,
+    "ms": 0.0233,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q16",
+    "hops": 192,
+    "prop_reads": 41,
+    "ms": 0.0543,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q17",
+    "hops": 5495,
+    "prop_reads": 4686,
+    "ms": 1.7363,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q17",
+    "hops": 4389,
+    "prop_reads": 2528,
+    "ms": 1.3523,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q17",
+    "hops": 8779,
+    "prop_reads": 2528,
+    "ms": 3.5044,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q18",
+    "hops": 35390,
+    "prop_reads": 35546,
+    "ms": 5.8577,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q18",
+    "hops": 156,
+    "prop_reads": 156,
+    "ms": 0.0461,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q18",
+    "hops": 312,
+    "prop_reads": 156,
+    "ms": 0.0978,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q19",
+    "hops": 3000,
+    "prop_reads": 3105,
+    "ms": 0.4435,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q19",
+    "hops": 418,
+    "prop_reads": 312,
+    "ms": 0.1467,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q19",
+    "hops": 837,
+    "prop_reads": 469,
+    "ms": 0.2859,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "query": "Q20",
+    "hops": 3040,
+    "prop_reads": 0,
+    "ms": 2.0876,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "query": "Q20",
+    "hops": 3040,
+    "prop_reads": 0,
+    "ms": 2.0654,
+    "correct": true
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "query": "Q20",
+    "hops": 9120,
+    "prop_reads": 3040,
+    "ms": 3.4064,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q01",
+    "hops": 9,
+    "prop_reads": 28,
+    "ms": 0.0067,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q01",
+    "hops": 19,
+    "prop_reads": 28,
+    "ms": 0.0085,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q01",
+    "hops": 47,
+    "prop_reads": 38,
+    "ms": 0.0158,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q02",
+    "hops": 175,
+    "prop_reads": 164,
+    "ms": 0.0539,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q02",
+    "hops": 503,
+    "prop_reads": 164,
+    "ms": 0.1291,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q02",
+    "hops": 1182,
+    "prop_reads": 339,
+    "ms": 0.3056,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q03",
+    "hops": 143,
+    "prop_reads": 61,
+    "ms": 0.0266,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q03",
+    "hops": 143,
+    "prop_reads": 61,
+    "ms": 0.0264,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q03",
+    "hops": 297,
+    "prop_reads": 71,
+    "ms": 0.0675,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q04",
+    "hops": 143,
+    "prop_reads": 78,
+    "ms": 0.0392,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q04",
+    "hops": 179,
+    "prop_reads": 97,
+    "ms": 0.0482,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q04",
+    "hops": 369,
+    "prop_reads": 107,
+    "ms": 0.1008,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q05",
+    "hops": 1152,
+    "prop_reads": 0,
+    "ms": 0.1813,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q05",
+    "hops": 1152,
+    "prop_reads": 0,
+    "ms": 0.1833,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q05",
+    "hops": 2315,
+    "prop_reads": 52,
+    "ms": 0.7706,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q06",
+    "hops": 2645,
+    "prop_reads": 2363,
+    "ms": 0.913,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q06",
+    "hops": 5017,
+    "prop_reads": 3553,
+    "ms": 1.7487,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q06",
+    "hops": 10209,
+    "prop_reads": 3728,
+    "ms": 4.8861,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q07",
+    "hops": 27,
+    "prop_reads": 3,
+    "ms": 0.0045,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q07",
+    "hops": 27,
+    "prop_reads": 3,
+    "ms": 0.005,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q07",
+    "hops": 64,
+    "prop_reads": 18,
+    "ms": 0.0131,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q08",
+    "hops": 17,
+    "prop_reads": 8,
+    "ms": 0.0042,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q08",
+    "hops": 17,
+    "prop_reads": 8,
+    "ms": 0.0041,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q08",
+    "hops": 34,
+    "prop_reads": 8,
+    "ms": 0.0087,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q09",
+    "hops": 5116,
+    "prop_reads": 2470,
+    "ms": 1.645,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q09",
+    "hops": 5116,
+    "prop_reads": 2470,
+    "ms": 1.7633,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q09",
+    "hops": 10407,
+    "prop_reads": 2645,
+    "ms": 3.9648,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q10",
+    "hops": 31,
+    "prop_reads": 35,
+    "ms": 0.012,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q10",
+    "hops": 48,
+    "prop_reads": 44,
+    "ms": 0.0163,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q10",
+    "hops": 107,
+    "prop_reads": 54,
+    "ms": 0.0342,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q11",
+    "hops": 9,
+    "prop_reads": 9,
+    "ms": 0.0034,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q11",
+    "hops": 38,
+    "prop_reads": 29,
+    "ms": 0.0109,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q11",
+    "hops": 86,
+    "prop_reads": 53,
+    "ms": 0.0268,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q12",
+    "hops": 216,
+    "prop_reads": 145,
+    "ms": 0.088,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q12",
+    "hops": 782,
+    "prop_reads": 518,
+    "ms": 0.3621,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q12",
+    "hops": 1454,
+    "prop_reads": 527,
+    "ms": 0.5262,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q13",
+    "hops": 49777,
+    "prop_reads": 0,
+    "ms": 8.6475,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q13",
+    "hops": 49777,
+    "prop_reads": 0,
+    "ms": 9.1091,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q13",
+    "hops": 149331,
+    "prop_reads": 49777,
+    "ms": 37.2185,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q14",
+    "hops": 1883811,
+    "prop_reads": 461428,
+    "ms": 788.2213,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q14",
+    "hops": 1883811,
+    "prop_reads": 461428,
+    "ms": 741.7158,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q14",
+    "hops": 3826615,
+    "prop_reads": 520420,
+    "ms": 1934.1408,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q15",
+    "hops": 3,
+    "prop_reads": 1,
+    "ms": 0.0014,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q15",
+    "hops": 3,
+    "prop_reads": 1,
+    "ms": 0.0014,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q15",
+    "hops": 5,
+    "prop_reads": 1,
+    "ms": 0.0021,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q16",
+    "hops": 73,
+    "prop_reads": 24,
+    "ms": 0.0192,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q16",
+    "hops": 123,
+    "prop_reads": 24,
+    "ms": 0.0301,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q16",
+    "hops": 247,
+    "prop_reads": 49,
+    "ms": 0.0699,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q17",
+    "hops": 12290,
+    "prop_reads": 11546,
+    "ms": 4.0566,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q17",
+    "hops": 4031,
+    "prop_reads": 2321,
+    "ms": 1.5521,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q17",
+    "hops": 8063,
+    "prop_reads": 2321,
+    "ms": 3.9009,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q18",
+    "hops": 117558,
+    "prop_reads": 117711,
+    "ms": 21.626,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q18",
+    "hops": 153,
+    "prop_reads": 153,
+    "ms": 0.042,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q18",
+    "hops": 306,
+    "prop_reads": 153,
+    "ms": 0.0882,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q19",
+    "hops": 10000,
+    "prop_reads": 10098,
+    "ms": 1.3694,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q19",
+    "hops": 392,
+    "prop_reads": 293,
+    "ms": 0.1391,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q19",
+    "hops": 784,
+    "prop_reads": 440,
+    "ms": 0.2674,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "query": "Q20",
+    "hops": 3457,
+    "prop_reads": 0,
+    "ms": 2.0894,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "query": "Q20",
+    "hops": 3457,
+    "prop_reads": 0,
+    "ms": 2.098,
+    "correct": true
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "query": "Q20",
+    "hops": 10371,
+    "prop_reads": 3457,
+    "ms": 3.795,
+    "correct": true
+   }
+  ],
+  "sizes": [
+   {
+    "scale": 1000,
+    "schema": "flat",
+    "build_seconds": 0.046,
+    "nodes": 12850,
+    "edges": 55309,
+    "mbytes": 29.9
+   },
+   {
+    "scale": 1000,
+    "schema": "mid",
+    "build_seconds": 0.098,
+    "nodes": 13036,
+    "edges": 73449,
+    "mbytes": 34.7
+   },
+   {
+    "scale": 1000,
+    "schema": "normalized",
+    "build_seconds": 0.53,
+    "nodes": 81510,
+    "edges": 146898,
+    "mbytes": 86.1
+   },
+   {
+    "scale": 3000,
+    "schema": "flat",
+    "build_seconds": 0.245,
+    "nodes": 38990,
+    "edges": 167734,
+    "mbytes": 91.2
+   },
+   {
+    "scale": 3000,
+    "schema": "mid",
+    "build_seconds": 0.797,
+    "nodes": 39394,
+    "edges": 222527,
+    "mbytes": 106.4
+   },
+   {
+    "scale": 3000,
+    "schema": "normalized",
+    "build_seconds": 1.241,
+    "nodes": 246946,
+    "edges": 445054,
+    "mbytes": 255.1
+   },
+   {
+    "scale": 10000,
+    "schema": "flat",
+    "build_seconds": 0.851,
+    "nodes": 129558,
+    "edges": 555604,
+    "mbytes": 307.8
+   },
+   {
+    "scale": 10000,
+    "schema": "mid",
+    "build_seconds": 2.427,
+    "nodes": 130824,
+    "edges": 738604,
+    "mbytes": 349.5
+   },
+   {
+    "scale": 10000,
+    "schema": "normalized",
+    "build_seconds": 6.259,
+    "nodes": 819453,
+    "edges": 1477208,
+    "mbytes": 874.8
+   }
+  ],
+  "hypotheses": [
+   {
+    "id": "H1",
+    "statement": "each normalization level adds one hop to the median query",
+    "verdict": "supported",
+    "note": "normalized/mid hop ratio 2.03 (median), 1.7–3.0 (range)"
+   },
+   {
+    "id": "H2",
+    "statement": "latency grows with the product of fan-outs along the path",
+    "verdict": "supported",
+    "note": "in the direction tested: latency tracks hops (ratio 2.3 vs 2.0); fan-out was not varied independently, so the multiplicative form is not tested"
+   },
+   {
+    "id": "H3",
+    "statement": "normalized memory grows faster than flat with scale",
+    "verdict": "refuted as stated",
+    "note": "both grow linearly (exponent 1.0); normalized is a constant 2.5× larger. The extra cost is a constant factor, not a higher order"
+   },
+   {
+    "id": "H4",
+    "statement": "mid is within 20% of flat on latency for 80% of queries while answering all twenty",
+    "verdict": "partly refuted",
+    "note": "12/20 = 60%, not 80%. The second clause holds, and flat's failures on the reverse lookups (Q17–Q19) are worse than the hypothesis anticipated"
+   }
+  ]
+ }
+}

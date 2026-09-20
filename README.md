@@ -4,6 +4,8 @@
 
 Yechan Moon · started September 2026 · status: review screened, experiment run, write-up pending
 
+**Interactive summary: <https://ans9611.github.io/ontology-design-study/>** — metric coverage (RQ1), the eight-case pattern table (RQ2) and the benchmark (RQ3) on one page, built from the tables in this repository.
+
 ---
 
 ## Abstract
@@ -93,6 +95,7 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 
 ```
 docs/
+    site/             static site for GitHub Pages; data.json is generated, index.html is hand-written
     results/          RQ3 results, figures and raw CSVs
     protocol.md       SLR protocol
     search-log.csv    every search run, dated
@@ -110,6 +113,7 @@ src/ontostudy/
     schemas/          flat / mid / normalized builders behind one accessor interface
     queries/          the twenty questions, written once against the interface
     bench.py          hop count, latency, memory per query, schema and scale
+    site.py           collects the RQ1/RQ2/RQ3 tables into docs/site/data.json
 notebooks/
 tests/
 ```
@@ -124,6 +128,7 @@ python -m ontostudy.screen ...   # record screening decisions into a candidate C
 python -m ontostudy.snowball     # backward/forward snowballing from the included set
 python -m ontostudy.check_refs   # verify every DOI in references.bib against Crossref
 python -m ontostudy.bench        # RQ3: three schemas x twenty queries x three scales
+python -m ontostudy.site         # rebuild docs/site/data.json after any table changes
 ```
 
 ## 8. Timeline

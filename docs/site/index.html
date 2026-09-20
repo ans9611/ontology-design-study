@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ontology Design Study</title>
+<meta name="description" content="Structural design choices in enterprise ontologies and their engineering cost: metric coverage (RQ1), eight industry cases (RQ2), a three-schema benchmark (RQ3).">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;           /* flat / mid / normalized */
+  --seq-1: #cde2fb; --seq-2: #86b6ef; --seq-3: #3987e5; --seq-4: #1c5cab;
+  --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --mid-neutral: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --seq-1: #184f95; --seq-2: #256abf; --seq-3: #5598e7; --seq-4: #9ec5f4;
+    --mid-neutral: #383835;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --seq-1: #184f95; --seq-2: #256abf; --seq-3: #5598e7; --seq-4: #9ec5f4;
+  --mid-neutral: #383835;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: inherit; }
+header, main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+header { padding-top: 40px; padding-bottom: 8px; }
+h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.01em; }
+h2 { font-size: 19px; margin: 32px 0 10px; }
+h3 { font-size: 15px; margin: 20px 0 6px; color: var(--ink-2); font-weight: 600; }
+.sub { color: var(--ink-2); margin: 0; max-width: 78ch; }
+.meta { color: var(--muted); font-size: 13px; margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap; }
+nav { display: flex; gap: 4px; border-bottom: 1px solid var(--grid); margin-top: 22px; overflow-x: auto; }
+nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; font: inherit; font-weight: 600; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+section[hidden] { display: none; }
+main { padding-bottom: 64px; }
+p { max-width: 78ch; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.tile .k { font-size: 13px; color: var(--ink-2); }
+.tile .v { font-size: 28px; font-weight: 600; margin: 2px 0; }
+.tile .n { font-size: 12px; color: var(--muted); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.wrap { overflow-x: auto; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink-2); white-space: nowrap; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.st-good i { background: var(--good); } .st-warn i { background: var(--warn); } .st-crit i { background: var(--critical); } .st-ser i { background: var(--serious); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin: 6px 0 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.sw1 { background: var(--s1); } .sw2 { background: var(--s2); } .sw3 { background: var(--s3); }
+.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; font-size: 13.5px; }
+.controls label { color: var(--ink-2); }
+select, .seg button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; }
+.seg { display: inline-flex; } .seg button { border-radius: 0; cursor: pointer; } .seg button:first-child { border-radius: 6px 0 0 6px; } .seg button:last-child { border-radius: 0 6px 6px 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+svg { display: block; width: 100%; height: auto; }
+svg text { fill: var(--ink-2); font-size: 12px; font-family: inherit; }
+svg .tick { fill: var(--muted); font-size: 11px; }
+svg .grid { stroke: var(--grid); stroke-width: 1; }
+svg .axis { stroke: var(--axis); stroke-width: 1; }
+svg .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 6px 20px rgba(0,0,0,.12); display: none; max-width: 320px; z-index: 10; }
+.tip b { display: block; margin-bottom: 2px; }
+.matrix { width: auto; }
+.matrix td.cell { padding: 0; width: 40px; min-width: 40px; }
+#rq1-bars { max-width: 720px; }
+.matrix .dot { display: block; margin: 2px; height: 26px; border-radius: 3px; }
+.matrix .on { background: var(--seq-3); } .matrix .named { background: var(--seq-1); }
+.matrix th.rot { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; padding: 8px 4px; font-weight: 500; white-space: nowrap; }
+.matrix tr:hover td, .matrix tr:hover th { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.hit { fill: transparent; }
+details summary { cursor: pointer; color: var(--ink-2); font-weight: 600; margin: 14px 0 6px; }
+.small { font-size: 13px; color: var(--muted); }
+.two { display: grid; gap: 16px; grid-template-columns: 1fr; } .two > * { min-width: 0; }
+select { max-width: 100%; }
+@media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } .two.wide-left { grid-template-columns: 3fr 2fr; } }
+.case-detail { font-size: 13.5px; }
+.case-detail dt { color: var(--ink-2); font-weight: 600; margin-top: 8px; } .case-detail dd { margin: 0; }
+.outcome-sustained { color: var(--ink); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Ontology Design Study</h1>
+  <p class="sub">Structural design choices in enterprise ontologies and what they cost in use: how many hops a routine question needs, query latency, memory, and whether the model was kept or abandoned.</p>
+  <div class="meta">
+    <span id="meta-run"></span>
+    <span><a href="https://github.com/ans9611/ontology-design-study">Repository and write-up</a></span>
+    <span>Data: <a href="data.json">data.json</a>, built from the repo's tables by <code>python -m ontostudy.site</code></span>
+  </div>
+  <nav role="tablist">
+    <button role="tab" data-tab="fit" aria-selected="true">Engineering fitness</button>
+    <button role="tab" data-tab="rq1">RQ1 · Metric coverage</button>
+    <button role="tab" data-tab="rq2">RQ2 · Eight cases</button>
+    <button role="tab" data-tab="rq3">RQ3 · Benchmark</button>
+  </nav>
+</header>
+<main>
+
+<section id="tab-fit">
+  <h2>Which design choices are fit for engineering use</h2>
+  <p>Each row below is a design decision that a modelling team makes early and rarely revisits. The evidence column names where the number comes from; nothing here is an opinion without a table behind it.</p>
+
+  <h3>Normalization depth (RQ3, one dataset modelled three ways)</h3>
+  <div class="wrap card"><table id="fit-schema"></table></div>
+  <div class="grid" id="fit-reading" style="margin-top:12px"></div>
+  <p class="small" id="fit-schema-note"></p>
+
+  <h3>Design patterns by outcome (RQ2, eight industry-scale graphs)</h3>
+  <div class="two">
+    <div class="wrap card"><table id="fit-patterns"></table></div>
+    <div class="card">
+      <div class="k" style="font-weight:600">How to read it</div>
+      <p class="small" style="margin:6px 0 0">A pattern seen only in sustained systems is an association, not a cause: eight purposive cases, no controls. Patterns observed in the two non-sustained cases (Freebase: abandoned; Cyc: limited adoption) are the ones to treat as risk signals when they appear in a new design. Grade B/C sources are practice evidence, not effect evidence.</p>
+      <div id="fit-hyp" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <h3>What the metric literature does not measure (RQ1)</h3>
+  <div class="grid" id="fit-rq1"></div>
+</section>
+
+<section id="tab-rq1" hidden>
+  <h2>RQ1 · What existing quality metrics measure</h2>
+  <p>Seven frameworks against six property groups. A filled cell means the framework has a metric for that property; a light cell means it names the property but derives it from structural proxies instead of measuring it. Hover for the text of the cell.</p>
+  <div class="wrap card"><table class="matrix" id="rq1-matrix"></table></div>
+  <h3>Coverage per property</h3>
+  <div class="card"><svg id="rq1-bars"></svg></div>
+  <details><summary>Table view</summary><div class="wrap"><table id="rq1-table"></table></div></details>
+</section>
+
+<section id="tab-rq2" hidden>
+  <h2>RQ2 · Patterns across eight industry-scale knowledge graphs</h2>
+  <p>Columns are cases, grouped by outcome. Rows are design patterns coded from the primary sources. Click a case name for its profile; click a pattern to see which cases share it.</p>
+  <div class="controls">
+    <label>Outcome</label>
+    <div class="seg" id="rq2-filter">
+      <button aria-pressed="true" data-v="all">All</button>
+      <button aria-pressed="false" data-v="sustained">Sustained</button>
+      <button aria-pressed="false" data-v="other">Abandoned / limited</button>
+    </div>
+  </div>
+  <div class="two wide-left">
+    <div class="wrap card"><table class="matrix" id="rq2-matrix"></table></div>
+    <div class="card case-detail" id="rq2-detail"><span class="small">Select a case or pattern.</span></div>
+  </div>
+</section>
+
+<section id="tab-rq3" hidden>
+  <h2>RQ3 · Query cost under three normalization depths</h2>
+  <p id="rq3-intro"></p>
+  <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span></div>
+
+  <h3>Per-query cost relative to the mid schema</h3>
+  <div class="controls">
+    <label>Metric</label>
+    <div class="seg" id="rq3-metric"><button aria-pressed="true" data-v="hops">hops</button><button aria-pressed="false" data-v="ms">latency</button></div>
+    <label>Scale (persons)</label>
+    <select id="rq3-scale"></select>
+  </div>
+  <div class="card"><svg id="rq3-ratio"></svg></div>
+  <p class="small">Log axis. 1.0 = the mid schema's cost on that query. Points above the line cost more than mid; below, less.</p>
+
+  <div class="two">
+    <div>
+      <h3>Latency against scale for one query</h3>
+      <div class="controls"><label>Query</label><select id="rq3-query"></select></div>
+      <div class="card"><svg id="rq3-scaling"></svg></div>
+      <p class="small">Log-log; the number after each schema is the fitted slope, the latency exponent: 0 means cost is set by the neighbourhood, 1 means it grows with the whole graph.</p>
+    </div>
+    <div>
+      <h3>Resident size against scale</h3>
+      <div class="controls"><span class="small">Recursive <code>sys.getsizeof</code> of the built graph.</span></div>
+      <div class="card"><svg id="rq3-memory"></svg></div>
+      <p class="small" id="rq3-memory-note"></p>
+    </div>
+  </div>
+
+  <h3>Hypotheses, pre-registered before the run</h3>
+  <div class="wrap card"><table id="rq3-hyp"></table></div>
+
+  <details><summary>Table view: all queries at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
+</section>
+</main>
+<div class="tip" id="tip"></div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const fmt = (x, d = 2) => Number(x).toLocaleString("en-US", { maximumFractionDigits: d });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const median = a => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const slope = pts => { const n = pts.length, mx = pts.reduce((a, p) => a + p[0], 0) / n, my = pts.reduce((a, p) => a + p[1], 0) / n;
+  return pts.reduce((a, p) => a + (p[0] - mx) * (p[1] - my), 0) / pts.reduce((a, p) => a + (p[0] - mx) ** 2, 0); };
+const SERIES = { flat: "var(--s1)", mid: "var(--s2)", normalized: "var(--s3)" };
+const isSustained = o => o.startsWith("sustained");
+
+// tabs
+document.querySelectorAll("nav [role=tab]").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav [role=tab]").forEach(x => x.setAttribute("aria-selected", x === b));
+  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== "tab-" + b.dataset.tab);
+  try { localStorage.setItem("tab", b.dataset.tab); } catch {}
+}));
+try { const t = localStorage.getItem("tab"); if (t) $(`nav [data-tab=${t}]`)?.click(); } catch {}
+
+// tooltip
+const tip = $("#tip");
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = "block"; moveTip(e); }
+function moveTip(e) { const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(e.clientY + 14, innerHeight - tip.offsetHeight - 8); tip.style.left = x + "px"; tip.style.top = y + "px"; }
+function hideTip() { tip.style.display = "none"; }
+function bindTips(root) { root.querySelectorAll("[data-tip]").forEach(el => { el.addEventListener("mouseenter", e => showTip(e, el.dataset.tip)); el.addEventListener("mousemove", moveTip); el.addEventListener("mouseleave", hideTip); }); }
+
+// segmented control
+function seg(el, onChange) { el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); onChange(b.dataset.v); })); return () => el.querySelector("[aria-pressed=true]").dataset.v; }
+
+fetch("data.json").then(r => r.json()).then(init).catch(e => { $("main").innerHTML = `<p>Could not load data.json (${esc(e.message)}). Serve this folder over HTTP, e.g. <code>python -m http.server</code> in <code>docs/site</code>.</p>`; });
+
+function init(D) {
+  const { rq1, rq2, rq3 } = D;
+  $("#meta-run").textContent = `Benchmark run ${rq3.run_date} · ${rq2.cases.length} cases · ${rq1.rows.length} frameworks`;
+
+  // ---------- RQ3 derived numbers ----------
+  const B = {}; rq3.bench.forEach(b => { B[`${b.scale}|${b.schema}|${b.query}`] = b; });
+  const get = (s, sc, q) => B[`${s}|${sc}|${q}`];
+  const maxScale = Math.max(...rq3.scales);
+  const qids = rq3.queries.map(q => q.id);
+  const exponent = (schema, q) => slope(rq3.scales.map(s => [Math.log(s), Math.log(get(s, schema, q).ms)]));
+  const stats = {};
+  for (const sc of rq3.schemas) {
+    const hopRatio = qids.map(q => get(maxScale, sc, q).hops / get(maxScale, "mid", q).hops);
+    const msRatio = qids.map(q => get(maxScale, sc, q).ms / get(maxScale, "mid", q).ms);
+    const within = qids.filter(q => get(maxScale, sc, q).ms <= 1.2 * Math.min(...rq3.schemas.map(x => get(maxScale, x, q).ms)));
+    const steep = qids.filter(q => exponent(sc, q) > 0.5);
+    const size = rq3.sizes.find(x => x.scale === maxScale && x.schema === sc);
+    const worst = qids.reduce((a, q) => (get(maxScale, sc, q).ms / get(maxScale, "mid", q).ms > get(maxScale, sc, a).ms / get(maxScale, "mid", a).ms ? q : a), qids[0]);
+    stats[sc] = { hopRatio: median(hopRatio), msRatio: median(msRatio), within, steep, size, worst, worstRatio: get(maxScale, sc, worst).ms / get(maxScale, "mid", worst).ms };
+  }
+  const midSize = stats.mid.size.mbytes;
+
+  // ---------- Fitness tab ----------
+  const verdict = {
+    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(maxScale, "flat", q).hops <= get(maxScale, "mid", q).hops).length}/20 queries. No reverse index on folded entities, so ${stats.flat.steep.join(", ")} scan the graph (latency exponent above 0.5). Fit when every question starts from the entity you keyed on; a property index would remove the penalty at the cost of maintaining one.`,
+    mid: `Never the fastest, never the slowest. Within 20% of the best schema on ${stats.mid.within.length}/20; loses up to ${fmt(Math.max(...qids.map(q => get(maxScale, "mid", q).ms / get(maxScale, "flat", q).ms)), 1)}× on lookups that flat answers from a property; wins by one to three orders of magnitude on reverse lookups. Bounded cost on all twenty questions.`,
+    normalized: `One extra hop per relation, everywhere: median hop ratio ${fmt(stats.normalized.hopRatio)}, latency ${fmt(stats.normalized.msRatio, 1)}×, memory ${fmt(stats.normalized.size.mbytes / midSize, 1)}× at every scale. A constant factor, not a higher order (H3 refuted). It buys per-relation provenance and qualifiers; the price is paid on every query.`,
+  };
+  $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">median hop ratio to mid</th><th class="num">median latency ratio</th><th class="num">size at n=${fmt(maxScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with exponent &gt; 0.5</th><th>worst query vs mid</th></tr></thead><tbody>` +
+    rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${s.within.length} / 20</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "—" : `${s.worst} · ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
+  $("#fit-reading").innerHTML = rq3.schemas.map(sc => `<div class="card"><div class="legend" style="margin:0 0 6px"><span><i style="background:${SERIES[sc]}"></i><b>${sc}</b></span></div><div class="small" style="color:var(--ink-2)">${verdict[sc]}</div></div>`).join("");
+  $("#fit-schema-note").textContent = `Computed from bench.csv at n = ${fmt(maxScale, 0)} persons, best of five runs, twenty parameter sets per query. Exponent = slope of log(latency) against log(persons) over ${rq3.scales.join(" / ")}. One engine (in-memory property graph); hop counts transfer to other engines, constant factors do not.`;
+
+  const other = rq2.cases.filter(c => !isSustained(c.outcome));
+  const patRows = rq2.patterns.map(p => { const cs = rq2.matrix[p]; const sus = cs.filter(id => isSustained(rq2.cases.find(c => c.id === id).outcome)); return { p, cs, sus: sus.length, non: cs.length - sus.length }; })
+    .sort((a, b) => b.non - a.non || b.sus - a.sus || a.p.localeCompare(b.p));
+  $("#fit-patterns").innerHTML = `<thead><tr><th>pattern</th><th class="num">sustained</th><th class="num">not sustained</th><th>cases</th></tr></thead><tbody>` +
+    patRows.map(r => `<tr><td><code>${r.p}</code></td><td class="num">${r.sus}</td><td class="num">${r.non ? `<span class="chip st-ser"><i></i>${r.non}</span>` : "0"}</td><td class="small">${r.cs.join(", ")}</td></tr>`).join("") + "</tbody>";
+  const chipClass = v => /^supported/.test(v) ? "st-good" : /^partly/.test(v) ? "st-warn" : "st-crit";
+  $("#fit-hyp").innerHTML = `<div class="k" style="font-weight:600">Pre-registered hypotheses</div>` + rq3.hypotheses.map(h => `<div style="margin-top:6px"><span class="chip ${chipClass(h.verdict)}"><i></i>${h.id} ${esc(h.verdict)}</span> <span class="small">${esc(h.statement)}</span></div>`).join("");
+
+  const proxy = t => /not measured|proxies/i.test(t);
+  const coverage = rq1.columns.map((c, i) => ({ c, n: rq1.rows.filter(r => r.cells[i] && !proxy(r.cells[i])).length, named: rq1.rows.filter(r => r.cells[i] && proxy(r.cells[i])).length }));
+  $("#fit-rq1").innerHTML = coverage.map(({ c, n, named }) => `<div class="card tile"><div class="k">${esc(c)}</div><div class="v">${n} <span class="small">/ ${rq1.rows.length}</span></div><div class="n">frameworks with a metric${named ? `; ${named} more name${named > 1 ? "" : "s"} it without measuring` : ""}</div></div>`).join("");
+
+  // ---------- RQ1 ----------
+  $("#rq1-matrix").innerHTML = `<thead><tr><th></th>${rq1.columns.map(c => `<th class="rot">${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
+    rq1.rows.map(r => `<tr><th>${esc(r.framework)}</th>${r.cells.map((t, i) => `<td class="cell"><span class="dot ${t ? (proxy(t) ? "named" : "on") : ""}" data-tip="<b>${esc(r.framework)} · ${esc(rq1.columns[i])}</b>${t ? esc(t) : "no metric"}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
+  $("#rq1-table").innerHTML = `<thead><tr><th>framework</th>${rq1.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>` + rq1.rows.map(r => `<tr><td>${esc(r.framework)}</td>${r.cells.map(t => `<td>${esc(t)}</td>`).join("")}</tr>`).join("") + "</tbody>";
+  barChart($("#rq1-bars"), coverage.map(x => ({ label: x.c, value: x.n, extra: x.named })), rq1.rows.length);
+
+  // ---------- RQ2 ----------
+  let rq2Sel = null;
+  const outcomeOrder = c => isSustained(c.outcome) ? 0 : c.outcome === "limited adoption" ? 1 : 2;
+  const getFilter = seg($("#rq2-filter"), renderRq2);
+  function renderRq2() {
+    const f = getFilter();
+    const cases = rq2.cases.filter(c => f === "all" || (f === "sustained") === isSustained(c.outcome)).sort((a, b) => outcomeOrder(a) - outcomeOrder(b));
+    $("#rq2-matrix").innerHTML = `<thead><tr><th></th>${cases.map(c => `<th class="rot"><a href="#" data-case="${c.id}" style="text-decoration:none">${esc(c.id)}</a></th>`).join("")}</tr>` +
+      `<tr><th class="small">outcome</th>${cases.map(c => `<td class="small">${isSustained(c.outcome) ? "✓" : c.outcome === "abandoned" ? "✗" : "△"}</td>`).join("")}</tr></thead><tbody>` +
+      rq2.patterns.map(p => `<tr><th><a href="#" data-pattern="${p}" style="text-decoration:none"><code>${p}</code></a></th>${cases.map(c => `<td class="cell"><span class="dot ${rq2.matrix[p].includes(c.id) ? "on" : ""}" data-tip="<b>${esc(c.name)}</b>${rq2.matrix[p].includes(c.id) ? `<code>${p}</code> observed` : "not observed"} · ${esc(c.outcome)}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
+    bindTips($("#rq2-matrix"));
+    $("#rq2-matrix").querySelectorAll("a[data-case]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); showCase(a.dataset.case); }));
+    $("#rq2-matrix").querySelectorAll("a[data-pattern]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); showPattern(a.dataset.pattern); }));
+  }
+  function showCase(id) {
+    const c = rq2.cases.find(x => x.id === id);
+    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:15px">${esc(c.name)}</div><dl>
+      <dt>Outcome</dt><dd>${esc(c.outcome)}</dd><dt>Organization</dt><dd>${esc(c.organization)}</dd><dt>Domain</dt><dd>${esc(c.domain)}</dd><dt>Period</dt><dd>${esc(c.period)}</dd><dt>Source grade</dt><dd>${esc(c.grade)}</dd>
+      <dt>Patterns</dt><dd>${c.patterns.map(p => `<code>${p}</code>`).join(", ")}</dd></dl>
+      <p class="small"><a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/${id === "amazon" ? "amazon-product-graph" : id}.md">Case file</a></p>`;
+  }
+  function showPattern(p) {
+    const cs = rq2.matrix[p].map(id => rq2.cases.find(c => c.id === id));
+    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:15px"><code>${p}</code></div><p class="small">Observed in ${cs.length} of ${rq2.cases.length} cases.</p><table>${cs.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.outcome)}</td></tr>`).join("")}</table>`;
+  }
+  renderRq2();
+
+  // ---------- RQ3 ----------
+  $("#rq3-intro").textContent = `Synthetic LDBC-SNB-shaped graphs at ${rq3.scales.map(s => fmt(s, 0)).join(" / ")} persons. Three schemas of the same data: flat (place, organisation, tag folded into properties), mid (entity nodes and direct edges), normalized (every relation reified as a node). Twenty questions fixed before the schemas were written; all three schemas returned identical answers on every check.`;
+  $("#rq3-scale").innerHTML = rq3.scales.map(s => `<option value="${s}" ${s === maxScale ? "selected" : ""}>${fmt(s, 0)}</option>`).join("");
+  $("#rq3-query").innerHTML = rq3.queries.map(q => `<option value="${q.id}" ${q.id === "Q18" ? "selected" : ""}>${q.id} · ${esc(q.question)}</option>`).join("");
+  const getMetric = seg($("#rq3-metric"), renderRatio);
+  $("#rq3-scale").addEventListener("change", () => { renderRatio(); renderTable(); });
+  $("#rq3-query").addEventListener("change", renderScaling);
+
+  function renderRatio() {
+    const m = getMetric(), sc = +$("#rq3-scale").value;
+    const pts = [];
+    for (const schema of rq3.schemas) for (const q of qids) {
+      const v = get(sc, schema, q), mid = get(sc, "mid", q);
+      pts.push({ x: q, y: v[m] / mid[m], series: schema, tip: `<b>${q} · ${schema}</b>${esc(rq3.queries.find(x => x.id === q).question)}<br>${m === "hops" ? `${fmt(v.hops, 0)} hops (mid ${fmt(mid.hops, 0)})` : `${fmt(v.ms, 3)} ms (mid ${fmt(mid.ms, 3)} ms)`} · ${fmt(v[m] / mid[m], 2)}× mid` });
+    }
+    dotChart($("#rq3-ratio"), qids, pts, m === "hops" ? "hop ratio to mid" : "latency ratio to mid");
+  }
+  function renderScaling() {
+    const q = $("#rq3-query").value;
+    const lines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: get(sc, s, q).ms })), exp: exponent(s, q) }));
+    lineChart($("#rq3-scaling"), lines, "ms per query", "persons", l => fmt(l.exp, 2));
+  }
+  const memLines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes })), exp: slope(rq3.scales.map(sc => [Math.log(sc), Math.log(rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes)])) }));
+  lineChart($("#rq3-memory"), memLines, "MB", "persons", l => fmt(l.exp, 2));
+  $("#rq3-memory-note").textContent = `All three grow linearly (slope ≈ 1). normalized / mid = ${rq3.scales.map(sc => fmt(rq3.sizes.find(z => z.scale === sc && z.schema === "normalized").mbytes / rq3.sizes.find(z => z.scale === sc && z.schema === "mid").mbytes, 2)).join(" / ")} at ${rq3.scales.map(s => fmt(s, 0)).join(" / ")} persons.`;
+  $("#rq3-hyp").innerHTML = `<thead><tr><th></th><th>statement</th><th>verdict</th></tr></thead><tbody>` + rq3.hypotheses.map(h => `<tr><td>${h.id}</td><td>${esc(h.statement)}</td><td><span class="chip ${chipClass(h.verdict)}"><i></i>${esc(h.verdict)}</span> <span class="small">${esc(h.note)}</span></td></tr>`).join("") + "</tbody>";
+  function renderTable() {
+    const sc = +$("#rq3-scale").value;
+    $("#rq3-table").innerHTML = `<thead><tr><th>query</th><th>question</th><th>kind</th>${rq3.schemas.map(s => `<th class="num">hops ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">ms ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">exp ${s}</th>`).join("")}</tr></thead><tbody>` +
+      rq3.queries.map(q => `<tr><td>${q.id}</td><td>${esc(q.question)}</td><td class="small">${esc(q.kind)}</td>${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).hops, 0)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).ms, 3)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(exponent(s, q.id), 2)}</td>`).join("")}</tr>`).join("") + "</tbody>";
+  }
+  renderRatio(); renderScaling(); renderTable();
+  bindTips($("#rq1-matrix"));
+}
+
+// ---------- charts (inline SVG) ----------
+const svgEl = (tag, attrs = {}, text) => { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+const niceLogTicks = (lo, hi) => { const t = []; for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) t.push(10 ** e); return t; };
+const tickLabel = v => v >= 1000 ? fmt(v, 0) : v >= 1 ? String(v) : v.toPrecision(1).replace(/\.?0+$/, "");
+
+function barChart(svg, rows, max) {
+  const W = 720, rowH = 30, L = 300, R = 150, T = 8, H = T + rows.length * rowH + 8;
+  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const x = v => L + (W - L - R) * v / max;
+  for (let v = 0; v <= max; v++) { svg.append(svgEl("line", { x1: x(v), x2: x(v), y1: T, y2: H - 8, class: v ? "grid" : "axis" })); svg.append(svgEl("text", { x: x(v), y: H - 0, "text-anchor": "middle", class: "tick" }, v)); }
+  rows.forEach((r, i) => {
+    const y = T + i * rowH + 5, bw = x(r.value) - x(0);
+    svg.append(svgEl("text", { x: L - 10, y: y + 14, "text-anchor": "end" }, r.label));
+    const bar = (x0, w, fill) => svgEl("path", { d: `M${x0},${y} h${Math.max(w - 4, 0)} a4,4 0 0 1 4,4 v12 a4,4 0 0 1 -4,4 h${-Math.max(w - 4, 0)} z`, fill });
+    if (bw > 0) svg.append(bar(x(0), bw, "var(--s1)"));
+    if (r.extra) svg.append(bar(x(r.value) + (bw > 0 ? 2 : 0), x(r.extra) - x(0) - (bw > 0 ? 2 : 0), "var(--seq-1)"));
+    svg.append(svgEl("text", { x: x(r.value + (r.extra || 0)) + 6, y: y + 14, class: "lbl" }, r.extra ? `${r.value} (+${r.extra} named only)` : `${r.value}`));
+    svg.append(svgEl("rect", { x: 0, y: T + i * rowH, width: W, height: rowH, class: "hit", "data-tip": `<b>${esc(r.label)}</b>${r.value} of ${max} frameworks measure it${r.extra ? `; ${r.extra} name${r.extra > 1 ? "" : "s"} it without measuring` : ""}` }));
+  });
+  bindTips(svg);
+}
+
+function dotChart(svg, cats, pts, yLabel) {
+  const W = 1000, H = 300, L = 56, R = 16, T = 12, Bt = 36;
+  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const ys = pts.map(p => p.y), lo = Math.min(...ys, 0.5), hi = Math.max(...ys, 4);
+  const y = v => T + (H - T - Bt) * (1 - (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)));
+  const x = i => L + (W - L - R) * (i + 0.5) / cats.length;
+  for (const t of niceLogTicks(lo, hi)) { if (t < lo || t > hi) continue; svg.append(svgEl("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), class: "grid" })); svg.append(svgEl("text", { x: L - 8, y: y(t) + 4, "text-anchor": "end", class: "tick" }, tickLabel(t))); }
+  svg.append(svgEl("line", { x1: L, x2: W - R, y1: y(1), y2: y(1), class: "axis" }));
+  svg.append(svgEl("text", { x: L - 8, y: y(1) + 4, "text-anchor": "end", class: "tick" }, "1"));
+  cats.forEach((c, i) => svg.append(svgEl("text", { x: x(i), y: H - 14, "text-anchor": "middle", class: "tick" }, c)));
+  svg.append(svgEl("text", { x: L, y: T + 4, class: "tick" }, yLabel));
+  const order = ["flat", "mid", "normalized"];
+  for (const p of pts) {
+    const i = cats.indexOf(p.x), off = (order.indexOf(p.series) - 1) * 9;
+    svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 5, fill: SERIES[p.series], stroke: "var(--surface)", "stroke-width": 2 }));
+    svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 9, class: "hit", "data-tip": p.tip }));
+  }
+  // direct-label the extreme
+  const ext = pts.reduce((a, p) => (p.y > a.y ? p : a), pts[0]);
+  svg.append(svgEl("text", { x: x(cats.indexOf(ext.x)) + 12, y: y(ext.y) + 4, class: "lbl" }, `${ext.x} ${ext.series} ${fmt(ext.y, 0)}×`));
+  bindTips(svg);
+}
+
+function lineChart(svg, lines, yLabel, xLabel, endLabel) {
+  const W = 520, H = 300, L = 60, R = 120, T = 12, Bt = 40;
+  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const all = lines.flatMap(l => l.pts), xs = all.map(p => p.x), ys = all.map(p => p.y);
+  const xlo = Math.min(...xs), xhi = Math.max(...xs), ylo = Math.min(...ys), yhi = Math.max(...ys);
+  const x = v => L + (W - L - R) * (Math.log10(v) - Math.log10(xlo)) / (Math.log10(xhi) - Math.log10(xlo));
+  const y = v => T + (H - T - Bt) * (1 - (Math.log10(v) - Math.log10(ylo)) / (Math.log10(yhi) - Math.log10(ylo) || 1));
+  for (const t of niceLogTicks(ylo, yhi)) { if (t < ylo / 1.5 || t > yhi * 1.5) continue; const yy = Math.min(Math.max(y(t), T), H - Bt); svg.append(svgEl("line", { x1: L, x2: W - R, y1: yy, y2: yy, class: "grid" })); svg.append(svgEl("text", { x: L - 8, y: yy + 4, "text-anchor": "end", class: "tick" }, tickLabel(t))); }
+  svg.append(svgEl("line", { x1: L, x2: W - R, y1: H - Bt, y2: H - Bt, class: "axis" }));
+  for (const v of [...new Set(xs)]) svg.append(svgEl("text", { x: x(v), y: H - Bt + 16, "text-anchor": "middle", class: "tick" }, fmt(v, 0)));
+  svg.append(svgEl("text", { x: L, y: H - 2, class: "tick" }, `${yLabel} · ${xLabel}, log-log`));
+  for (const l of lines) {
+    svg.append(svgEl("path", { d: l.pts.map((p, i) => `${i ? "L" : "M"}${x(p.x)},${y(p.y)}`).join(" "), fill: "none", stroke: SERIES[l.series], "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    for (const p of l.pts) { svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 4, fill: SERIES[l.series], stroke: "var(--surface)", "stroke-width": 2 })); svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 9, class: "hit", "data-tip": `<b>${l.series} · ${fmt(p.x, 0)} persons</b>${fmt(p.y, 3)} ${yLabel}` })); }
+  }
+  // end labels, nudged apart
+  const ends = lines.map(l => ({ l, yy: y(l.pts[l.pts.length - 1].y) })).sort((a, b) => a.yy - b.yy);
+  for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < 14) ends[i].yy = ends[i - 1].yy + 14;
+  for (const e of ends) svg.append(svgEl("text", { x: W - R + 8, y: e.yy + 4, class: "lbl" }, `${e.l.series} · ${endLabel(e.l)}`));
+  bindTips(svg);
+}
+</script>
+</body>
+</html>

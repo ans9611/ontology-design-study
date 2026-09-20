@@ -14,3 +14,14 @@ def test_parse_bib_reads_fields():
 
 def test_search_strings_cover_all_rqs():
     assert set(STRINGS) == {"S1", "S2", "S3"}
+
+
+def test_site_data_matches_the_tables():
+    from ontostudy.site import build
+
+    d = build()
+    assert len(d["rq1"]["rows"]) == 7 and len(d["rq1"]["columns"]) == 6
+    assert [c["id"] for c in d["rq2"]["cases"]] == ["google-kg", "amazon", "wikidata", "freebase", "schema-org", "gene-ontology", "snomed-ct", "cyc"]
+    assert d["rq2"]["cases"][3]["outcome"] == "abandoned"
+    assert len(d["rq3"]["queries"]) == 20 and len(d["rq3"]["bench"]) == 3 * 3 * 20
+    assert [h["verdict"] for h in d["rq3"]["hypotheses"]] == ["supported", "supported", "refuted as stated", "partly refuted"]

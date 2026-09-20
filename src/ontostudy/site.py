@@ -3,7 +3,7 @@
     python -m ontostudy.site            # writes docs/site/data.json
 
 Reads docs/metrics-matrix.md (RQ1), docs/cases/ (RQ2), docs/results/*.csv and
-src/ontostudy/queries/QUESTIONS.md (RQ3). Nothing is typed in here by hand; if a
+src/ontostudy/queries/QUESTIONS.md (RQ3), and docs/guidelines.md. Nothing is typed in here by hand; if a
 table changes, rerun this.
 """
 from __future__ import annotations
@@ -102,8 +102,13 @@ def rq3() -> dict:
     }
 
 
+def guidelines() -> list[dict]:
+    rows = md_tables((DOCS / "guidelines.md").read_text())[0][1:]
+    return [{"id": r[0], "guideline": r[1], "evidence": r[2], "strength": r[3]} for r in rows]
+
+
 def build() -> dict:
-    return {"rq1": rq1(), "rq2": rq2(), "rq3": rq3()}
+    return {"rq1": rq1(), "rq2": rq2(), "rq3": rq3(), "guidelines": guidelines()}
 
 
 if __name__ == "__main__":

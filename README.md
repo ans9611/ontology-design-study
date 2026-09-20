@@ -83,6 +83,7 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 2. A coded set of design patterns with their association to sustained versus abandoned outcomes across eight cases (RQ2).
 3. Measured scaling exponents for query cost under three normalization depths, with the pre-registered hypotheses confirmed or refuted (RQ3).
 4. A reproducible harness: schemas, queries and benchmark code in this repository.
+5. Design guidelines for practitioners, each tied to the strand and strength of its evidence ([guidelines](docs/guidelines.md)).
 
 ## 6. Threats to validity
 
@@ -96,6 +97,7 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 ```
 docs/
     site/             static site for GitHub Pages; data.json is generated, index.html is hand-written
+    guidelines.md     twelve design guidelines, each tied to its evidence and strength
     results/          RQ3 results, figures and raw CSVs
     protocol.md       SLR protocol
     search-log.csv    every search run, dated

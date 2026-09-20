@@ -25,3 +25,4 @@ def test_site_data_matches_the_tables():
     assert d["rq2"]["cases"][3]["outcome"] == "abandoned"
     assert len(d["rq3"]["queries"]) == 20 and len(d["rq3"]["bench"]) == 3 * 3 * 20
     assert [h["verdict"] for h in d["rq3"]["hypotheses"]] == ["supported", "supported", "refuted as stated", "partly refuted"]
+    assert [g["id"] for g in d["guidelines"]] == [f"G{i}" for i in range(1, 13)]

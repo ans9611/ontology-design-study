@@ -2126,5 +2126,79 @@
     "note": "12/20 = 60%, not 80%. The second clause holds, and flat's failures on the reverse lookups (Q17–Q19) are worse than the hypothesis anticipated"
    }
   ]
- }
+ },
+ "guidelines": [
+  {
+   "id": "G1",
+   "guideline": "Write the questions the graph must answer before drawing the schema, and review the schema against them.",
+   "evidence": "The experiment fixed its twenty questions before any schema was written, which is what exposed the reverse-lookup failures below. Across cases, schemas built around what applications do with entities (`action-first`: eBay and Facebook in [15], Schema.org [17]) were sustained; the one built top-down from an upper ontology first (Cyc [19]) saw limited adoption. Competency questions are the standard form of this step [4].",
+   "strength": "measured, association, literature"
+  },
+  {
+   "id": "G2",
+   "guideline": "Every entity that a question starts from gets its own node or an index. Folding it into a property is not free.",
+   "evidence": "Flat folds place, organisation and tag into properties. On the three questions that start from one of those (Q17 employees of an organisation, Q18 messages with a tag, Q19 people in a city) flat scans the graph: 3×, 768× and 26× the hops of mid, latency slope 0.8–1.1 against about 0 for mid. On the other seventeen, flat is at or below mid's cost.",
+   "strength": "measured"
+  },
+  {
+   "id": "G3",
+   "guideline": "Reify a relation only where you need per-statement provenance or qualifiers, and budget for it: about 2× hops and latency, 2.5× memory, on every query that crosses it.",
+   "evidence": "Normalized over mid: median hop ratio 2.03 (1.7–3.0 across the twenty queries), median latency 2.3×, memory 2.4–2.5× at every scale (H1 supported). The cost is a constant factor, not a higher order (H3 refuted). Wikidata attaches qualifiers and references to a statement instead of reifying a node [16]; Freebase's reified compound value types had no direct equivalent when the data had to move [11].",
+   "strength": "measured, association"
+  },
+  {
+   "id": "G4",
+   "guideline": "Default to entity nodes with direct edges (the mid schema). It is never the fastest and never the slowest, and it answers every question with bounded cost.",
+   "evidence": "Mid is within 20% of the best schema on 12 of 20 queries, up to 4× slower where flat answers from a property, and one to three orders of magnitude faster on the reverse lookups (H4 partly refuted: 60%, not 80%).",
+   "strength": "measured"
+  },
+  {
+   "id": "G5",
+   "guideline": "Measure at three or more scales and fit the slope. A prototype cannot show which design fails.",
+   "evidence": "Q18 on flat takes 2 ms at 1,000 persons and looks acceptable; its latency slope is 1.09, so it grows with the whole graph. Neighbourhood queries (Q01–Q12, Q15, Q16, Q20) have slopes of 0.0–0.4 on every schema; only the path searches Q13 and Q14 grow with n everywhere (1.2–1.4), and no schema choice changes that.",
+   "strength": "measured"
+  },
+  {
+   "id": "G6",
+   "guideline": "Record provenance on every statement from the first load.",
+   "evidence": "`provenance-per-statement` appears in three sustained cases (Google and peers [15], Wikidata [16], Gene Ontology [18]). Freebase's per-statement sourcing was optional; at migration a large fraction of its facts could not be imported because the target required a source per statement [11].",
+   "strength": "association"
+  },
+  {
+   "id": "G7",
+   "guideline": "Check quality with soft constraints that run continuously and surface violations, not with a schema that blocks writes.",
+   "evidence": "Wikidata declares constraints on properties and reports violations by bot [16]; Schema.org accepts imperfect data and lets consumers clean it [17]; Gene Ontology reasons over logical definitions to catch inconsistencies [18]; SNOMED CT classifies every release. All four are sustained.",
+   "strength": "association"
+  },
+  {
+   "id": "G8",
+   "guideline": "Cap expressivity at what stays tractable, and give consumers subsets rather than the whole.",
+   "evidence": "SNOMED CT limits itself to the EL description-logic profile so classification stays tractable, and most implementers use extracts (`expressivity-capped-for-tractability`, `subset-for-use`). Cyc's higher-order logic made inference expensive and results hard to predict, and adoption stayed limited [19].",
+   "strength": "association"
+  },
+  {
+   "id": "G9",
+   "guideline": "Obsolete terms instead of deleting them, and keep conflicting values with ranks instead of choosing one.",
+   "evidence": "Gene Ontology obsoletes with replacement pointers and versions definitions as meaning drifts [18]; Wikidata keeps contradictory values with preferred / normal / deprecated ranks [16]. Both have run for more than two decades or one decade respectively under those rules.",
+   "strength": "association"
+  },
+  {
+   "id": "G10",
+   "guideline": "Decide who edits the schema and how, and do not let the graph depend on one sponsor.",
+   "evidence": "Editorial governance appears in Gene Ontology, SNOMED CT and the corporate graphs in [15]. Freebase was sustained by a single sponsor and ended when the sponsor's priorities changed (`platform-dependency`) [11]. Governance alone is not sufficient: Cyc had it and still saw limited adoption.",
+   "strength": "association"
+  },
+  {
+   "id": "G11",
+   "guideline": "Put hop count, latency and memory on the design-review checklist. No existing quality framework measures them.",
+   "evidence": "Of the seven frameworks in the RQ1 matrix, none has a metric for operational cost. OQuaRE [6] names performance efficiency but scores it from structural proxies. Application-based evaluation [7] is the only approach that would capture it and is the least standardized.",
+   "strength": "literature"
+  },
+  {
+   "id": "G12",
+   "guideline": "When the domain is too heterogeneous for a fixed schema, discover the schema from the data and measure extraction quality as graph quality.",
+   "evidence": "Amazon's product graph treats schema discovery as a learning problem because product types and attributes change continuously (`schema-discovered-not-designed`). Grade B source: a keynote, no peer-reviewed system paper.",
+   "strength": "association (grade B)"
+  }
+ ]
 }

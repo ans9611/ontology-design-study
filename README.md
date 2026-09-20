@@ -4,7 +4,7 @@
 
 Yechan Moon · started September 2026 · status: review screened, experiment run, write-up pending
 
-**Interactive summary: <https://ans9611.github.io/ontology-design-study/>** — metric coverage (RQ1), the eight-case pattern table (RQ2) and the benchmark (RQ3) on one page, built from the tables in this repository.
+**Interactive summary: <https://ans9611.github.io/ontology-design-study/>** — the three schemas drawn as graphs, a workload-mix calculator, metric coverage (RQ1), the eight-case pattern catalogue (RQ2) and the benchmark with its follow-up runs (RQ3), all computed in the page from the tables in this repository.
 
 ---
 
@@ -28,7 +28,7 @@ Three observations from practice motivate the work.
 
 **Ontology engineering methodologies.** The field's methods descend from Gruber's definition of an ontology as an explicit specification of a conceptualization [1]. Uschold and Gruninger [2] and METHONTOLOGY [3] formalized the lifecycle; Noy and McGuinness [4] gave the widely used practitioner guide; the NeOn methodology [12] extended it to networked, reused ontologies. OntoClean [13] added formal criteria (rigidity, identity, unity) for checking a taxonomy. These methods are about getting the conceptualization right. None of them treats query cost as a design input.
 
-**Quality evaluation.** OntoQA [5] and OQuaRE [6] define structural and schema-level metrics (depth, breadth, relationship richness, cohesion). Vrandečić [7] surveys evaluation approaches and notes that most are structural or gold-standard based. Paulheim [14] reviews refinement methods for knowledge graphs, focusing on completeness and correctness of instances. Across this literature, the operational cost of a design is not a measured quantity; RQ1 checks this systematically.
+**Quality evaluation.** OntoQA [5] and OQuaRE [6] define structural and schema-level metrics (depth, breadth, relationship richness, cohesion). Vrandečić [7] surveys evaluation approaches and notes that most are structural or gold-standard based. Paulheim [14] reviews refinement methods for knowledge graphs, focusing on completeness and correctness of instances. Across the quality-evaluation literature, the operational cost of a design is not a measured quantity. The benchmark literature does measure it: LUBM [25], SP²Bench [26], BSBM [27] and LDBC [8] report query time against a fixed ontology or schema, but treat the schema as given and vary the engine or the scale, not the modelling choice. RQ1 checks the first claim systematically; the gap the study addresses is the join between the two literatures.
 
 **Industry-scale knowledge graphs.** Noy et al. [15] compare the knowledge graphs at Google, Microsoft, Facebook, eBay and IBM and report recurring challenges: entity resolution, schema evolution, and the tension between a rich schema and one that people will actually populate. Wikidata [16] is the largest open case and manages quality through property constraints rather than a formal ontology. Schema.org [17] is the clearest example of a deliberately minimal schema achieving broad adoption. The Gene Ontology [18] has survived for over two decades under an explicit governance process. Cyc [19] is the canonical long-running project with limited adoption. Freebase [11] is the canonical shutdown. These form the case set for RQ2. Hogan et al. [20] provide the general survey used as the frame.
 
@@ -83,7 +83,7 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 
 1. A metric matrix showing which properties current ontology quality measures cover, with operational cost identified as a gap (RQ1).
 2. A coded set of design patterns with their association to sustained versus abandoned outcomes across eight cases (RQ2).
-3. Measured scaling exponents for query cost under three normalization depths, with the pre-registered hypotheses confirmed or refuted (RQ3).
+3. Measured scaling exponents for query cost under three normalization depths, with the pre-registered hypotheses confirmed or refuted (RQ3), and a two-term cost model (random accesses, scanned records) fitted per engine so that a schema's counts can be priced on more than one engine.
 4. A reproducible harness: schemas, queries and benchmark code in this repository.
 5. Design guidelines for practitioners, each tied to the strand and strength of its evidence ([guidelines](docs/guidelines.md)).
 
@@ -205,3 +205,9 @@ python -m ontostudy.site         # rebuild docs/site/data.json after any table c
 [23] R. K. Yin. *Case Study Research and Applications: Design and Methods*, 6th ed. SAGE, 2018.
 
 [24] P. Runeson and M. Höst. Guidelines for conducting and reporting case study research in software engineering. *Empirical Software Engineering*, 14(2):131–164, 2009. doi:10.1007/s10664-008-9102-8
+
+[25] Y. Guo, Z. Pan, and J. Heflin. LUBM: A benchmark for OWL knowledge base systems. *Journal of Web Semantics*, 3(2–3):158–182, 2005. doi:10.1016/j.websem.2005.06.005
+
+[26] M. Schmidt, T. Hornung, G. Lausen, and C. Pinkel. SP²Bench: A SPARQL performance benchmark. *Proc. ICDE*, 222–233, 2009. doi:10.1109/ICDE.2009.28
+
+[27] C. Bizer and A. Schultz. The Berlin SPARQL benchmark. *International Journal on Semantic Web and Information Systems*, 5(2):1–24, 2009. doi:10.4018/jswis.2009040101

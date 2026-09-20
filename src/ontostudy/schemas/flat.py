@@ -42,7 +42,7 @@ class FlatSchema(Schema):
         for p, m, d in D.likes: G.add_edge(p, "likes", m, date=d)
 
     def _scan(self, ntype):
-        ns = self.G.nodes(ntype); self.G.hops += len(ns); return ns
+        ns = self.G.nodes(ntype); self.G.hops += len(ns); self.G.scans += len(ns); return ns
 
     def friends(self, p): return [(v, e["since"]) for v, e in self.G.o(p, "knows")]
     def city_name(self, p): return self.G.p(p, "city")

@@ -292,6 +292,7 @@
  },
  "rq3": {
   "run_date": "2026-09-20",
+  "cost_model": null,
   "scales": [
    1000,
    2000,
@@ -11552,8 +11553,8 @@
   },
   {
    "id": "G11",
-   "guideline": "Put hop count, latency and memory on the design-review checklist. No existing quality framework measures them.",
-   "evidence": "Of the seven frameworks in the RQ1 matrix, none has a metric for operational cost. OQuaRE [6] names performance efficiency but scores it from structural proxies. Application-based evaluation [7] is the only approach that would capture it and is the least standardized.",
+   "guideline": "Put records touched, latency and memory on the design-review checklist, and measure them against the schema, not only the engine.",
+   "evidence": "Of the seven quality frameworks in the RQ1 matrix, none has a metric for operational cost; OQuaRE [6] names performance efficiency but scores it from structural proxies. The benchmark literature (LUBM [25], SP²Bench [26], BSBM [27], LDBC [8]) measures latency and scale but holds the schema fixed and varies the engine. Neither connects a modelling choice to its cost, which is what a design review needs.",
    "strength": "literature"
   },
   {
@@ -11663,6 +11664,8 @@
       "kind": "entity",
       "label": "P0",
       "props": {
+       "country": "Country2",
+       "city": "City2_1",
        "employers": [
         [
          "Company3_0",
@@ -11674,9 +11677,7 @@
          "Country1",
          2006
         ]
-       ],
-       "country": "Country2",
-       "city": "City2_1"
+       ]
       }
      },
      {
@@ -11685,6 +11686,8 @@
       "kind": "entity",
       "label": "P5",
       "props": {
+       "country": "Country2",
+       "city": "City2_1",
        "employers": [
         [
          "Company2_2",
@@ -11696,9 +11699,7 @@
          "Country4",
          2017
         ]
-       ],
-       "country": "Country2",
-       "city": "City2_1"
+       ]
       }
      },
      {
@@ -11707,15 +11708,15 @@
       "kind": "entity",
       "label": "P6",
       "props": {
+       "country": "Country0",
+       "city": "City0_2",
        "employers": [
         [
          "Company5_1",
          "Country4",
          2002
         ]
-       ],
-       "country": "Country0",
-       "city": "City0_2"
+       ]
       }
      },
      {
@@ -11979,6 +11980,34 @@
       "props": {}
      },
      {
+      "id": 123,
+      "type": "Organisation",
+      "kind": "entity",
+      "label": "Company2_2",
+      "props": {}
+     },
+     {
+      "id": 134,
+      "type": "Organisation",
+      "kind": "entity",
+      "label": "Company5_1",
+      "props": {}
+     },
+     {
+      "id": 2,
+      "type": "Country",
+      "kind": "entity",
+      "label": "Country1",
+      "props": {}
+     },
+     {
+      "id": 5,
+      "type": "Country",
+      "kind": "entity",
+      "label": "Country4",
+      "props": {}
+     },
+     {
       "id": 497,
       "type": "Post",
       "kind": "entity",
@@ -12014,8 +12043,18 @@
       "label": "isPartOf"
      },
      {
+      "s": 123,
+      "t": 2,
+      "label": "isLocatedIn"
+     },
+     {
       "s": 125,
       "t": 3,
+      "label": "isLocatedIn"
+     },
+     {
+      "s": 134,
+      "t": 5,
       "label": "isLocatedIn"
      },
      {
@@ -12046,6 +12085,16 @@
      {
       "s": 137,
       "t": 125,
+      "label": "workAt"
+     },
+     {
+      "s": 142,
+      "t": 123,
+      "label": "workAt"
+     },
+     {
+      "s": 143,
+      "t": 134,
       "label": "workAt"
      },
      {
@@ -12438,6 +12487,34 @@
       "props": {}
      },
      {
+      "id": 123,
+      "type": "Organisation",
+      "kind": "entity",
+      "label": "Company2_2",
+      "props": {}
+     },
+     {
+      "id": 134,
+      "type": "Organisation",
+      "kind": "entity",
+      "label": "Company5_1",
+      "props": {}
+     },
+     {
+      "id": 2,
+      "type": "Country",
+      "kind": "entity",
+      "label": "Country1",
+      "props": {}
+     },
+     {
+      "id": 5,
+      "type": "Country",
+      "kind": "entity",
+      "label": "Country4",
+      "props": {}
+     },
+     {
       "id": 497,
       "type": "Post",
       "kind": "entity",
@@ -12473,7 +12550,21 @@
       "props": {}
      },
      {
+      "id": 4190,
+      "type": "OrgLocation",
+      "kind": "relation",
+      "label": "OrgLocation",
+      "props": {}
+     },
+     {
       "id": 4192,
+      "type": "OrgLocation",
+      "kind": "relation",
+      "label": "OrgLocation",
+      "props": {}
+     },
+     {
+      "id": 4201,
       "type": "OrgLocation",
       "kind": "relation",
       "label": "OrgLocation",
@@ -12516,6 +12607,20 @@
      },
      {
       "id": 5979,
+      "type": "Employment",
+      "kind": "relation",
+      "label": "Employment",
+      "props": {}
+     },
+     {
+      "id": 5986,
+      "type": "Employment",
+      "kind": "relation",
+      "label": "Employment",
+      "props": {}
+     },
+     {
+      "id": 5988,
       "type": "Employment",
       "kind": "relation",
       "label": "Employment",
@@ -12569,6 +12674,16 @@
       "label": "of"
      },
      {
+      "s": 123,
+      "t": 4190,
+      "label": "located"
+     },
+     {
+      "s": 4190,
+      "t": 2,
+      "label": "in"
+     },
+     {
       "s": 125,
       "t": 4192,
       "label": "located"
@@ -12576,6 +12691,16 @@
      {
       "s": 4192,
       "t": 3,
+      "label": "in"
+     },
+     {
+      "s": 134,
+      "t": 4201,
+      "label": "located"
+     },
+     {
+      "s": 4201,
+      "t": 5,
       "label": "in"
      },
      {
@@ -12636,6 +12761,26 @@
      {
       "s": 5979,
       "t": 125,
+      "label": "employer"
+     },
+     {
+      "s": 142,
+      "t": 5986,
+      "label": "employed"
+     },
+     {
+      "s": 5986,
+      "t": 123,
+      "label": "employer"
+     },
+     {
+      "s": 143,
+      "t": 5988,
+      "label": "employed"
+     },
+     {
+      "s": 5988,
+      "t": 134,
       "label": "employer"
      },
      {

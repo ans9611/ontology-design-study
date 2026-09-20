@@ -114,8 +114,10 @@ def rq3() -> dict:
         m = re.match(r"\*\*(.+?)\*\*:?\s*(.*)", verdict)
         hypotheses.append({"id": hid, "statement": statement, "verdict": m.group(1), "note": m.group(2)})
     run = re.search(r"[Rr]un on (\d{4}-\d{2}-\d{2})", results).group(1)
+    from .report import cost_model
     return {
         "run_date": run,
+        "cost_model": cost_model(),
         "scales": main["scales"],
         "schemas": main["schemas"],
         "queries": questions,
@@ -149,7 +151,10 @@ def schema_graphs(n: int = 300) -> dict:
     post = next(m for m in D.posts if m["creator"] == p0["id"])
     country = next(c["countryId"] for c in D.cities if c["id"] == p0["cityId"])
     org = next(o for pp, o, _ in D.work if pp == p0["id"])
-    sample_ids = [p0["id"], *friends[:2], p0["cityId"], country, org, post["id"], *post["tags"][:2], post["forum"]]
+    friend_orgs = [next(o for pp, o, _ in D.work if pp == f) for f in friends[:2]]           # so a friend's employer's country is reachable (Q11)
+    org_country = {o["id"]: o["countryId"] for o in D.orgs}
+    sample_ids = [p0["id"], *friends[:2], p0["cityId"], country, org, *friend_orgs, *[org_country[o] for o in friend_orgs],
+                  post["id"], *post["tags"][:2], post["forum"]]
     out = {}
     for name, G in graphs.items():
         counts = Counter(G.node_type.values())

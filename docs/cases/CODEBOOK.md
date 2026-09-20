@@ -49,3 +49,7 @@ These appear in individual case files and need a decision before the second codi
 | abandoned | shut down or migrated away, documented in an A/B source |
 
 Outcome is coded from a different source than the patterns where possible, so that the same passage does not supply both.
+
+## A measurable outcome, for later
+
+"Sustained / abandoned" is coded from published accounts and is confounded by sponsorship and by what gets published. An observable proxy exists for most cases: schema churn, the number of types or properties added and deprecated per year, readable from Wikidata's property-proposal archive, Schema.org's release notes and GitHub issues, Gene Ontology and SNOMED CT release notes, and the Freebase schema history. Coding churn for the eight cases would give RQ2 a dependent variable that is a number rather than a label; it has not been done.

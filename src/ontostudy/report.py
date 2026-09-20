@@ -72,14 +72,75 @@ def f(x, d=2):
     return f"{x:,.{d}f}"
 
 
+def ols_multi(X, y):
+    """Least squares for a few regressors: returns coefficients (last is the intercept) and R²."""
+    import numpy as np
+    A = np.column_stack([np.array(X, dtype=float), np.ones(len(y))])
+    coef, *_ = np.linalg.lstsq(A, np.array(y, dtype=float), rcond=None)
+    pred = A @ coef; yv = np.array(y, dtype=float)
+    r2 = 1 - ((yv - pred) ** 2).sum() / ((yv - yv.mean()) ** 2).sum()
+    return coef.tolist(), float(r2)
+
+
+def cost_model():
+    """log(ms) = a·log(1 + random accesses) + b·log(1 + scanned records) + c, fitted per engine.
+
+    Counts come from the Python engine's bench.csv (they are properties of the schema, not
+    the engine); the Kùzu fit uses those counts with Kùzu's own times on the rows both runs share.
+    Returns None until bench.csv carries the `scans` column.
+    """
+    R = load_bench("bench.csv")
+    if not R or "scans" not in next(iter(R["B"].values())):
+        return None
+    def xs(row):
+        h, sc = int(row["hops"]), int(row["scans"])
+        return [math.log1p(h - sc), math.log1p(sc)]
+    fits = {}
+    X = [xs(r) for r in R["B"].values()]; y = [math.log(float(r["seconds"]) * 1000) for r in R["B"].values()]
+    (a, b, c), r2 = ols_multi(X, y); fits["python"] = {"a": a, "b": b, "c": c, "r2": r2, "n": len(y)}
+    K = load_bench("bench_kuzu.csv")
+    if K:
+        X, y = [], []
+        for key, row in K["B"].items():
+            if key in R["B"]:
+                X.append(xs(R["B"][key])); y.append(math.log(float(row["seconds"]) * 1000))
+        if len(y) > 6:
+            (a, b, c), r2 = ols_multi(X, y); fits["kuzu"] = {"a": a, "b": b, "c": c, "r2": r2, "n": len(y)}
+    return fits
+
+
+def cost_model_table(fits):
+    out = ["| engine | a: random access | b: sequential scan | c: fixed (log ms) | R² | rows |", "|---|---|---|---|---|---|"]
+    for eng, m in fits.items():
+        out.append(f"| {eng} | {m['a']:.2f} | {m['b']:.2f} | {m['c']:.2f} | {m['r2']:.2f} | {m['n']} |")
+    return ("Fit of log(ms per query) = a·log(1 + random accesses) + b·log(1 + scanned records) + c. Random accesses are edge traversals and "
+            "index hits (pointer chasing); scanned records are nodes visited by a full scan of a type. Counts are the schema's, taken from the "
+            "Python engine; each engine contributes its own times.\n\n" + "\n".join(out))
+
+
+REF_SCALE = 10000   # the one scale every run shares; headline numbers are reported here
+
+
+def boot_median(values, boots=2000, seed=0):
+    """Median with a 95% bootstrap interval over the twenty queries."""
+    import random
+    rng = random.Random(seed); v = list(values); meds = []
+    for _ in range(boots):
+        meds.append(statistics.median(rng.choice(v) for _ in v))
+    meds.sort()
+    return statistics.median(v), meds[int(0.025 * boots)], meds[int(0.975 * boots)]
+
+
 def headline(R):
-    n = R["scales"][-1]; B = R["B"]; qs = R["queries"]; S = R["schemas"]
+    n = REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]; B = R["B"]; qs = R["queries"]; S = R["schemas"]
     hop = lambda s, q: int(B[(n, s, q)]["hops"])
     ms = lambda s, q: float(B[(n, s, q)]["seconds"])
     out = ["| | " + " | ".join(S) + " |", "|---|" + "---|" * len(S)]
     if "mid" in S:
-        out.append(f"| median hop ratio to mid, n={n:,} | " + " | ".join(f(statistics.median(hop(s, q) / hop("mid", q) for q in qs)) for s in S) + " |")
-        out.append(f"| median latency ratio to mid, n={n:,} | " + " | ".join(f(statistics.median(ms(s, q) / ms("mid", q) for q in qs)) for s in S) + " |")
+        def cell(vals):
+            m, lo, hi = boot_median(vals); return f"{f(m)} [{f(lo)}, {f(hi)}]"
+        out.append(f"| median hop ratio to mid, n={n:,} [95% CI over queries] | " + " | ".join(cell([hop(s, q) / hop("mid", q) for q in qs]) for s in S) + " |")
+        out.append(f"| median latency ratio to mid, n={n:,} [95% CI] | " + " | ".join(cell([ms(s, q) / ms("mid", q) for q in qs]) for s in S) + " |")
     if R["sizes"]:
         out.append(f"| size at n={n:,} | " + " | ".join(f"{float(R['sizes'][(n, s)]['mbytes']):,.0f} MB" for s in S) + " |")
         out.append(f"| build time at n={n:,} | " + " | ".join(f"{float(R['sizes'][(n, s)]['build_seconds']):.1f} s" for s in S) + " |")
@@ -90,7 +151,7 @@ def headline(R):
 
 
 def per_query(R):
-    n = R["scales"][-1]; B = R["B"]; S = R["schemas"]
+    n = REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]; B = R["B"]; S = R["schemas"]
     head = "| query | " + " | ".join(f"hops {s}" for s in S) + " | " + " | ".join(f"ms {s}" for s in S) + " | " + " | ".join(f"exp {s}" for s in S) + " |"
     out = [head, "|---|" + "---|" * (3 * len(S))]
     for q in R["queries"]:
@@ -107,7 +168,7 @@ def per_query(R):
 
 def diagnostic(R, key="hops"):
     """The six diagnostic queries, one row each, hops (or ms) and slope per schema."""
-    n = R["scales"][-1]; B = R["B"]; S = R["schemas"]
+    n = REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]; B = R["B"]; S = R["schemas"]
     label = "hops" if key == "hops" else "ms"
     out = ["| query | " + " | ".join(f"{label} {s}" for s in S) + " | " + " | ".join(f"exp {s}" for s in S) + " |", "|---|" + "---|" * (2 * len(S))]
     for q in [q for q in DIAG if q in R["queries"]]:
@@ -158,6 +219,9 @@ def build_blocks():
     w = writes_table()
     if w:
         blocks["writes"] = w
+    cm = cost_model()
+    if cm:
+        blocks["cost-model"] = cost_model_table(cm)
     return blocks
 
 

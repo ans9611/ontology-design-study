@@ -14,10 +14,14 @@ Columns are the property groups. A cell says how the framework measures it, or i
 | Noy et al. [15] | | entity resolution and provenance as recurring challenges | | schema must be populated to be useful; "the schema is what people will actually fill in" | | schema evolution, governance, tooling named as open challenges |
 | Wikidata [16] | | property constraints checked continuously | | | | community process as quality control |
 
+## What this table does not cover: benchmark literature
+
+The table holds *quality-evaluation* frameworks. A separate literature measures query performance over ontologies and RDF stores directly: LUBM [25] (OWL knowledge base systems, a fixed university ontology, queries scaled by number of universities), SP²Bench [26] (SPARQL over a DBLP-shaped dataset), BSBM [27] (an e-commerce use case) and LDBC SNB [8]. All of them measure latency and scale; none varies the ontology's structure as the treatment. The RQ1 claim is therefore not "nobody measures operational cost" but "quality frameworks do not measure it, and benchmarks that do measure it hold the design fixed". Both halves are needed for the gap this study addresses.
+
 ## Observations so far
 
 1. Structural metrics are the most developed and the least connected to any outcome. Depth and breadth of a taxonomy are easy to compute; nothing in the seed set relates them to anything a user experiences.
-2. OQuaRE names performance efficiency but derives it from structure rather than from measurement. This is the closest existing work to RQ3 and the clearest gap.
+2. OQuaRE names performance efficiency but derives it from structure rather than from measurement. Among quality frameworks this is the closest to RQ3; among benchmarks, LDBC SNB is the closest because its schema is the one RQ3 varies.
 3. Application-based evaluation [7] is the only approach that would capture operational cost, and it is the least standardized.
 4. Industry accounts [15] treat schema evolution and population as the hard problems. Neither has a metric in the academic frameworks.
 

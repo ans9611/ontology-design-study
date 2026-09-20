@@ -19,7 +19,8 @@ class Graph:
         self.out: dict[tuple[int, str], list[tuple[int, dict]]] = defaultdict(list)
         self.inn: dict[tuple[int, str], list[tuple[int, dict]]] = defaultdict(list)
         self.by_type: dict[str, list[int]] = defaultdict(list)
-        self.hops = 0          # edge traversals since reset
+        self.hops = 0          # records touched since reset: edge traversals plus scanned nodes
+        self.scans = 0         # of which: nodes visited by a full scan of a type (sequential, not pointer-chasing)
         self.prop_reads = 0    # property reads since reset
         self.indexes: dict[str, dict] = {}   # secondary indexes a schema chooses to maintain; counted in nbytes
 
@@ -37,6 +38,7 @@ class Graph:
     # --- traversal (counted)
     def reset(self) -> None:
         self.hops = 0
+        self.scans = 0
         self.prop_reads = 0
 
     def o(self, u: int, label: str) -> list[tuple[int, dict]]:

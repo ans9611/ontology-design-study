@@ -9,17 +9,18 @@ Four follow-up runs answer objections to the main run and are reported in their 
 - Data: synthetic LDBC-SNB-shaped graphs (see the dated note in ../hypotheses.md on why not LDBC Datagen). At 10,000 persons: 50k friendships, 39k posts, 78k comments, 175k likes. Entity fan-in is uniform in the main run: about 100 persons per city, 200 per company, 160 messages per tag.
 - Schemas: flat (place, organisation, tag folded into properties; no reverse index on them), mid (entity nodes and direct edges; the SNB model), normalized (every relation reified as a node).
 - Queries: the twenty in ../../src/ontostudy/queries/QUESTIONS.md, written once against the accessor interface. Twenty parameter sets per query, shared by all schemas; best of five runs, all five recorded.
-- Metrics: hops (edge traversals, counted in the graph; a scan counts as one traversal per node), latency (ms per query), resident size (recursive sys.getsizeof), and a log-log latency exponent fitted over the six scales with two standard errors reported.
+- Metrics: hops (records touched: edge traversals and index hits, plus one per node for a full scan of a type; the scan part is recorded separately as `scans`), latency (ms per query), resident size (recursive sys.getsizeof), and a log-log latency exponent fitted over the six scales with two standard errors reported. Headline numbers are reported at 10,000 persons, the one scale every run shares, with a 95% bootstrap interval over the twenty queries.
+- Machine: Apple M4 Pro, 25.8 GB RAM, macOS, Python 3.9.6, Kùzu 0.11.3, one process, nothing else running during a timed run.
 
 ## Headline numbers
 
 <!-- table:headline -->
 | | flat | mid | normalized |
 |---|---|---|---|
-| median hop ratio to mid, n=20,000 | 1.00 | 1.00 | 2.03 |
-| median latency ratio to mid, n=20,000 | 0.96 | 1.00 | 2.27 |
-| size at n=20,000 | 618 MB | 701 MB | 1,755 MB |
-| build time at n=20,000 | 4.8 s | 4.1 s | 11.3 s |
+| median hop ratio to mid, n=10,000 [95% CI over queries] | 1.00 [0.62, 1.00] | 1.00 [1.00, 1.00] | 2.03 [2.00, 2.25] |
+| median latency ratio to mid, n=10,000 [95% CI] | 0.99 [0.75, 1.02] | 1.00 [1.00, 1.00] | 2.30 [2.01, 2.67] |
+| size at n=10,000 | 308 MB | 350 MB | 875 MB |
+| build time at n=10,000 | 2.5 s | 3.1 s | 7.6 s |
 | queries within 20% of the fastest | 17 | 12 | 0 |
 | queries with latency exponent > 0.5 | 5 (Q13, Q14, Q17, Q18, Q19) | 2 (Q13, Q14) | 2 (Q13, Q14) |
 <!-- /table -->
@@ -30,33 +31,33 @@ Four follow-up runs answer objections to the main run and are reported in their 
 
 ![memory](fig3_memory.png)
 
-## Per-query table, largest scale
+## Per-query table, reference scale 10,000
 
 <!-- table:per-query -->
 exp = slope of log(latency) against log(persons) over 1,000 / 2,000 / 3,000 / 5,000 / 10,000 / 20,000; ± is two standard errors of the fit.
 
 | query | hops flat | hops mid | hops normalized | ms flat | ms mid | ms normalized | exp flat | exp mid | exp normalized |
 |---|---|---|---|---|---|---|---|---|---|
-| Q01 | 8 | 16 | 41 | 0.005 | 0.007 | 0.013 | -0.17 ± 0.14 | -0.18 ± 0.14 | -0.17 ± 0.13 |
-| Q02 | 179 | 520 | 1,221 | 0.055 | 0.132 | 0.299 | -0.04 ± 0.13 | -0.03 ± 0.13 | -0.05 ± 0.13 |
-| Q03 | 135 | 135 | 278 | 0.025 | 0.025 | 0.062 | -0.09 ± 0.13 | -0.09 ± 0.13 | -0.10 ± 0.12 |
-| Q04 | 135 | 170 | 348 | 0.036 | 0.046 | 0.095 | -0.07 ± 0.13 | -0.06 ± 0.12 | -0.08 ± 0.12 |
-| Q05 | 1,025 | 1,025 | 2,059 | 0.153 | 0.155 | 0.512 | -0.09 ± 0.15 | -0.09 ± 0.14 | -0.07 ± 0.13 |
-| Q06 | 2,870 | 5,575 | 11,329 | 0.924 | 1.655 | 4.632 | 0.11 ± 0.13 | 0.12 ± 0.14 | 0.19 ± 0.14 |
-| Q07 | 25 | 25 | 58 | 0.004 | 0.004 | 0.013 | -0.16 ± 0.13 | -0.18 ± 0.13 | -0.13 ± 0.12 |
-| Q08 | 16 | 16 | 32 | 0.003 | 0.004 | 0.008 | -0.17 ± 0.13 | -0.15 ± 0.12 | -0.14 ± 0.12 |
-| Q09 | 5,560 | 5,560 | 11,300 | 1.535 | 1.517 | 4.143 | 0.11 ± 0.12 | 0.11 ± 0.13 | 0.16 ± 0.12 |
-| Q10 | 31 | 48 | 104 | 0.013 | 0.017 | 0.033 | -0.12 ± 0.13 | -0.10 ± 0.13 | -0.09 ± 0.13 |
-| Q11 | 8 | 31 | 70 | 0.003 | 0.010 | 0.022 | -0.19 ± 0.13 | -0.15 ± 0.13 | -0.14 ± 0.13 |
-| Q12 | 201 | 720 | 1,339 | 0.076 | 0.244 | 0.446 | -0.11 ± 0.13 | -0.12 ± 0.12 | -0.13 ± 0.16 |
-| Q13 | 113,104 | 113,104 | 339,314 | 20.507 | 20.581 | 80.800 | 1.14 ± 0.10 | 1.14 ± 0.10 | 1.04 ± 0.16 |
-| Q14 | 4,315,251 | 4,315,251 | 8,763,254 | 1732.639 | 1886.903 | 4468.908 | 1.18 ± 0.17 | 1.21 ± 0.16 | 1.18 ± 0.21 |
-| Q15 | 3 | 3 | 5 | 0.002 | 0.002 | 0.002 | -0.21 ± 0.15 | -0.20 ± 0.16 | -0.19 ± 0.16 |
-| Q16 | 60 | 103 | 206 | 0.016 | 0.026 | 0.060 | -0.07 ± 0.09 | -0.08 ± 0.09 | -0.09 ± 0.08 |
-| Q17 | 22,428 | 4,237 | 8,475 | 7.190 | 1.630 | 4.184 | 0.63 ± 0.12 | 0.17 ± 0.25 | 0.21 ± 0.27 |
-| Q18 | 235,838 | 157 | 315 | 45.963 | 0.048 | 0.095 | 0.94 ± 0.06 | -0.14 ± 0.12 | -0.13 ± 0.10 |
-| Q19 | 20,000 | 397 | 794 | 2.778 | 0.138 | 0.286 | 0.80 ± 0.09 | 0.05 ± 0.28 | 0.06 ± 0.27 |
-| Q20 | 3,970 | 3,970 | 11,910 | 2.068 | 2.112 | 3.963 | -0.09 ± 0.12 | -0.09 ± 0.12 | -0.01 ± 0.13 |
+| Q01 | 9 | 19 | 47 | 0.006 | 0.008 | 0.015 | -0.17 ± 0.14 | -0.18 ± 0.14 | -0.17 ± 0.13 |
+| Q02 | 175 | 503 | 1,182 | 0.053 | 0.124 | 0.281 | -0.04 ± 0.13 | -0.03 ± 0.13 | -0.05 ± 0.13 |
+| Q03 | 143 | 143 | 297 | 0.026 | 0.026 | 0.066 | -0.09 ± 0.13 | -0.09 ± 0.13 | -0.10 ± 0.12 |
+| Q04 | 143 | 179 | 369 | 0.038 | 0.047 | 0.100 | -0.07 ± 0.13 | -0.06 ± 0.12 | -0.08 ± 0.12 |
+| Q05 | 1,152 | 1,152 | 2,315 | 0.182 | 0.179 | 0.552 | -0.09 ± 0.15 | -0.09 ± 0.14 | -0.07 ± 0.13 |
+| Q06 | 2,645 | 5,017 | 10,209 | 0.769 | 1.352 | 3.877 | 0.11 ± 0.13 | 0.12 ± 0.14 | 0.19 ± 0.14 |
+| Q07 | 27 | 27 | 64 | 0.005 | 0.004 | 0.014 | -0.16 ± 0.13 | -0.18 ± 0.13 | -0.13 ± 0.12 |
+| Q08 | 17 | 17 | 34 | 0.004 | 0.004 | 0.009 | -0.17 ± 0.13 | -0.15 ± 0.12 | -0.14 ± 0.12 |
+| Q09 | 5,116 | 5,116 | 10,407 | 1.351 | 1.291 | 3.638 | 0.11 ± 0.12 | 0.11 ± 0.13 | 0.16 ± 0.12 |
+| Q10 | 31 | 48 | 107 | 0.013 | 0.017 | 0.033 | -0.12 ± 0.13 | -0.10 ± 0.13 | -0.09 ± 0.13 |
+| Q11 | 9 | 38 | 86 | 0.003 | 0.011 | 0.027 | -0.19 ± 0.13 | -0.15 ± 0.13 | -0.14 ± 0.13 |
+| Q12 | 216 | 782 | 1,454 | 0.083 | 0.260 | 0.474 | -0.11 ± 0.13 | -0.12 ± 0.12 | -0.13 ± 0.16 |
+| Q13 | 49,777 | 49,777 | 149,331 | 7.670 | 7.675 | 31.547 | 1.14 ± 0.10 | 1.14 ± 0.10 | 1.04 ± 0.16 |
+| Q14 | 1,883,811 | 1,883,811 | 3,826,615 | 642.745 | 665.713 | 1763.019 | 1.18 ± 0.17 | 1.21 ± 0.16 | 1.18 ± 0.21 |
+| Q15 | 3 | 3 | 5 | 0.001 | 0.001 | 0.002 | -0.21 ± 0.15 | -0.20 ± 0.16 | -0.19 ± 0.16 |
+| Q16 | 73 | 123 | 247 | 0.020 | 0.031 | 0.071 | -0.07 ± 0.09 | -0.08 ± 0.09 | -0.09 ± 0.08 |
+| Q17 | 12,290 | 4,031 | 8,063 | 3.962 | 1.385 | 3.694 | 0.63 ± 0.12 | 0.17 ± 0.25 | 0.21 ± 0.27 |
+| Q18 | 117,558 | 153 | 306 | 21.903 | 0.043 | 0.089 | 0.94 ± 0.06 | -0.14 ± 0.12 | -0.13 ± 0.10 |
+| Q19 | 10,000 | 392 | 784 | 1.418 | 0.144 | 0.272 | 0.80 ± 0.09 | 0.05 ± 0.28 | 0.06 ± 0.27 |
+| Q20 | 3,457 | 3,457 | 10,371 | 2.014 | 2.013 | 3.530 | -0.09 ± 0.12 | -0.09 ± 0.12 | -0.01 ± 0.13 |
 <!-- /table -->
 
 ## Resident size by scale
@@ -100,8 +101,8 @@ exp = slope of log(latency) against log(persons) over 1,000 / 2,000 / 3,000 / 5,
 <!-- table:indexed-headline -->
 | | flat | flat_indexed | mid |
 |---|---|---|---|
-| median hop ratio to mid, n=10,000 | 1.00 | 0.90 | 1.00 |
-| median latency ratio to mid, n=10,000 | 0.96 | 0.83 | 1.00 |
+| median hop ratio to mid, n=10,000 [95% CI over queries] | 1.00 [0.62, 1.00] | 0.90 [0.56, 1.00] | 1.00 [1.00, 1.00] |
+| median latency ratio to mid, n=10,000 [95% CI] | 0.96 [0.74, 1.01] | 0.83 [0.66, 0.98] | 1.00 [1.00, 1.00] |
 | size at n=10,000 | 308 MB | 310 MB | 350 MB |
 | build time at n=10,000 | 2.6 s | 2.8 s | 4.9 s |
 | queries within 20% of the fastest | 17 | 20 | 10 |
@@ -128,8 +129,8 @@ The three indexes cost 2 MB on top of flat's 308 MB (mid: 350 MB). With them, fl
 <!-- table:skew-headline -->
 | | flat | flat_indexed | mid | normalized |
 |---|---|---|---|---|
-| median hop ratio to mid, n=10,000 | 1.00 | 0.90 | 1.00 | 2.04 |
-| median latency ratio to mid, n=10,000 | 0.92 | 0.82 | 1.00 | 2.28 |
+| median hop ratio to mid, n=10,000 [95% CI over queries] | 1.00 [0.61, 1.00] | 0.90 [0.55, 1.00] | 1.00 [1.00, 1.00] | 2.04 [2.00, 2.23] |
+| median latency ratio to mid, n=10,000 [95% CI] | 0.92 [0.73, 1.01] | 0.82 [0.62, 0.98] | 1.00 [1.00, 1.00] | 2.28 [2.05, 2.54] |
 | size at n=10,000 | 307 MB | 309 MB | 349 MB | 874 MB |
 | build time at n=10,000 | 2.2 s | 4.5 s | 3.2 s | 10.2 s |
 | queries within 20% of the fastest | 16 | 20 | 10 | 0 |
@@ -197,6 +198,15 @@ Records touched per update and microseconds per update, n = 10,000, best of k.
 <!-- /table -->
 
 Flat pays on writes for what it saved on reads, in proportion to fan-in. At 10,000 persons a renamed city is rewritten on 95 person records in flat and on one node in mid or normalized; a renamed tag on 153 messages against one. Unindexed flat also has to *find* those records by scanning (0.6 ms for a city, 24 ms for a tag), while flat_indexed finds them through the same index that made its reads fast (21 µs and 68 µs). The per-entity updates go the other way: moving a person or changing an employer touches 2–3 records on flat and 4–10 on mid and normalized, because flat rewrites a property where the others delete and insert edges (and normalized also retires a relation node). Under the skewed fan-in of the second follow-up the largest tag sits on 19,691 messages, so the rename cost of a denormalised design scales with the head of the distribution. None of this measures concurrency, transactions or permission checks.
+
+## What a hop costs, per engine
+
+The hop count is a count of work, not a cost: the Kùzu run above shows the same 117k-record scan costing about 500× mid on the Python engine and 5× on Kùzu. Splitting the count into its two kinds of work makes it a cost model. Every hop is either a random access (an edge traversal or an index hit, pointer chasing) or one record of a sequential scan of a whole type; the bench records the scan part separately, and the model below fits each engine's time to the two counts.
+
+<!-- table:cost-model -->
+<!-- /table -->
+
+<!-- prose:cost-model -->
 
 ## Threats specific to these runs
 

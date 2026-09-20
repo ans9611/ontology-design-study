@@ -40,6 +40,7 @@ class Row:
     query: str
     hops: int
     prop_reads: int
+    scans: int         # part of hops that was a sequential scan of a whole node type
     seconds: float
     correct: bool
     runs: str = ""     # every repeat's seconds per query, semicolon-separated, for confidence intervals
@@ -83,14 +84,14 @@ def run(scales, repeats, n_args, seed=0, schema_names=None, skew=0.0):
         for qid, fn in QUERIES.items():
             answers = {}
             for name, S in schemas.items():
-                times, hops, reads = [], 0, 0
+                times, hops, reads, scans = [], 0, 0, 0
                 for _ in range(repeats):
                     S.G.reset(); t0 = time.perf_counter()
                     res = [fn(S, a) for a in args]
                     times.append((time.perf_counter() - t0) / n_args)
-                    hops, reads = S.G.hops, S.G.prop_reads
+                    hops, reads, scans = S.G.hops, S.G.prop_reads, S.G.scans
                 answers[name] = res
-                rows.append(Row(n, name, qid, hops // n_args, reads // n_args, min(times), True, ";".join(f"{t:.3e}" for t in times)))
+                rows.append(Row(n, name, qid, hops // n_args, reads // n_args, scans // n_args, min(times), True, ";".join(f"{t:.3e}" for t in times)))
             ref = answers.get("normalized", answers["mid"])
             for r in rows[-len(schemas):]:
                 r.correct = answers[r.schema] == ref
@@ -114,7 +115,7 @@ def main(argv=None) -> int:
     with out.with_name(out.name.replace("bench", "sizes") if "bench" in out.name else "sizes_" + out.name).open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(sizes[0].keys())); w.writeheader(); w.writerows(sizes)
     bad = [r for r in rows if not r.correct]
-    print(f"{len(rows)} rows -> {out.relative_to(ROOT)}; {len(bad)} answer mismatches")
+    print(f"{len(rows)} rows -> {out}; {len(bad)} answer mismatches")
     for r in bad[:10]:
         print("  MISMATCH", r.scale, r.schema, r.query)
     return 1 if bad else 0

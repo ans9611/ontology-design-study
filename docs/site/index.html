@@ -146,6 +146,11 @@ svg.chart .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
 .readings div { font-size: 14.5px; color: var(--ink-2); }
 .readings b { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 600; margin-bottom: 4px; font-size: 16px; }
 .readings i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.mix { display: grid; gap: 6px 24px; grid-template-columns: 1fr; margin: 12px 0; font-size: 14px; }
+@media (min-width: 760px) { .mix { grid-template-columns: 1fr 1fr; } }
+.mix label { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; color: var(--ink-2); }
+.mix label input { grid-column: 1 / -1; width: 100%; accent-color: var(--ink); }
+.mix output { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
 .gap { display: grid; gap: 4px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 12px; }
 .gap div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14.5px; }
 .gap div b { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
@@ -167,6 +172,9 @@ svg.chart .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
 .graphs .prop-chip { fill: var(--rule); }
 .graphs .prop-text { font-size: 8.5px; fill: var(--ink-2); pointer-events: none; }
 .graphs .edge { stroke: var(--rule); stroke-width: 1; fill: none; }
+.graphs .edge.on { stroke-width: 3.5; opacity: .9; }
+.graphs .node.scan circle { stroke-width: 3; }
+.graphs .hopcount { font-size: 13px; font-weight: 600; fill: var(--ink); }
 .graphs .edge-label { font-size: 8px; fill: var(--muted); pointer-events: none; }
 details summary { cursor: pointer; color: var(--ink-2); margin: 20px 0 8px; }
 footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14px; color: var(--ink-2); }
@@ -177,7 +185,7 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
 <header class="hero">
   <div class="hero-top">
     <div>
-      <h1>The schema fixes the query.</h1>
+      <h1>The schema sets the hops. The engine sets their price.</h1>
       <p class="lede" style="margin-top:14px">Structural choices in enterprise ontologies, and what each one costs once the model is in use: hops, latency, memory, and whether people keep using it.</p>
     </div>
     <div class="hero-links"><a href="https://github.com/ans9611/ontology-design-study">Repository and write-up</a><a href="data.json">data.json</a></div>
@@ -193,24 +201,14 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
 
 <div class="body">
   <nav class="rail" aria-label="Sections">
-    <a href="#graphs">Schemas</a>
     <a href="#fit">Short version</a>
+    <a href="#graphs">Schemas</a>
     <a href="#guide">How to build one</a>
     <a href="#rq1"><span class="rq">RQ1</span>Metrics</a>
     <a href="#rq2"><span class="rq">RQ2</span>Cases</a>
     <a href="#rq3"><span class="rq">RQ3</span>Benchmark</a>
   </nav>
   <main>
-
-<section id="graphs">
-  <h2>The three schemas, as graphs</h2>
-  <p>Top row: every node type and relation type in each schema, from the data itself; circle area follows the instance count. A diamond is a relation that the schema stores as a node of its own. A grey tag under a node is a value that flat copies onto the node as a property instead of linking to it. Bottom row: one person's neighbourhood, the same entities in all three, drawn the way each schema stores it. Drag nodes; hover for counts.</p>
-  <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span><span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="var(--ink)"/></svg>entity type</span><span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="var(--s3)"/></svg>relation stored as a node</span><span><i style="border-radius:3px;background:var(--rule)"></i>value stored as a property</span></div>
-  <div class="graphs" id="type-graphs"></div>
-  <h3>One person's neighbourhood, three ways</h3>
-  <div class="graphs stack" id="sample-graphs"></div>
-  <p class="small" id="graphs-note"></p>
-</section>
 
 <section id="fit">
   <h2>The short version, for a design review</h2>
@@ -221,17 +219,41 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
   <div class="readings" id="fit-reading"></div>
   <p class="note" id="fit-schema-note"></p>
 
-  <h3>Which patterns go with systems that lasted</h3>
+  <h3>Your workload</h3>
+  <p>The medians above assume every question matters equally. Set the mix your graph will actually serve, and how often a copied value is renamed, and the cost per thousand operations is recomputed from the measured numbers.</p>
+  <div class="mix" id="mix">
+    <label>Neighbourhood reads <span class="small">(Q01–Q12, Q15, Q16, Q20)</span> <output></output><input type="range" min="0" max="100" value="80" data-g="nbr"></label>
+    <label>Path searches <span class="small">(Q13, Q14)</span> <output></output><input type="range" min="0" max="100" value="5" data-g="path"></label>
+    <label>Reverse lookups <span class="small">(Q17–Q19: from a tag, a city, an employer)</span> <output></output><input type="range" min="0" max="100" value="15" data-g="rev"></label>
+    <label>Renames per 1,000 reads <output></output><input type="range" min="0" max="50" value="1" step="0.5" data-g="renames"></label>
+    <label>Records that copy a renamed value (fan-in) <output></output><input type="range" min="1" max="5" value="2" step="0.05" data-g="fanin"></label>
+  </div>
+  <div class="fig"><svg class="chart" id="mix-chart"></svg></div>
+  <p class="small" id="mix-note" style="margin-top:8px"></p>
+
+  <h3>Which patterns were seen where</h3>
   <div class="two wide-left">
     <div class="wrap"><table id="fit-patterns"></table></div>
     <div>
-      <p class="note" style="margin-top:0">A pattern seen only in sustained systems is an association, not a cause: eight purposive cases and no controls. Patterns from the two non-sustained cases, Freebase (abandoned) and Cyc (limited adoption), are the ones to treat as risk signals when they show up in a new design.</p>
+      <p class="note" style="margin-top:0">A catalogue, not a tally: eight purposive cases, one coder, no controls, and survivorship in what gets published. Patterns from the two non-sustained cases, Freebase (abandoned) and Cyc (limited adoption), are marked; they are questions to ask in a design review, not evidence of cause. The codebook for a second coder is in docs/cases/CODEBOOK.md.</p>
       <div id="fit-hyp"></div>
     </div>
   </div>
 
   <h3>What the quality-metric literature does not measure</h3>
+  <p class="note">Quality-evaluation frameworks only. The benchmark literature (LUBM, SP²Bench, BSBM, LDBC) does measure latency and scale, but holds the schema fixed and varies the engine; neither literature connects a modelling choice to its cost.</p>
   <div class="gap" id="fit-rq1"></div>
+</section>
+
+<section id="graphs">
+  <h2>The three schemas, as graphs</h2>
+  <p>Top row: every node type and relation type in each schema, from the data itself; circle area follows the instance count. A diamond is a relation that the schema stores as a node of its own. A grey tag under a node is a value that flat copies onto the node as a property instead of linking to it. Bottom row: one person's neighbourhood, the same entities in all three, drawn the way each schema stores it. Drag nodes; hover for counts.</p>
+  <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span><span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="var(--ink)"/></svg>entity type</span><span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="var(--s3)"/></svg>relation stored as a node</span><span><i style="border-radius:3px;background:var(--rule)"></i>value stored as a property</span></div>
+  <div class="graphs" id="type-graphs"></div>
+  <h3>One person's neighbourhood, three ways</h3>
+  <div class="controls"><span>Trace a question</span><select id="trace-q"></select><span class="small">The path is drawn in the schema's colour; a scan lights every record it reads.</span></div>
+  <div class="graphs stack" id="sample-graphs"></div>
+  <p class="small" id="graphs-note"></p>
 </section>
 
 <section id="guide">
@@ -243,7 +265,7 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
 <section id="rq1">
   <p class="kicker">RQ1</p>
   <h2>What existing quality metrics measure</h2>
-  <p>Seven frameworks against six property groups. A filled cell means the framework has a metric for that property. A light cell means it names the property but derives it from structural proxies rather than measuring it. Hover a cell for its text.</p>
+  <p>Seven quality-evaluation frameworks against six property groups. A filled cell means the framework has a metric for that property. A light cell means it names the property but derives it from structural proxies rather than measuring it. Hover a cell for its text. Performance benchmarks (LUBM, SP²Bench, BSBM, LDBC) are not in this table: they measure query time and scale but treat the schema as given.</p>
   <div class="wrap"><table class="matrix" id="rq1-matrix"></table></div>
   <h3>Frameworks covering each property</h3>
   <div class="fig"><svg class="chart" id="rq1-bars"></svg></div>
@@ -300,6 +322,10 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
     </div>
   </div>
 
+  <h3>What a hop costs, per engine</h3>
+  <p>A hop count is work, not cost: the same 117k-record scan is about 500× mid on the in-memory engine and 5× on Kùzu. Splitting the count into random accesses (edge traversals and index hits) and sequentially scanned records, and fitting each engine's time to the two, turns it into a cost model.</p>
+  <div id="cost-model"></div>
+
   <h3>Hypotheses, written before the run</h3>
   <div class="wrap"><table id="rq3-hyp"></table></div>
 
@@ -338,7 +364,7 @@ const railLinks = [...document.querySelectorAll(".rail a")];
 const railObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) railLinks.forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "-15% 0px -75% 0px" });
 document.querySelectorAll("main section").forEach(s => railObs.observe(s));
 
-fetch("data.json").then(r => r.json()).then(init).catch(e => { $("main").innerHTML = `<p>data.json did not load (${esc(e.message)}). Serve this folder over HTTP, for example <code>python -m http.server</code> inside <code>docs/site</code>.</p>`; });
+fetch("data.json").then(r => r.json()).then(init).catch(e => { console.error(e); $("main").insertAdjacentHTML("afterbegin", `<p class="note">Something failed while drawing this page (${esc(e.message)}). If you opened the file directly, serve the folder over HTTP: <code>python -m http.server</code> inside <code>docs/site</code>.</p>`); });
 
 // ---------- hero: one relation, drawn three ways ----------
 function schemaDiagram(kind) {
@@ -364,44 +390,88 @@ function init(D) {
   const B = {}; rq3.bench.forEach(b => { B[`${b.scale}|${b.schema}|${b.query}`] = b; });
   const get = (s, sc, q) => B[`${s}|${sc}|${q}`];
   const maxScale = Math.max(...rq3.scales);
+  const refScale = rq3.scales.includes(10000) ? 10000 : maxScale;     // the scale every run shares
   const qids = rq3.queries.map(q => q.id);
   const exponent = (schema, q) => slope(rq3.scales.map(s => [Math.log(s), Math.log(get(s, schema, q).ms)]));
   const stats = {};
   for (const sc of rq3.schemas) {
-    const hopRatio = qids.map(q => get(maxScale, sc, q).hops / get(maxScale, "mid", q).hops);
-    const msRatio = qids.map(q => get(maxScale, sc, q).ms / get(maxScale, "mid", q).ms);
-    const within = qids.filter(q => get(maxScale, sc, q).ms <= 1.2 * Math.min(...rq3.schemas.map(x => get(maxScale, x, q).ms)));
+    const hopRatio = qids.map(q => get(refScale, sc, q).hops / get(refScale, "mid", q).hops);
+    const msRatio = qids.map(q => get(refScale, sc, q).ms / get(refScale, "mid", q).ms);
+    const within = qids.filter(q => get(refScale, sc, q).ms <= 1.2 * Math.min(...rq3.schemas.map(x => get(refScale, x, q).ms)));
     const steep = qids.filter(q => exponent(sc, q) > 0.5);
-    const size = rq3.sizes.find(x => x.scale === maxScale && x.schema === sc);
-    const worst = qids.reduce((a, q) => (get(maxScale, sc, q).ms / get(maxScale, "mid", q).ms > get(maxScale, sc, a).ms / get(maxScale, "mid", a).ms ? q : a), qids[0]);
-    stats[sc] = { hopRatio: median(hopRatio), msRatio: median(msRatio), within, steep, size, worst, worstRatio: get(maxScale, sc, worst).ms / get(maxScale, "mid", worst).ms };
+    const size = rq3.sizes.find(x => x.scale === refScale && x.schema === sc);
+    const worst = qids.reduce((a, q) => (get(refScale, sc, q).ms / get(refScale, "mid", q).ms > get(refScale, sc, a).ms / get(refScale, "mid", a).ms ? q : a), qids[0]);
+    stats[sc] = { hopRatio: median(hopRatio), msRatio: median(msRatio), within, steep, size, worst, worstRatio: get(refScale, sc, worst).ms / get(refScale, "mid", worst).ms };
   }
   const midSize = stats.mid.size.mbytes;
 
   // hero
   const hopsPerFriend = { flat: 1, mid: 2, normalized: 4 };
-  $("#schemas").innerHTML = rq3.schemas.map(sc => `<div class="schema"><h4><i style="background:${SERIES[sc]}"></i>${sc}</h4><p class="hops">A friend's city: <b>${hopsPerFriend[sc]} hop${hopsPerFriend[sc] > 1 ? "s" : ""}</b>. Q01 at n = ${fmt(maxScale, 0)}: <b>${fmt(get(maxScale, sc, "Q01").hops, 0)}</b> traversals.</p>${schemaDiagram(sc)}</div>`).join("");
-  $("#hero-claim").innerHTML = `Reifying a relation costs one hop per relation, on every query. Across twenty benchmark questions the normalized schema needs <b>${fmt(stats.normalized.hopRatio)}×</b> the hops of the mid schema, takes <b>${fmt(stats.normalized.msRatio, 1)}×</b> as long, and holds <b>${fmt(stats.normalized.size.mbytes / midSize, 1)}×</b> the memory, at every scale measured.`;
-  $("#hero-note").textContent = `Medians at ${fmt(maxScale, 0)} persons, best of five runs, synthetic LDBC-SNB-shaped data. Above, the same relation is drawn the way each schema stores it; the coloured line is the path Q01 walks.`;
+  $("#schemas").innerHTML = rq3.schemas.map(sc => `<div class="schema"><h4><i style="background:${SERIES[sc]}"></i>${sc}</h4><p class="hops">A friend's city: <b>${hopsPerFriend[sc]} hop${hopsPerFriend[sc] > 1 ? "s" : ""}</b>. Q01 at n = ${fmt(refScale, 0)}: <b>${fmt(get(refScale, sc, "Q01").hops, 0)}</b> traversals.</p>${schemaDiagram(sc)}</div>`).join("");
+  const kz = (rq3.followups || {}).kuzu;
+  const kzRatio = kz ? (() => { const n = Math.max(...kz.scales); const r = kz.bench.filter(b => b.scale === n && b.schema === "normalized").map(b => b.ms / kz.bench.find(x => x.scale === n && x.schema === "mid" && x.query === b.query).ms); return [Math.min(...r), Math.max(...r)]; })() : null;
+  $("#hero-claim").innerHTML = `Reifying a relation costs one hop per relation, on every query: the normalized schema needs <b>${fmt(stats.normalized.hopRatio)}×</b> the hops of mid across twenty questions, and that ratio is the schema's. What a hop costs is the engine's: <b>${fmt(stats.normalized.msRatio, 1)}×</b> the time on an in-memory graph${kzRatio ? `, <b>${fmt(kzRatio[0], 1)}–${fmt(kzRatio[1], 1)}×</b> on Kùzu` : ""}; storage is <b>${fmt(stats.normalized.size.mbytes / midSize, 1)}×</b> on both.`;
+  $("#hero-note").textContent = `Medians at ${fmt(refScale, 0)} persons, best of five runs, synthetic LDBC-SNB-shaped data. Above, the same relation is drawn the way each schema stores it; the coloured line is the path Q01 walks.`;
 
   // ---------- short version ----------
   const fu = rq3.followups || {};
   const idx = fu.indexed ? (() => { const n = Math.max(...fu.indexed.scales); const at = (sc, q) => fu.indexed.bench.find(b => b.scale === n && b.schema === sc && b.query === q);
     return { within: qids.filter(q => at("flat_indexed", q).ms <= 1.2 * Math.min(...fu.indexed.schemas.map(x => at(x, q).ms))).length, mb: fu.indexed.sizes.find(z => z.scale === n && z.schema === "flat_indexed").mbytes - fu.indexed.sizes.find(z => z.scale === n && z.schema === "flat").mbytes }; })() : null;
   const verdict = {
-    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(maxScale, "flat", q).hops <= get(maxScale, "mid", q).hops).length} of 20 queries. Without a reverse index on the folded entities, ${stats.flat.steep.join(", ")} scan the graph (latency slope above 0.5).${idx ? ` Three reverse indexes costing ${fmt(idx.mb, 0)} MB remove that: with them flat is within 20% of the best schema on ${idx.within} of 20.` : ""} The price is paid on writes: a renamed city or tag is rewritten on every record that copied it.`,
-    mid: `Never the fastest, never the slowest, as long as no index is allowed. Within 20% of the best schema on ${stats.mid.within.length} of 20; up to ${fmt(Math.max(...qids.map(q => get(maxScale, "mid", q).ms / get(maxScale, "flat", q).ms)), 1)}× slower where flat answers from a property; one to three orders of magnitude faster than unindexed flat on reverse lookups. One record per fact, so a rename touches one node.`,
+    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(refScale, "flat", q).hops <= get(refScale, "mid", q).hops).length} of 20 queries. Without a reverse index on the folded entities, ${stats.flat.steep.join(", ")} scan the graph (latency slope above 0.5).${idx ? ` Three reverse indexes costing ${fmt(idx.mb, 0)} MB remove that: with them flat is within 20% of the best schema on ${idx.within} of 20.` : ""} The price is paid on writes: a renamed city or tag is rewritten on every record that copied it.`,
+    mid: `Never the fastest, never the slowest, as long as no index is allowed. Within 20% of the best schema on ${stats.mid.within.length} of 20; up to ${fmt(Math.max(...qids.map(q => get(refScale, "mid", q).ms / get(refScale, "flat", q).ms)), 1)}× slower where flat answers from a property; one to three orders of magnitude faster than unindexed flat on reverse lookups. One record per fact, so a rename touches one node.`,
     normalized: `One extra hop per relation, everywhere: median hop ratio ${fmt(stats.normalized.hopRatio)}, latency ${fmt(stats.normalized.msRatio, 1)}×, memory ${fmt(stats.normalized.size.mbytes / midSize, 1)}× at every scale in this engine. A constant factor, not a higher order (H3 refuted); on Kùzu the latency constant is larger (up to 7.6× on multi-hop joins) while the storage ratio is the same. It buys per-relation provenance and qualifiers; the price is paid on every query.`,
   };
-  $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">hops, median ratio to mid</th><th class="num">latency, median ratio</th><th class="num">size at n = ${fmt(maxScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with slope above 0.5</th><th>worst query against mid</th></tr></thead><tbody>` +
+  $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">hops, median ratio to mid</th><th class="num">latency, median ratio</th><th class="num">size at n = ${fmt(refScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with slope above 0.5</th><th>worst query against mid</th></tr></thead><tbody>` +
     rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${s.within.length} of 20</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "" : `${s.worst}, ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
   $("#fit-reading").innerHTML = rq3.schemas.map(sc => `<div><b><i style="background:${SERIES[sc]}"></i>${sc}</b>${verdict[sc]}</div>`).join("");
-  $("#fit-schema-note").textContent = `Computed from bench.csv at n = ${fmt(maxScale, 0)} persons, best of five runs, twenty parameter sets per query. Slope is log(latency) against log(persons) over ${rq3.scales.join(" / ")}. One engine, an in-memory property graph: hop counts transfer to other engines, constant factors do not.`;
+  $("#fit-schema-note").textContent = `Computed from bench.csv at n = ${fmt(refScale, 0)} persons (the scale every run shares), best of five runs, twenty parameter sets per query. Slope is log(latency) against log(persons) over ${rq3.scales.join(" / ")}. One engine, an in-memory property graph: hop counts transfer to other engines, constant factors do not.`;
+
+  // ---------- your workload: weighted cost per 1,000 operations, read from the same rows ----------
+  (function workload() {
+    const groups = { nbr: qids.filter(q => !["Q13", "Q14", "Q17", "Q18", "Q19"].includes(q)), path: ["Q13", "Q14"], rev: ["Q17", "Q18", "Q19"] };
+    const mainAt = (schema, q) => { const b = rq3.bench.find(x => x.scale === refScale && x.schema === schema && x.query === q); return b ? b.ms : null; };
+    // flat_indexed comes from a separate run; carry its ratio to mid onto the main run's mid, so runs are not compared across timing sessions
+    const idxAt = q => { if (!fu.indexed) return null; const f = fu.indexed.bench.find(x => x.scale === refScale && x.schema === "flat_indexed" && x.query === q), m = fu.indexed.bench.find(x => x.scale === refScale && x.schema === "mid" && x.query === q); return f && m ? mainAt("mid", q) * f.ms / m.ms : null; };
+    const msAt = (schema, q) => schema === "flat_indexed" ? idxAt(q) : mainAt(schema, q);
+    const schemas = ["flat", "flat_indexed", "mid", "normalized"].filter(sc => qids.every(q => msAt(sc, q) != null));
+    const readMs = {}; for (const sc of schemas) readMs[sc] = Object.fromEntries(Object.entries(groups).map(([g, qs]) => [g, qs.reduce((a, q) => a + msAt(sc, q), 0) / qs.length]));
+    const W = (rq3.writes || []).filter(w => w.scale === refScale && w.update === "rename_city");
+    const rename = Object.fromEntries(W.map(w => [w.schema, { us: w.us, records: w.records }]));
+    const inputs = [...document.querySelectorAll("#mix input")];
+    function compute() {
+      const v = Object.fromEntries(inputs.map(i => [i.dataset.g, +i.value]));
+      const fanin = Math.round(10 ** v.fanin);
+      inputs.forEach(i => { const o = i.parentElement.querySelector("output"); o.textContent = i.dataset.g === "fanin" ? fmt(fanin, 0) : i.dataset.g === "renames" ? fmt(v.renames, 1) : `${v[i.dataset.g]}%`; });
+      const wsum = v.nbr + v.path + v.rev || 1;
+      const rows = schemas.map(sc => {
+        const read = 1000 * (v.nbr * readMs[sc].nbr + v.path * readMs[sc].path + v.rev * readMs[sc].rev) / wsum;
+        const r = rename[sc]; const perRename = r ? (r.records > 1 ? r.us * fanin / r.records : r.us) / 1000 : 0;   // ms; copies scale with fan-in, a single node does not
+        return { sc, read, write: v.renames * perRename, total: read + v.renames * perRename };
+      });
+      return { rows, fanin, v };
+    }
+    function render() {
+      const { rows, fanin, v } = compute();
+      barsMs($("#mix-chart"), rows);
+      const fi = rows.find(r => r.sc === "flat_indexed"), md = rows.find(r => r.sc === "mid");
+      let note = `ms per 1,000 operations at ${fmt(refScale, 0)} persons; read costs are the mean measured latency of each group, weighted by your mix; a rename costs the measured rename time, scaled to ${fmt(fanin, 0)} copies for the schemas that copy values.`;
+      if (fi && md) {
+        const dRead = md.read - fi.read, dWrite = (fi.write - md.write) / (v.renames || 1);
+        if (dRead > 0 && dWrite > 0) { const be = dRead / dWrite; note += ` At this fan-in, copying values (flat with indexes) stays cheaper than linking (mid) up to ${fmt(be, be < 10 ? 1 : 0)} renames per 1,000 reads${be > 50 ? ", far beyond this slider: in this engine a rename is microseconds and a read is milliseconds, so the write path only matters when renames are frequent or fan-in is in the tens of thousands" : ""}.`; }
+        else if (dRead <= 0) note += ` With this mix, mid is already cheaper on reads than flat with indexes.`;
+      }
+      $("#mix-note").textContent = note;
+    }
+    inputs.forEach(i => i.addEventListener("input", render));
+    render();
+  })();
 
   const patRows = rq2.patterns.map(p => { const cs = rq2.matrix[p]; const sus = cs.filter(id => isSustained(rq2.cases.find(c => c.id === id).outcome)); return { p, cs, sus: sus.length, non: cs.length - sus.length }; })
     .sort((a, b) => b.non - a.non || b.sus - a.sus || a.p.localeCompare(b.p));
-  $("#fit-patterns").innerHTML = `<thead><tr><th>pattern</th><th class="num">sustained</th><th class="num">not sustained</th><th>cases</th></tr></thead><tbody>` +
-    patRows.map(r => `<tr><td><code>${r.p}</code></td><td class="num">${r.sus}</td><td class="num">${r.non ? `<span class="chip st-ser"><i></i>${r.non}</span>` : "0"}</td><td class="small">${r.cs.join(", ")}</td></tr>`).join("") + "</tbody>";
+  const outcomeOf = id => rq2.cases.find(c => c.id === id).outcome;
+  $("#fit-patterns").innerHTML = `<thead><tr><th>pattern</th><th>seen in</th></tr></thead><tbody>` +
+    patRows.map(r => `<tr><td><code>${r.p}</code></td><td class="small">${r.cs.map(id => isSustained(outcomeOf(id)) ? id : `<span class="chip st-ser"><i></i>${id}, ${esc(outcomeOf(id))}</span>`).join(", ")}</td></tr>`).join("") + "</tbody>";
   const chipClass = v => /^supported/.test(v) ? "st-good" : /^partly/.test(v) ? "st-warn" : "st-crit";
   $("#fit-hyp").innerHTML = `<p style="margin:18px 0 6px;font-weight:600">Pre-registered hypotheses</p>` + rq3.hypotheses.map(h => `<div style="margin-top:8px;font-size:14px"><span class="chip ${chipClass(h.verdict)}"><i></i>${h.id}, ${esc(h.verdict)}</span><br><span class="small">${esc(h.statement)}</span></div>`).join("");
 
@@ -476,6 +546,9 @@ function init(D) {
   const memLines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes })), exp: slope(rq3.scales.map(sc => [Math.log(sc), Math.log(rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes)])) }));
   lineChart($("#rq3-memory"), memLines, "MB", "persons", l => fmt(l.exp, 2));
   $("#rq3-memory-note").textContent = `All three grow linearly (slope about 1). Normalized over mid is ${rq3.scales.map(sc => fmt(rq3.sizes.find(z => z.scale === sc && z.schema === "normalized").mbytes / rq3.sizes.find(z => z.scale === sc && z.schema === "mid").mbytes, 2)).join(", ")} at ${rq3.scales.map(s => fmt(s, 0)).join(", ")} persons.`;
+  const cm = rq3.cost_model;
+  $("#cost-model").innerHTML = cm ? `<div class="wrap"><table><thead><tr><th>engine</th><th class="num">a: random access</th><th class="num">b: scanned record</th><th class="num">c: fixed</th><th class="num">R²</th><th class="num">rows</th></tr></thead><tbody>${Object.entries(cm).map(([e, m]) => `<tr><td>${e}</td><td class="num">${fmt(m.a, 2)}</td><td class="num">${fmt(m.b, 2)}</td><td class="num">${fmt(m.c, 2)}</td><td class="num">${fmt(m.r2, 2)}</td><td class="num">${m.n}</td></tr>`).join("")}</tbody></table></div>
+    <p class="small" style="margin-top:8px">log(ms) = a·log(1 + random accesses) + b·log(1 + scanned records) + c. Doubling the random accesses multiplies time by ${Object.entries(cm).map(([e, m]) => `${fmt(2 ** m.a, 2)} on ${e}`).join(" and ")}; doubling the scanned records by ${Object.entries(cm).map(([e, m]) => `${fmt(2 ** m.b, 2)} on ${e}`).join(" and ")}. Counts are the schema's, from the in-memory engine; each engine supplies its own times.</p>` : `<p class="small">Available once the main run records the scan split.</p>`;
   $("#rq3-hyp").innerHTML = `<thead><tr><th></th><th>statement</th><th>verdict</th></tr></thead><tbody>` + rq3.hypotheses.map(h => `<tr><td>${h.id}</td><td>${esc(h.statement)}</td><td><span class="chip ${chipClass(h.verdict)}"><i></i>${esc(h.verdict)}</span> <span class="small">${esc(h.note)}</span></td></tr>`).join("") + "</tbody>";
   function renderTable() {
     const sc = +$("#rq3-scale").value;
@@ -502,10 +575,52 @@ function renderSchemaGraphs(SG, rq3) {
     const sm = g.sample;
     const snodes = sm.nodes.map(v => ({ id: v.id, kind: v.kind, label: v.kind === "relation" ? v.type : `${v.type}${v.label && v.label !== v.type ? " " + v.label : ""}`, props: Object.entries(v.props || {}).map(([k, val]) => { const t = `${k}: ${Array.isArray(val) ? val.map(x => Array.isArray(x) ? x[0] : x).join(", ") : val}`; return t.length > 26 ? t.slice(0, 25) + "…" : t; }), r: v.kind === "relation" ? 5 : 7, tip: `<b>${v.type}</b>${v.label}${Object.keys(v.props || {}).length ? "<br>" + Object.entries(v.props).map(([k, val]) => `${k}: ${JSON.stringify(val)}`).join("<br>") : ""}` }));
     const slinks = sm.edges.map(e => ({ source: e.s, target: e.t, label: e.label, tip: `<b>${e.label}</b>` }));
-    const hops = { flat: 1, mid: 2, normalized: 4 }[schema];
-    panel(sampleHost, schema, `${sm.nodes.length} nodes, ${sm.edges.length} edges; a friend's city is ${hops} hop${hops > 1 ? "s" : ""} away`, snodes, slinks, { labels: true, edgeLabels: false, W: 1000, H: 290, ring: sm.nodes[0].id });
+    PANELS[schema] = panel(sampleHost, schema, `${sm.nodes.length} nodes, ${sm.edges.length} edges`, snodes, slinks, { labels: true, edgeLabels: false, W: 1000, H: sm.nodes.length > 20 ? 380 : 290, ring: sm.nodes[0].id });
+    PANELS[schema].types = Object.fromEntries(sm.nodes.map(v => [v.id, v.type]));
   }
+  const sel = $("#trace-q");
+  const qtext2 = Object.fromEntries(rq3.queries.map(q => [q.id, q.question]));
+  sel.innerHTML = Object.entries(TRACES).map(([q, t]) => `<option value="${q}">${q}: ${esc(qtext2[q] || t.text)}</option>`).join("");
+  sel.addEventListener("change", () => traceAll(rq3.schemas));
+  traceAll(rq3.schemas);
   $("#graphs-note").textContent = "Type graphs are read from a 300-person build of each schema; instance counts in the tooltips are from that build, the totals in the captions from the largest benchmark scale. The neighbourhood is the first person, two friends, their city and country, one employer, one post with its tags, and that post's forum.";
+}
+
+const PANELS = {};
+// question → the entity types its path visits, in order; relation nodes in between are free
+const TRACES = {
+  Q01: { types: ["Person", "Person", "City"], text: "a friend's city" },
+  Q11: { types: ["Person", "Person", "Organisation", "Country"], text: "friends' employers' country" },
+  Q19: { types: ["City", "Person", "Organisation"], text: "people in a city and their employers" },
+};
+function traceAll(schemas) {
+  const q = $("#trace-q").value, spec = TRACES[q];
+  for (const schema of schemas) {
+    const P = PANELS[schema]; if (!P) continue;
+    const adj = {}; P.links.forEach(l => { (adj[l.source.id] ||= []).push([l.target.id, l]); (adj[l.target.id] ||= []).push([l.source.id, l]); });
+    const typeOf = id => P.types[id], isRel = id => P.nodes.find(d => d.id === id).kind === "relation";
+    const onEdges = new Set(), scanNodes = new Set(); let hops = 0, note = [];
+    // start: the centre person, or every node of the start type (a scan) when the start type is not in this schema
+    let frontier = [];
+    if (spec.types[0] === "Person") frontier = [P.center];
+    else { const starts = P.nodes.filter(d => typeOf(d.id) === spec.types[0]).map(d => d.id); if (starts.length) frontier = starts; else { const alt = P.nodes.filter(d => typeOf(d.id) === spec.types[1]).map(d => d.id); alt.forEach(id => scanNodes.add(id)); hops += alt.length; note.push(`${spec.types[0]} is a property here: scan every ${spec.types[1]} (${alt.length} in this sample)`); frontier = alt; spec._skip = 1; } }
+    let k = spec._skip ? 2 : 1; delete spec._skip;
+    const used = new Set(frontier);
+    for (; k < spec.types.length; k++) {
+      const want = spec.types[k]; const next = [];
+      for (const u of frontier) {
+        // breadth-first through relation nodes only, to the nearest node of the wanted type
+        const q2 = [[u, []]], seen = new Set([u]); let found = null;
+        while (q2.length && !found) { const [x, path] = q2.shift(); for (const [y, l] of adj[x] || []) { if (seen.has(y)) continue; seen.add(y); const p2 = [...path, l]; if (typeOf(y) === want && !used.has(y)) { found = [y, p2]; break; } if (isRel(y)) q2.push([y, p2]); } }
+        if (found) { found[1].forEach(l => onEdges.add(l)); hops += found[1].length; used.add(found[0]); next.push(found[0]); }
+      }
+      if (!next.length) { const have = P.nodes.some(d => typeOf(d.id) === want); note.push(have ? `no ${want} reachable in this sample` : `${want} is a property here: read it, no hop`); break; }
+      frontier = next;
+    }
+    P.linkSel.classed("on", l => onEdges.has(l)).style("stroke", l => onEdges.has(l) ? SERIES[schema] : null);
+    P.nodeSel.classed("scan", d => scanNodes.has(d.id)).select("circle").style("stroke", d => scanNodes.has(d.id) ? SERIES[schema] : null);
+    P.svg.selectAll("text.hopcount").data([0]).join("text").attr("class", "hopcount").attr("x", 12).attr("y", 20).text(`${q}: ${hops} hop${hops === 1 ? "" : "s"}${note.length ? " · " + note.join("; ") : ""}`);
+  }
 }
 
 function panel(host, schema, stat, nodes, links, o) {
@@ -572,32 +687,34 @@ function panel(host, schema, stat, nodes, links, o) {
   }
   place();
   node.call(d3.drag().on("start", (e, d) => { d.fx = d.x; d.fy = d.y; }).on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; if (sim) { sim.alpha(0.3).tick(); } else { d.x = e.x; d.y = e.y; } place(); }).on("end", (e, d) => { d.fx = null; d.fy = null; }));
+  node.attr("class", "node");
+  return { svg, nodes, links, nodeSel: node, linkSel: link, center: o.ring };
 }
 
 // ---------- follow-up runs: index, skew, second engine, writes ----------
 const DIAG = ["Q02", "Q11", "Q13", "Q17", "Q18", "Q19"];
 const RUN_TEXT = {
-  indexed: ["Flat with reverse indexes", "Same flat schema plus three dictionaries (city, employer, tag) built after load. The index lookup is charged one hop per result, like a reverse edge."],
-  skew: ["Heavy-tailed fan-in", "Cities, employers and tags drawn from a Zipf distribution (exponent 1) so a few carry most of the persons and messages; query parameters drawn in proportion, so the head is asked about as often as it is populated."],
-  kuzu: ["Second engine: Kùzu", "The same data loaded into an embedded graph database three ways, the six diagnostic questions written in Cypher once per schema, engine execution time best of five. Kùzu has no secondary property indexes, so flat's reverse lookups scan here too."],
+  indexed: ["Flat with reverse indexes", "Same flat schema plus three dictionaries (city, employer, tag) built after load. The index lookup is charged one hop per result, like a reverse edge.", "Verdict: the reverse-lookup penalty was the missing index, not the flat layout. Three indexes cost 2 MB and put flat within 20% of the best schema on every question."],
+  skew: ["Heavy-tailed fan-in", "Cities, employers and tags drawn from a Zipf distribution (exponent 1) so a few carry most of the persons and messages; query parameters drawn in proportion, so the head is asked about as often as it is populated.", "Verdict: with supernodes, reverse lookups grow with n on every schema; the schema sets the constant, not the exponent."],
+  kuzu: ["Second engine: Kùzu", "The same data loaded into an embedded graph database three ways, the six diagnostic questions written in Cypher once per schema, engine execution time best of five. Kùzu has no secondary property indexes, so flat's reverse lookups scan here too.", "Verdict: storage ratios transfer, latency ratios do not. Reification costs more on a join engine (up to 7×); an unindexed scan costs far less on a columnar one (5× instead of 500×)."],
 };
 function renderFollowups(rq3, qtext) {
   const host = $("#rq3-followups"); const parts = [];
   const slopeOf = (run, s, q) => slope(run.scales.map(n => [Math.log(n), Math.log(run.bench.find(b => b.scale === n && b.schema === s && b.query === q).ms)]));
   for (const [tag, run] of Object.entries(rq3.followups || {})) {
-    const [title, text] = RUN_TEXT[tag] || [tag, ""]; const n = Math.max(...run.scales);
+    const [title, text, verdict] = RUN_TEXT[tag] || [tag, "", ""]; const n = Math.max(...run.scales);
     const at = (s, q) => run.bench.find(b => b.scale === n && b.schema === s && b.query === q);
     const hasHops = "hops" in run.bench[0];
     const sizes = run.sizes.filter(z => z.scale === n);
     const rows = DIAG.filter(q => run.bench.some(b => b.query === q)).map(q => `<tr><td>${q}</td><td class="small">${esc(qtext[q])}</td>${run.schemas.map(s => `<td class="num">${hasHops ? fmt(at(s, q).hops, 0) : fmt(at(s, q).ms, 3)}</td>`).join("")}${run.schemas.map(s => `<td class="num">${fmt(slopeOf(run, s, q), 2)}</td>`).join("")}</tr>`).join("");
-    parts.push(`<h3>${esc(title)}</h3><p class="small" style="color:var(--ink-2)">${esc(text)} Persons: ${run.scales.map(x => fmt(x, 0)).join(", ")}.${sizes.length ? ` Size at ${fmt(n, 0)}: ${sizes.map(z => `${z.schema} ${fmt(z.mbytes, 0)} MB`).join(", ")}.` : ""}</p>
+    parts.push(`<h3>${esc(title)}</h3>${verdict ? `<p style="font-weight:500;max-width:70ch">${esc(verdict)}</p>` : ""}<p class="small" style="color:var(--ink-2)">${esc(text)} Persons: ${run.scales.map(x => fmt(x, 0)).join(", ")}.${sizes.length ? ` Size at ${fmt(n, 0)}: ${sizes.map(z => `${z.schema} ${fmt(z.mbytes, 0)} MB`).join(", ")}.` : ""}</p>
       <div class="wrap"><table><thead><tr><th>query</th><th></th>${run.schemas.map(s => `<th class="num">${hasHops ? "hops" : "ms"} ${s}</th>`).join("")}${run.schemas.map(s => `<th class="num">slope ${s}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`);
   }
   if (rq3.writes && rq3.writes.length) {
     const n = Math.max(...rq3.writes.map(w => w.scale)); const W = rq3.writes.filter(w => w.scale === n);
     const schemas = [...new Set(W.map(w => w.schema))], updates = [...new Set(W.map(w => w.update))];
     const at = (s, u) => W.find(w => w.schema === s && w.update === u);
-    parts.push(`<h3>The write path</h3><p class="small" style="color:var(--ink-2)">Records touched by one update at ${fmt(n, 0)} persons: property writes plus edge insertions and deletions. Flat pays here for what it saved on reads: a renamed city or tag is rewritten on every record that copied it.</p>
+    parts.push(`<h3>The write path</h3><p style="font-weight:500;max-width:70ch">Verdict: denormalisation pays on reads and charges on writes in proportion to fan-in; a rename touches every record that copied the value.</p><p class="small" style="color:var(--ink-2)">Records touched by one update at ${fmt(n, 0)} persons: property writes plus edge insertions and deletions. Flat pays here for what it saved on reads: a renamed city or tag is rewritten on every record that copied it.</p>
       <div class="wrap"><table><thead><tr><th>update</th>${schemas.map(s => `<th class="num">${s} records</th>`).join("")}${schemas.map(s => `<th class="num">${s} µs</th>`).join("")}</tr></thead><tbody>${updates.map(u => `<tr><td>${u.replace(/_/g, " ")}</td>${schemas.map(s => `<td class="num">${fmt(at(s, u).records, 0)}</td>`).join("")}${schemas.map(s => `<td class="num">${fmt(at(s, u).us, 1)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
   }
   host.innerHTML = parts.length ? `<h3 style="margin-top:48px">Follow-up runs</h3><p>Each of these answers one objection to the main run. They are reported separately because the main run's hypotheses were registered before they existed.</p>` + parts.join("") : "";
@@ -620,6 +737,21 @@ function barChart(svg, rows, max) {
   g.filter(d => d.extra > 0).append("rect").attr("x", d => x(d.value) + (d.value ? 2 : 0)).attr("y", 5).attr("height", 20).attr("width", d => x(d.extra) - x(0) - (d.value ? 2 : 0)).attr("rx", 4).attr("fill", "var(--seq-1)");
   g.append("text").attr("class", "lbl").attr("x", d => x(d.value + (d.extra || 0)) + 6).attr("y", 19).text(d => d.extra ? `${d.value} (+${d.extra} named only)` : d.value);
   g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${esc(d.label)}</b>${d.value} of ${max} frameworks measure it${d.extra ? `; ${d.extra} name${d.extra > 1 ? "" : "s"} it without measuring` : ""}`; }).call(d3tips);
+}
+
+// Horizontal bars: total ms per 1,000 operations per schema, read and write parts stacked
+function barsMs(svg, rows) {
+  const W = 720, rowH = 34, L = 110, R = 90, T = 8, H = T + rows.length * rowH + 28;
+  const root = d3.select(svg).attr("viewBox", `0 0 ${W} ${H}`); root.selectAll("*").remove();
+  const x = d3.scaleLinear().domain([0, d3.max(rows, r => r.total) * 1.05 || 1]).range([L, W - R]).nice();
+  root.append("g").attr("transform", `translate(0,${H - 24})`).call(d3.axisBottom(x).ticks(5).tickSize(-(H - T - 24)).tickFormat(d3.format(",~g"))).call(axisStyle).select(".domain").remove();
+  root.append("text").attr("class", "tick").attr("x", L, 0).attr("y", H - 4).text("ms per 1,000 operations");
+  const g = root.selectAll("g.row").data(rows).join("g").attr("class", "row").attr("transform", (d, i) => `translate(0,${T + i * rowH})`);
+  g.append("text").attr("x", L - 10).attr("y", 20).attr("text-anchor", "end").text(d => d.sc.replace("_indexed", " + index"));
+  g.append("rect").attr("x", x(0)).attr("y", 7).attr("height", 20).attr("width", d => Math.max(0, x(d.read) - x(0))).attr("fill", d => seriesColor(d.sc.startsWith("flat") ? "flat" : d.sc)).attr("opacity", d => d.sc === "flat_indexed" ? 0.55 : 1);
+  g.append("rect").attr("x", d => x(d.read) + (d.read ? 2 : 0)).attr("y", 7).attr("height", 20).attr("width", d => Math.max(0, x(d.total) - x(d.read) - (d.read ? 2 : 0))).attr("fill", "var(--rule)");
+  g.append("text").attr("class", "lbl").attr("x", d => x(d.total) + 6).attr("y", 21).text(d => `${fmt(d.total, 0)}${d.write > 0.02 * d.total ? ` (${fmt(d.write, 0)} on writes)` : ""}`);
+  g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${d.sc}</b>reads ${fmt(d.read, 1)} ms + writes ${fmt(d.write, 1)} ms per 1,000 operations`; }).call(d3tips);
 }
 
 // One row per question, one dot per schema on a shared x axis. opts: log, ref (emphasised rule), refs (other rules), ticks, fmtX, label, onSelect, selected

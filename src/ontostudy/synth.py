@@ -51,11 +51,15 @@ def generate(n_persons: int, seed: int = 0, skew: float = 0.0) -> Dataset:
         nid[0] += 1
         return nid[0]
 
+    zipf: dict[int, list[float]] = {}   # Zipf weights by pool length; the same list every call, so computed once
+
     def pick(pool, k=1):
         """k distinct items, uniform when skew == 0, Zipf by list position otherwise."""
         if not skew:
             return rng.sample(pool, k)
-        w = [1 / (i + 1) ** skew for i in range(len(pool))]
+        w = zipf.get(len(pool))
+        if w is None:
+            w = zipf[len(pool)] = [1 / (i + 1) ** skew for i in range(len(pool))]
         out = []
         while len(out) < k:
             x = rng.choices(pool, w)[0]

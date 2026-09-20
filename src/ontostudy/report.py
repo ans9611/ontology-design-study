@@ -121,6 +121,10 @@ def cost_model_table(fits):
 REF_SCALE = 10000   # the one scale every run shares; headline numbers are reported here
 
 
+def ref_scale(R):
+    return REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]
+
+
 def boot_median(values, boots=2000, seed=0):
     """Median with a 95% bootstrap interval over the twenty queries."""
     import random
@@ -132,7 +136,7 @@ def boot_median(values, boots=2000, seed=0):
 
 
 def headline(R):
-    n = REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]; B = R["B"]; qs = R["queries"]; S = R["schemas"]
+    n = ref_scale(R); B = R["B"]; qs = R["queries"]; S = R["schemas"]
     hop = lambda s, q: int(B[(n, s, q)]["hops"])
     ms = lambda s, q: float(B[(n, s, q)]["seconds"])
     out = ["| | " + " | ".join(S) + " |", "|---|" + "---|" * len(S)]
@@ -151,7 +155,7 @@ def headline(R):
 
 
 def per_query(R):
-    n = REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]; B = R["B"]; S = R["schemas"]
+    n = ref_scale(R); B = R["B"]; S = R["schemas"]
     head = "| query | " + " | ".join(f"hops {s}" for s in S) + " | " + " | ".join(f"ms {s}" for s in S) + " | " + " | ".join(f"exp {s}" for s in S) + " |"
     out = [head, "|---|" + "---|" * (3 * len(S))]
     for q in R["queries"]:
@@ -168,7 +172,7 @@ def per_query(R):
 
 def diagnostic(R, key="hops"):
     """The six diagnostic queries, one row each, hops (or ms) and slope per schema."""
-    n = REF_SCALE if REF_SCALE in R["scales"] else R["scales"][-1]; B = R["B"]; S = R["schemas"]
+    n = ref_scale(R); B = R["B"]; S = R["schemas"]
     label = "hops" if key == "hops" else "ms"
     out = ["| query | " + " | ".join(f"{label} {s}" for s in S) + " | " + " | ".join(f"exp {s}" for s in S) + " |", "|---|" + "---|" * (2 * len(S))]
     for q in [q for q in DIAG if q in R["queries"]]:

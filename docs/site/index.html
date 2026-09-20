@@ -5,202 +5,273 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ontology Design Study</title>
 <meta name="description" content="Structural design choices in enterprise ontologies and their engineering cost: metric coverage (RQ1), eight industry cases (RQ2), a three-schema benchmark (RQ3).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&display=swap">
 <style>
 :root {
   color-scheme: light;
-  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
-  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10);
-  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;           /* flat / mid / normalized */
-  --seq-1: #cde2fb; --seq-2: #86b6ef; --seq-3: #3987e5; --seq-4: #1c5cab;
+  --page: #edf0ec; --sheet: #f7f8f6; --ink: #12302b; --ink-2: #4b615a; --muted: #7d8f88;
+  --rule: #c6cfc9; --rule-soft: #d9e0dc; --grid: #dde3df;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;                      /* flat / mid / normalized */
+  --seq-1: #cde2fb; --seq-3: #3987e5;
   --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --critical: #d03b3b;
-  --mid-neutral: #f0efec;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+    --page: #0f1a17; --sheet: #16241f; --ink: #e9efec; --ink-2: #b7c5bf; --muted: #7f918a;
+    --rule: #2f423b; --rule-soft: #24352f; --grid: #24352f;
     --s1: #3987e5; --s2: #d95926; --s3: #199e70;
-    --seq-1: #184f95; --seq-2: #256abf; --seq-3: #5598e7; --seq-4: #9ec5f4;
-    --mid-neutral: #383835;
+    --seq-1: #184f95; --seq-3: #5598e7;
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --page: #0d0d0d; --surface: #1a1a19; --ink: #fff; --ink-2: #c3c2b7; --muted: #898781;
-  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10);
+  --page: #0f1a17; --sheet: #16241f; --ink: #e9efec; --ink-2: #b7c5bf; --muted: #7f918a;
+  --rule: #2f423b; --rule-soft: #24352f; --grid: #24352f;
   --s1: #3987e5; --s2: #d95926; --s3: #199e70;
-  --seq-1: #184f95; --seq-2: #256abf; --seq-3: #5598e7; --seq-4: #9ec5f4;
-  --mid-neutral: #383835;
+  --seq-1: #184f95; --seq-3: #5598e7;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-a { color: inherit; }
-header, main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-header { padding-top: 40px; padding-bottom: 8px; }
-h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.01em; }
-h2 { font-size: 19px; margin: 32px 0 10px; }
-h3 { font-size: 15px; margin: 20px 0 6px; color: var(--ink-2); font-weight: 600; }
-.sub { color: var(--ink-2); margin: 0; max-width: 78ch; }
-.meta { color: var(--muted); font-size: 13px; margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap; }
-nav { display: flex; gap: 4px; border-bottom: 1px solid var(--grid); margin-top: 22px; overflow-x: auto; }
-nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; font: inherit; font-weight: 600; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
-nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
-section[hidden] { display: none; }
-main { padding-bottom: 64px; }
-p { max-width: 78ch; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.tile .k { font-size: 13px; color: var(--ink-2); }
-.tile .v { font-size: 28px; font-weight: 600; margin: 2px 0; }
-.tile .n { font-size: 12px; color: var(--muted); }
-table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
-th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .schema .trace { animation: none; stroke-dashoffset: 0; } }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: "Bricolage Grotesque", system-ui, sans-serif; font-size: 16px; line-height: 1.5; font-optical-sizing: auto; }
+a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--ink); }
+:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+code { font-family: inherit; font-weight: 500; }
+p { max-width: 68ch; margin: 0 0 1em; }
+h1 { font-size: clamp(34px, 5vw, 56px); line-height: 1.02; font-weight: 500; letter-spacing: -.02em; margin: 0; max-width: 16ch; }
+h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.15; font-weight: 500; letter-spacing: -.015em; margin: 0 0 12px; max-width: 30ch; }
+h3 { font-size: 18px; font-weight: 600; margin: 40px 0 10px; }
+.lede { font-size: 19px; line-height: 1.4; color: var(--ink-2); max-width: 58ch; }
+.small { font-size: 13.5px; color: var(--muted); }
+.note { font-size: 13.5px; color: var(--ink-2); max-width: 60ch; border-left: 2px solid var(--rule); padding-left: 12px; margin: 14px 0; }
+
+/* frame */
+.frame { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+.hero { padding: 56px 0 24px; }
+.hero-top { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 36px; }
+.hero-links { font-size: 14px; color: var(--ink-2); display: flex; gap: 20px; flex-wrap: wrap; }
+.schemas { display: grid; grid-template-columns: 1fr; gap: 12px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 20px 0; }
+@media (min-width: 760px) { .schemas { grid-template-columns: 1fr 1fr 1fr; gap: 24px; } }
+.schema { display: flex; flex-direction: column; }
+.schema svg { margin-top: auto; }
+.schema h4 { margin: 0 0 4px; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.schema h4 i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.schema .hops { font-size: 15px; color: var(--ink-2); margin: 0 0 8px; }
+.schema .hops b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.schema svg { width: 100%; height: auto; display: block; }
+.schema .node, .schema .rel { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.5; }
+.schema .edge { stroke: var(--ink-2); stroke-width: 1.5; fill: none; }
+.schema .lbl { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.schema .rel-lbl { fill: var(--ink); font-size: 11.5px; font-weight: 600; }
+.schema .prop { fill: var(--ink-2); font-size: 12px; }
+.schema .elbl { fill: var(--ink-2); font-size: 11.5px; }
+.schema .trace { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: .9; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: trace 1.1s cubic-bezier(.4,0,.2,1) forwards; }
+.schema:nth-child(2) .trace { animation-delay: .35s; } .schema:nth-child(3) .trace { animation-delay: .7s; }
+@keyframes trace { to { stroke-dashoffset: 0; } }
+.hero-claim { display: grid; gap: 20px; grid-template-columns: 1fr; padding: 24px 0 8px; }
+@media (min-width: 900px) { .hero-claim { grid-template-columns: 2fr 1fr; align-items: start; } }
+.hero-claim .claim { font-size: 20px; line-height: 1.35; max-width: 40ch; margin: 0; }
+.hero-claim .claim b { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* body: rail + content */
+.body { display: grid; grid-template-columns: 1fr; gap: 0 40px; padding-top: 24px; }
+@media (min-width: 900px) { .body { grid-template-columns: 150px minmax(0, 1fr); } }
+main { min-width: 0; }
+.rail { display: none; }
+@media (min-width: 900px) { .rail { display: block; position: sticky; top: 24px; align-self: start; font-size: 14px; } }
+.rail a { display: block; padding: 6px 0; color: var(--ink-2); text-decoration: none; border-top: 1px solid var(--rule-soft); }
+.rail a:first-child { border-top: 0; }
+.rail a[aria-current="true"] { color: var(--ink); font-weight: 600; }
+.rail .rq { font-variant-numeric: tabular-nums; margin-right: 8px; color: var(--muted); }
+.rail a[aria-current="true"] .rq { color: var(--ink); }
+main section { padding: 32px 0 48px; border-top: 1px solid var(--rule); scroll-margin-top: 16px; }
+main section:first-child { border-top: 0; padding-top: 8px; }
+.kicker { font-size: 15px; color: var(--muted); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+thead th { color: var(--ink-2); font-weight: 500; border-bottom: 1px solid var(--rule); }
+td.num, th.num { text-align: right; }
 .wrap { overflow-x: auto; }
-.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink-2); white-space: nowrap; }
-.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.st-good i { background: var(--good); } .st-warn i { background: var(--warn); } .st-crit i { background: var(--critical); } .st-ser i { background: var(--serious); }
-.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin: 6px 0 10px; }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); margin: 8px 0 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .sw1 { background: var(--s1); } .sw2 { background: var(--s2); } .sw3 { background: var(--s3); }
-.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; font-size: 13.5px; }
-.controls label { color: var(--ink-2); }
-select, .seg button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; }
-.seg { display: inline-flex; } .seg button { border-radius: 0; cursor: pointer; } .seg button:first-child { border-radius: 6px 0 0 6px; } .seg button:last-child { border-radius: 0 6px 6px 0; }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
-svg { display: block; width: 100%; height: auto; }
-svg text { fill: var(--ink-2); font-size: 12px; font-family: inherit; }
-svg .tick { fill: var(--muted); font-size: 11px; }
-svg .grid { stroke: var(--grid); stroke-width: 1; }
-svg .axis { stroke: var(--axis); stroke-width: 1; }
-svg .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
-.tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 6px 20px rgba(0,0,0,.12); display: none; max-width: 320px; z-index: 10; }
-.tip b { display: block; margin-bottom: 2px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; vertical-align: baseline; }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.st-good i { background: var(--good); } .st-warn i { background: var(--warn); } .st-crit i { background: var(--critical); } .st-ser i { background: var(--serious); }
+
+/* controls */
+.controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0; font-size: 14px; color: var(--ink-2); }
+select, .seg button { font: inherit; font-size: 14px; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); padding: 4px 8px; max-width: 100%; }
+.seg { display: inline-flex; } .seg button { cursor: pointer; margin-left: -1px; } .seg button:first-child { margin-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); position: relative; }
+
+/* charts */
+.fig { background: var(--sheet); border-top: 1px solid var(--rule); padding: 12px 8px 4px; }
+svg.chart { display: block; width: 100%; height: auto; }
+svg.chart text { fill: var(--ink-2); font-size: 12px; font-family: inherit; }
+svg.chart .tick { fill: var(--muted); font-size: 11px; }
+svg.chart .grid { stroke: var(--grid); stroke-width: 1; }
+svg.chart .axis { stroke: var(--rule); stroke-width: 1; }
+svg.chart .lbl { fill: var(--ink); font-size: 12px; font-weight: 600; }
+.hit { fill: transparent; }
+#rq1-bars { max-width: 720px; }
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--page); padding: 8px 10px; font-size: 13px; display: none; max-width: 320px; z-index: 10; line-height: 1.4; }
+.tip b { display: block; margin-bottom: 2px; font-weight: 600; }
+.tip code { font-weight: 600; }
+
+/* matrices */
 .matrix { width: auto; }
 .matrix td.cell { padding: 0; width: 40px; min-width: 40px; }
-#rq1-bars { max-width: 720px; }
-.matrix .dot { display: block; margin: 2px; height: 26px; border-radius: 3px; }
+.matrix .dot { display: block; margin: 2px; height: 26px; }
 .matrix .on { background: var(--seq-3); } .matrix .named { background: var(--seq-1); }
-.matrix th.rot { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; padding: 8px 4px; font-weight: 500; white-space: nowrap; }
-.matrix tr:hover td, .matrix tr:hover th { background: color-mix(in srgb, var(--ink) 4%, transparent); }
-.hit { fill: transparent; }
-details summary { cursor: pointer; color: var(--ink-2); font-weight: 600; margin: 14px 0 6px; }
-.small { font-size: 13px; color: var(--muted); }
-.two { display: grid; gap: 16px; grid-template-columns: 1fr; } .two > * { min-width: 0; }
-select { max-width: 100%; }
+.matrix th.rot { writing-mode: vertical-rl; transform: rotate(180deg); text-align: left; padding: 8px 4px; font-weight: 500; white-space: nowrap; color: var(--ink); }
+.matrix th.rot a { text-decoration: none; }
+.matrix tbody th { font-weight: 500; color: var(--ink); }
+.matrix tbody th a { text-decoration: none; }
+.matrix tr:hover td, .matrix tr:hover th { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.two { display: grid; gap: 24px; grid-template-columns: 1fr; }
+.two > * { min-width: 0; }
 @media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } .two.wide-left { grid-template-columns: 3fr 2fr; } }
-.case-detail { font-size: 13.5px; }
-.case-detail dt { color: var(--ink-2); font-weight: 600; margin-top: 8px; } .case-detail dd { margin: 0; }
-.outcome-sustained { color: var(--ink); }
+.detail { font-size: 14px; }
+.detail dt { color: var(--ink-2); margin-top: 10px; } .detail dd { margin: 0; }
+.readings { display: grid; gap: 20px 32px; grid-template-columns: 1fr; margin-top: 16px; }
+@media (min-width: 760px) { .readings { grid-template-columns: 1fr 1fr 1fr; } }
+.readings div { font-size: 14.5px; color: var(--ink-2); }
+.readings b { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 600; margin-bottom: 4px; font-size: 16px; }
+.readings i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.gap { display: grid; gap: 4px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 12px; }
+.gap div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14.5px; }
+.gap div b { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+details summary { cursor: pointer; color: var(--ink-2); margin: 20px 0 8px; }
+footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14px; color: var(--ink-2); }
 </style>
 </head>
 <body>
-<header>
-  <h1>Ontology Design Study</h1>
-  <p class="sub">Structural design choices in enterprise ontologies and what they cost in use: how many hops a routine question needs, query latency, memory, and whether the model was kept or abandoned.</p>
-  <div class="meta">
-    <span id="meta-run"></span>
-    <span><a href="https://github.com/ans9611/ontology-design-study">Repository and write-up</a></span>
-    <span>Data: <a href="data.json">data.json</a>, built from the repo's tables by <code>python -m ontostudy.site</code></span>
+<div class="frame">
+<header class="hero">
+  <div class="hero-top">
+    <div>
+      <h1>The schema fixes the query.</h1>
+      <p class="lede" style="margin-top:14px">Structural choices in enterprise ontologies, and what each one costs once the model is in use: hops, latency, memory, and whether people keep using it.</p>
+    </div>
+    <div class="hero-links"><a href="https://github.com/ans9611/ontology-design-study">Repository and write-up</a><a href="data.json">data.json</a></div>
   </div>
-  <nav role="tablist">
-    <button role="tab" data-tab="fit" aria-selected="true">Engineering fitness</button>
-    <button role="tab" data-tab="rq1">RQ1 · Metric coverage</button>
-    <button role="tab" data-tab="rq2">RQ2 · Eight cases</button>
-    <button role="tab" data-tab="rq3">RQ3 · Benchmark</button>
-  </nav>
+
+  <div class="schemas" id="schemas"></div>
+
+  <div class="hero-claim">
+    <p class="claim" id="hero-claim"></p>
+    <p class="small" style="font-size:14px" id="hero-note"></p>
+  </div>
 </header>
-<main>
 
-<section id="tab-fit">
-  <h2>Which design choices are fit for engineering use</h2>
-  <p>Each row below is a design decision that a modelling team makes early and rarely revisits. The evidence column names where the number comes from; nothing here is an opinion without a table behind it.</p>
+<div class="body">
+  <nav class="rail" aria-label="Sections">
+    <a href="#fit">Short version</a>
+    <a href="#rq1"><span class="rq">RQ1</span>Metrics</a>
+    <a href="#rq2"><span class="rq">RQ2</span>Cases</a>
+    <a href="#rq3"><span class="rq">RQ3</span>Benchmark</a>
+  </nav>
+  <main>
 
-  <h3>Normalization depth (RQ3, one dataset modelled three ways)</h3>
-  <div class="wrap card"><table id="fit-schema"></table></div>
-  <div class="grid" id="fit-reading" style="margin-top:12px"></div>
-  <p class="small" id="fit-schema-note"></p>
+<section id="fit">
+  <h2>The short version, for a design review</h2>
+  <p>Three tables, three questions. Every number below is computed in this page from the repository's data; the reading beside it is the study's, and stays within what the number shows.</p>
 
-  <h3>Design patterns by outcome (RQ2, eight industry-scale graphs)</h3>
-  <div class="two">
-    <div class="wrap card"><table id="fit-patterns"></table></div>
-    <div class="card">
-      <div class="k" style="font-weight:600">How to read it</div>
-      <p class="small" style="margin:6px 0 0">A pattern seen only in sustained systems is an association, not a cause: eight purposive cases, no controls. Patterns observed in the two non-sustained cases (Freebase: abandoned; Cyc: limited adoption) are the ones to treat as risk signals when they appear in a new design. Grade B/C sources are practice evidence, not effect evidence.</p>
-      <div id="fit-hyp" style="margin-top:14px"></div>
+  <h3>How deep to normalize</h3>
+  <div class="wrap"><table id="fit-schema"></table></div>
+  <div class="readings" id="fit-reading"></div>
+  <p class="note" id="fit-schema-note"></p>
+
+  <h3>Which patterns go with systems that lasted</h3>
+  <div class="two wide-left">
+    <div class="wrap"><table id="fit-patterns"></table></div>
+    <div>
+      <p class="note" style="margin-top:0">A pattern seen only in sustained systems is an association, not a cause: eight purposive cases and no controls. Patterns from the two non-sustained cases, Freebase (abandoned) and Cyc (limited adoption), are the ones to treat as risk signals when they show up in a new design.</p>
+      <div id="fit-hyp"></div>
     </div>
   </div>
 
-  <h3>What the metric literature does not measure (RQ1)</h3>
-  <div class="grid" id="fit-rq1"></div>
+  <h3>What the quality-metric literature does not measure</h3>
+  <div class="gap" id="fit-rq1"></div>
 </section>
 
-<section id="tab-rq1" hidden>
-  <h2>RQ1 · What existing quality metrics measure</h2>
-  <p>Seven frameworks against six property groups. A filled cell means the framework has a metric for that property; a light cell means it names the property but derives it from structural proxies instead of measuring it. Hover for the text of the cell.</p>
-  <div class="wrap card"><table class="matrix" id="rq1-matrix"></table></div>
-  <h3>Coverage per property</h3>
-  <div class="card"><svg id="rq1-bars"></svg></div>
+<section id="rq1">
+  <p class="kicker">RQ1</p>
+  <h2>What existing quality metrics measure</h2>
+  <p>Seven frameworks against six property groups. A filled cell means the framework has a metric for that property. A light cell means it names the property but derives it from structural proxies rather than measuring it. Hover a cell for its text.</p>
+  <div class="wrap"><table class="matrix" id="rq1-matrix"></table></div>
+  <h3>Frameworks covering each property</h3>
+  <div class="fig"><svg class="chart" id="rq1-bars"></svg></div>
   <details><summary>Table view</summary><div class="wrap"><table id="rq1-table"></table></div></details>
 </section>
 
-<section id="tab-rq2" hidden>
-  <h2>RQ2 · Patterns across eight industry-scale knowledge graphs</h2>
-  <p>Columns are cases, grouped by outcome. Rows are design patterns coded from the primary sources. Click a case name for its profile; click a pattern to see which cases share it.</p>
+<section id="rq2">
+  <p class="kicker">RQ2</p>
+  <h2>Patterns across eight industry-scale knowledge graphs</h2>
+  <p>Columns are cases, grouped by outcome. Rows are design patterns coded from the primary sources. Select a case for its profile, or a pattern for the cases that share it.</p>
   <div class="controls">
-    <label>Outcome</label>
+    <span>Outcome</span>
     <div class="seg" id="rq2-filter">
       <button aria-pressed="true" data-v="all">All</button>
       <button aria-pressed="false" data-v="sustained">Sustained</button>
-      <button aria-pressed="false" data-v="other">Abandoned / limited</button>
+      <button aria-pressed="false" data-v="other">Abandoned or limited</button>
     </div>
   </div>
   <div class="two wide-left">
-    <div class="wrap card"><table class="matrix" id="rq2-matrix"></table></div>
-    <div class="card case-detail" id="rq2-detail"><span class="small">Select a case or pattern.</span></div>
+    <div class="wrap"><table class="matrix" id="rq2-matrix"></table></div>
+    <div class="detail" id="rq2-detail"><span class="small">Nothing selected yet. Choose a case or a pattern in the table.</span></div>
   </div>
 </section>
 
-<section id="tab-rq3" hidden>
-  <h2>RQ3 · Query cost under three normalization depths</h2>
+<section id="rq3">
+  <p class="kicker">RQ3</p>
+  <h2>Query cost under three normalization depths</h2>
   <p id="rq3-intro"></p>
   <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span></div>
 
-  <h3>Per-query cost relative to the mid schema</h3>
+  <h3>Each query's cost relative to the mid schema</h3>
   <div class="controls">
-    <label>Metric</label>
+    <span>Metric</span>
     <div class="seg" id="rq3-metric"><button aria-pressed="true" data-v="hops">hops</button><button aria-pressed="false" data-v="ms">latency</button></div>
-    <label>Scale (persons)</label>
+    <span>Persons</span>
     <select id="rq3-scale"></select>
   </div>
-  <div class="card"><svg id="rq3-ratio"></svg></div>
-  <p class="small">Log axis. 1.0 = the mid schema's cost on that query. Points above the line cost more than mid; below, less.</p>
+  <div class="fig"><svg class="chart" id="rq3-ratio"></svg></div>
+  <p class="small" style="margin-top:8px">Log axis. 1 is the mid schema's own cost on that query.</p>
 
   <div class="two">
     <div>
-      <h3>Latency against scale for one query</h3>
-      <div class="controls"><label>Query</label><select id="rq3-query"></select></div>
-      <div class="card"><svg id="rq3-scaling"></svg></div>
-      <p class="small">Log-log; the number after each schema is the fitted slope, the latency exponent: 0 means cost is set by the neighbourhood, 1 means it grows with the whole graph.</p>
+      <h3>Latency against scale, one query at a time</h3>
+      <div class="controls"><select id="rq3-query" aria-label="Query"></select></div>
+      <div class="fig"><svg class="chart" id="rq3-scaling"></svg></div>
+      <p class="small" style="margin-top:8px">Log-log. The number after each schema is the fitted slope: near 0, cost is set by the neighbourhood; near 1, it grows with the whole graph.</p>
     </div>
     <div>
       <h3>Resident size against scale</h3>
-      <div class="controls"><span class="small">Recursive <code>sys.getsizeof</code> of the built graph.</span></div>
-      <div class="card"><svg id="rq3-memory"></svg></div>
-      <p class="small" id="rq3-memory-note"></p>
+      <div class="controls"><span>Recursive <code>sys.getsizeof</code> of the built graph</span></div>
+      <div class="fig"><svg class="chart" id="rq3-memory"></svg></div>
+      <p class="small" style="margin-top:8px" id="rq3-memory-note"></p>
     </div>
   </div>
 
-  <h3>Hypotheses, pre-registered before the run</h3>
-  <div class="wrap card"><table id="rq3-hyp"></table></div>
-
-  <details><summary>Table view: all queries at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
+  <h3>Hypotheses, written before the run</h3>
+  <div class="wrap"><table id="rq3-hyp"></table></div>
+  <details><summary>Table view: every query at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
 </section>
-</main>
-<div class="tip" id="tip"></div>
+
+  </main>
+</div>
+<footer>Yechan Moon, 2026. Method, protocol, case files and raw timings are in the <a href="https://github.com/ans9611/ontology-design-study">repository</a>; this page is rebuilt from them by <code>python -m ontostudy.site</code>.</footer>
+</div>
+<div class="tip" id="tip" role="tooltip"></div>
 
 <script>
 const $ = (s, el = document) => el.querySelector(s);
@@ -212,31 +283,42 @@ const slope = pts => { const n = pts.length, mx = pts.reduce((a, p) => a + p[0],
 const SERIES = { flat: "var(--s1)", mid: "var(--s2)", normalized: "var(--s3)" };
 const isSustained = o => o.startsWith("sustained");
 
-// tabs
-document.querySelectorAll("nav [role=tab]").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("nav [role=tab]").forEach(x => x.setAttribute("aria-selected", x === b));
-  document.querySelectorAll("main > section").forEach(s => s.hidden = s.id !== "tab-" + b.dataset.tab);
-  try { localStorage.setItem("tab", b.dataset.tab); } catch {}
-}));
-try { const t = localStorage.getItem("tab"); if (t) $(`nav [data-tab=${t}]`)?.click(); } catch {}
-
 // tooltip
 const tip = $("#tip");
 function showTip(e, html) { tip.innerHTML = html; tip.style.display = "block"; moveTip(e); }
 function moveTip(e) { const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(e.clientY + 14, innerHeight - tip.offsetHeight - 8); tip.style.left = x + "px"; tip.style.top = y + "px"; }
 function hideTip() { tip.style.display = "none"; }
 function bindTips(root) { root.querySelectorAll("[data-tip]").forEach(el => { el.addEventListener("mouseenter", e => showTip(e, el.dataset.tip)); el.addEventListener("mousemove", moveTip); el.addEventListener("mouseleave", hideTip); }); }
-
-// segmented control
 function seg(el, onChange) { el.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); onChange(b.dataset.v); })); return () => el.querySelector("[aria-pressed=true]").dataset.v; }
 
-fetch("data.json").then(r => r.json()).then(init).catch(e => { $("main").innerHTML = `<p>Could not load data.json (${esc(e.message)}). Serve this folder over HTTP, e.g. <code>python -m http.server</code> in <code>docs/site</code>.</p>`; });
+// rail: mark the section in view
+const railLinks = [...document.querySelectorAll(".rail a")];
+const railObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) railLinks.forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + e.target.id)); }), { rootMargin: "-15% 0px -75% 0px" });
+document.querySelectorAll("main section").forEach(s => railObs.observe(s));
+
+fetch("data.json").then(r => r.json()).then(init).catch(e => { $("main").innerHTML = `<p>data.json did not load (${esc(e.message)}). Serve this folder over HTTP, for example <code>python -m http.server</code> inside <code>docs/site</code>.</p>`; });
+
+// ---------- hero: one relation, drawn three ways ----------
+function schemaDiagram(kind) {
+  // Q01: a person's friend and that friend's city. The trace is the path the query walks.
+  const N = (x, y, w, label, props) => `<rect class="node" x="${x}" y="${y}" width="${w}" height="${props ? 46 : 30}" rx="2"/><text class="lbl" x="${x + 8}" y="${y + 19}">${label}</text>${props ? `<text class="prop" x="${x + 8}" y="${y + 36}">${props}</text>` : ""}`;
+  const R = (cx, cy, label) => `<path class="rel" d="M${cx},${cy - 15} L${cx + 36},${cy} L${cx},${cy + 15} L${cx - 36},${cy} Z"/><text class="rel-lbl" x="${cx}" y="${cy + 4}" text-anchor="middle">${label}</text>`;
+  const E = (d, label, lx, ly) => `<path class="edge" d="${d}" marker-end="url(#arr-${kind})"/>${label ? `<text class="elbl" x="${lx}" y="${ly}" text-anchor="middle">${label}</text>` : ""}`;
+  const defs = `<defs><marker id="arr-${kind}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="var(--ink-2)"/></marker></defs>`;
+  if (kind === "flat") return `<svg viewBox="0 0 340 100" role="img" aria-label="flat: Person knows Person; city stored as a property">${defs}
+    ${E("M96,42 L166,42", "knows", 131, 34)}${N(10, 27, 86, "Person", "name")}${N(168, 19, 160, "Person", "name, city, country")}
+    <path class="trace" style="stroke:var(--s1)" d="M53,80 L53,88 L248,88 L248,72"/></svg>`;
+  if (kind === "mid") return `<svg viewBox="0 0 340 100" role="img" aria-label="mid: Person knows Person, Person is located in City">${defs}
+    ${E("M96,42 L138,42", "knows", 117, 34)}${E("M222,42 L258,42", "in", 240, 34)}${N(10, 27, 86, "Person", "name")}${N(140, 27, 82, "Person", "name")}${N(260, 27, 70, "City")}
+    <path class="trace" style="stroke:var(--s2)" d="M53,80 L53,88 L181,88 L181,80 L181,88 L295,88 L295,64"/></svg>`;
+  return `<svg viewBox="0 0 340 100" role="img" aria-label="normalized: Person, Knows node, Person, Located node, City">${defs}
+    ${E("M64,42 L72,42")}${E("M148,42 L156,42")}${E("M218,42 L226,42")}${E("M292,42 L300,42")}
+    ${N(4, 27, 60, "Person")}${R(110, 42, "Knows")}${N(158, 27, 60, "Person")}${R(259, 42, "In")}${N(302, 27, 36, "City")}
+    <path class="trace" style="stroke:var(--s3)" d="M34,62 L34,88 L110,88 L110,62 L110,88 L188,88 L188,62 L188,88 L259,88 L259,62 L259,88 L320,88 L320,62"/></svg>`;
+}
 
 function init(D) {
   const { rq1, rq2, rq3 } = D;
-  $("#meta-run").textContent = `Benchmark run ${rq3.run_date} · ${rq2.cases.length} cases · ${rq1.rows.length} frameworks`;
-
-  // ---------- RQ3 derived numbers ----------
   const B = {}; rq3.bench.forEach(b => { B[`${b.scale}|${b.schema}|${b.query}`] = b; });
   const get = (s, sc, q) => B[`${s}|${sc}|${q}`];
   const maxScale = Math.max(...rq3.scales);
@@ -254,66 +336,71 @@ function init(D) {
   }
   const midSize = stats.mid.size.mbytes;
 
-  // ---------- Fitness tab ----------
+  // hero
+  const hopsPerFriend = { flat: 1, mid: 2, normalized: 4 };
+  $("#schemas").innerHTML = rq3.schemas.map(sc => `<div class="schema"><h4><i style="background:${SERIES[sc]}"></i>${sc}</h4><p class="hops">A friend's city: <b>${hopsPerFriend[sc]} hop${hopsPerFriend[sc] > 1 ? "s" : ""}</b>. Q01 at n = ${fmt(maxScale, 0)}: <b>${fmt(get(maxScale, sc, "Q01").hops, 0)}</b> traversals.</p>${schemaDiagram(sc)}</div>`).join("");
+  $("#hero-claim").innerHTML = `Reifying a relation costs one hop per relation, on every query. Across twenty benchmark questions the normalized schema needs <b>${fmt(stats.normalized.hopRatio)}×</b> the hops of the mid schema, takes <b>${fmt(stats.normalized.msRatio, 1)}×</b> as long, and holds <b>${fmt(stats.normalized.size.mbytes / midSize, 1)}×</b> the memory, at every scale measured.`;
+  $("#hero-note").textContent = `Medians at ${fmt(maxScale, 0)} persons, best of five runs, synthetic LDBC-SNB-shaped data. Above, the same relation is drawn the way each schema stores it; the coloured line is the path Q01 walks.`;
+
+  // ---------- short version ----------
   const verdict = {
-    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(maxScale, "flat", q).hops <= get(maxScale, "mid", q).hops).length}/20 queries. No reverse index on folded entities, so ${stats.flat.steep.join(", ")} scan the graph (latency exponent above 0.5). Fit when every question starts from the entity you keyed on; a property index would remove the penalty at the cost of maintaining one.`,
-    mid: `Never the fastest, never the slowest. Within 20% of the best schema on ${stats.mid.within.length}/20; loses up to ${fmt(Math.max(...qids.map(q => get(maxScale, "mid", q).ms / get(maxScale, "flat", q).ms)), 1)}× on lookups that flat answers from a property; wins by one to three orders of magnitude on reverse lookups. Bounded cost on all twenty questions.`,
+    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(maxScale, "flat", q).hops <= get(maxScale, "mid", q).hops).length} of 20 queries. No reverse index on folded entities, so ${stats.flat.steep.join(", ")} scan the graph (latency slope above 0.5). Fits when every question starts from the entity you keyed on; a property index would remove the penalty, at the cost of maintaining one.`,
+    mid: `Never the fastest, never the slowest. Within 20% of the best schema on ${stats.mid.within.length} of 20; up to ${fmt(Math.max(...qids.map(q => get(maxScale, "mid", q).ms / get(maxScale, "flat", q).ms)), 1)}× slower where flat answers from a property; one to three orders of magnitude faster on reverse lookups. Bounded cost on all twenty questions.`,
     normalized: `One extra hop per relation, everywhere: median hop ratio ${fmt(stats.normalized.hopRatio)}, latency ${fmt(stats.normalized.msRatio, 1)}×, memory ${fmt(stats.normalized.size.mbytes / midSize, 1)}× at every scale. A constant factor, not a higher order (H3 refuted). It buys per-relation provenance and qualifiers; the price is paid on every query.`,
   };
-  $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">median hop ratio to mid</th><th class="num">median latency ratio</th><th class="num">size at n=${fmt(maxScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with exponent &gt; 0.5</th><th>worst query vs mid</th></tr></thead><tbody>` +
-    rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${s.within.length} / 20</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "—" : `${s.worst} · ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
-  $("#fit-reading").innerHTML = rq3.schemas.map(sc => `<div class="card"><div class="legend" style="margin:0 0 6px"><span><i style="background:${SERIES[sc]}"></i><b>${sc}</b></span></div><div class="small" style="color:var(--ink-2)">${verdict[sc]}</div></div>`).join("");
-  $("#fit-schema-note").textContent = `Computed from bench.csv at n = ${fmt(maxScale, 0)} persons, best of five runs, twenty parameter sets per query. Exponent = slope of log(latency) against log(persons) over ${rq3.scales.join(" / ")}. One engine (in-memory property graph); hop counts transfer to other engines, constant factors do not.`;
+  $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">hops, median ratio to mid</th><th class="num">latency, median ratio</th><th class="num">size at n = ${fmt(maxScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with slope above 0.5</th><th>worst query against mid</th></tr></thead><tbody>` +
+    rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${s.within.length} of 20</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "" : `${s.worst}, ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
+  $("#fit-reading").innerHTML = rq3.schemas.map(sc => `<div><b><i style="background:${SERIES[sc]}"></i>${sc}</b>${verdict[sc]}</div>`).join("");
+  $("#fit-schema-note").textContent = `Computed from bench.csv at n = ${fmt(maxScale, 0)} persons, best of five runs, twenty parameter sets per query. Slope is log(latency) against log(persons) over ${rq3.scales.join(" / ")}. One engine, an in-memory property graph: hop counts transfer to other engines, constant factors do not.`;
 
-  const other = rq2.cases.filter(c => !isSustained(c.outcome));
   const patRows = rq2.patterns.map(p => { const cs = rq2.matrix[p]; const sus = cs.filter(id => isSustained(rq2.cases.find(c => c.id === id).outcome)); return { p, cs, sus: sus.length, non: cs.length - sus.length }; })
     .sort((a, b) => b.non - a.non || b.sus - a.sus || a.p.localeCompare(b.p));
   $("#fit-patterns").innerHTML = `<thead><tr><th>pattern</th><th class="num">sustained</th><th class="num">not sustained</th><th>cases</th></tr></thead><tbody>` +
     patRows.map(r => `<tr><td><code>${r.p}</code></td><td class="num">${r.sus}</td><td class="num">${r.non ? `<span class="chip st-ser"><i></i>${r.non}</span>` : "0"}</td><td class="small">${r.cs.join(", ")}</td></tr>`).join("") + "</tbody>";
   const chipClass = v => /^supported/.test(v) ? "st-good" : /^partly/.test(v) ? "st-warn" : "st-crit";
-  $("#fit-hyp").innerHTML = `<div class="k" style="font-weight:600">Pre-registered hypotheses</div>` + rq3.hypotheses.map(h => `<div style="margin-top:6px"><span class="chip ${chipClass(h.verdict)}"><i></i>${h.id} ${esc(h.verdict)}</span> <span class="small">${esc(h.statement)}</span></div>`).join("");
+  $("#fit-hyp").innerHTML = `<p style="margin:18px 0 6px;font-weight:600">Pre-registered hypotheses</p>` + rq3.hypotheses.map(h => `<div style="margin-top:8px;font-size:14px"><span class="chip ${chipClass(h.verdict)}"><i></i>${h.id}, ${esc(h.verdict)}</span><br><span class="small">${esc(h.statement)}</span></div>`).join("");
 
   const proxy = t => /not measured|proxies/i.test(t);
   const coverage = rq1.columns.map((c, i) => ({ c, n: rq1.rows.filter(r => r.cells[i] && !proxy(r.cells[i])).length, named: rq1.rows.filter(r => r.cells[i] && proxy(r.cells[i])).length }));
-  $("#fit-rq1").innerHTML = coverage.map(({ c, n, named }) => `<div class="card tile"><div class="k">${esc(c)}</div><div class="v">${n} <span class="small">/ ${rq1.rows.length}</span></div><div class="n">frameworks with a metric${named ? `; ${named} more name${named > 1 ? "" : "s"} it without measuring` : ""}</div></div>`).join("");
+  $("#fit-rq1").innerHTML = coverage.map(({ c, n, named }) => `<div><span>${esc(c)}</span><b>${n} of ${rq1.rows.length}${named ? ` <span class="small">(+${named} names it)</span>` : ""}</b></div>`).join("");
 
   // ---------- RQ1 ----------
   $("#rq1-matrix").innerHTML = `<thead><tr><th></th>${rq1.columns.map(c => `<th class="rot">${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
-    rq1.rows.map(r => `<tr><th>${esc(r.framework)}</th>${r.cells.map((t, i) => `<td class="cell"><span class="dot ${t ? (proxy(t) ? "named" : "on") : ""}" data-tip="<b>${esc(r.framework)} · ${esc(rq1.columns[i])}</b>${t ? esc(t) : "no metric"}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
+    rq1.rows.map(r => `<tr><th>${esc(r.framework)}</th>${r.cells.map((t, i) => `<td class="cell"><span class="dot ${t ? (proxy(t) ? "named" : "on") : ""}" data-tip="<b>${esc(r.framework)}: ${esc(rq1.columns[i])}</b>${t ? esc(t) : "no metric"}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
   $("#rq1-table").innerHTML = `<thead><tr><th>framework</th>${rq1.columns.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>` + rq1.rows.map(r => `<tr><td>${esc(r.framework)}</td>${r.cells.map(t => `<td>${esc(t)}</td>`).join("")}</tr>`).join("") + "</tbody>";
   barChart($("#rq1-bars"), coverage.map(x => ({ label: x.c, value: x.n, extra: x.named })), rq1.rows.length);
+  bindTips($("#rq1-matrix"));
 
   // ---------- RQ2 ----------
-  let rq2Sel = null;
   const outcomeOrder = c => isSustained(c.outcome) ? 0 : c.outcome === "limited adoption" ? 1 : 2;
   const getFilter = seg($("#rq2-filter"), renderRq2);
   function renderRq2() {
     const f = getFilter();
     const cases = rq2.cases.filter(c => f === "all" || (f === "sustained") === isSustained(c.outcome)).sort((a, b) => outcomeOrder(a) - outcomeOrder(b));
-    $("#rq2-matrix").innerHTML = `<thead><tr><th></th>${cases.map(c => `<th class="rot"><a href="#" data-case="${c.id}" style="text-decoration:none">${esc(c.id)}</a></th>`).join("")}</tr>` +
-      `<tr><th class="small">outcome</th>${cases.map(c => `<td class="small">${isSustained(c.outcome) ? "✓" : c.outcome === "abandoned" ? "✗" : "△"}</td>`).join("")}</tr></thead><tbody>` +
-      rq2.patterns.map(p => `<tr><th><a href="#" data-pattern="${p}" style="text-decoration:none"><code>${p}</code></a></th>${cases.map(c => `<td class="cell"><span class="dot ${rq2.matrix[p].includes(c.id) ? "on" : ""}" data-tip="<b>${esc(c.name)}</b>${rq2.matrix[p].includes(c.id) ? `<code>${p}</code> observed` : "not observed"} · ${esc(c.outcome)}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
+    $("#rq2-matrix").innerHTML = `<thead><tr><th></th>${cases.map(c => `<th class="rot"><a href="#rq2" data-case="${c.id}">${esc(c.id)}</a></th>`).join("")}</tr>` +
+      `<tr><th class="small" style="font-weight:400">outcome</th>${cases.map(c => `<td class="small" style="text-align:center;padding-right:0">${isSustained(c.outcome) ? "kept" : c.outcome === "abandoned" ? "ended" : "limited"}</td>`).join("")}</tr></thead><tbody>` +
+      rq2.patterns.map(p => `<tr><th><a href="#rq2" data-pattern="${p}"><code>${p}</code></a></th>${cases.map(c => `<td class="cell"><span class="dot ${rq2.matrix[p].includes(c.id) ? "on" : ""}" data-tip="<b>${esc(c.name)}</b>${rq2.matrix[p].includes(c.id) ? `<code>${p}</code> observed` : "not observed"}. Outcome: ${esc(c.outcome)}"></span></td>`).join("")}</tr>`).join("") + "</tbody>";
     bindTips($("#rq2-matrix"));
     $("#rq2-matrix").querySelectorAll("a[data-case]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); showCase(a.dataset.case); }));
     $("#rq2-matrix").querySelectorAll("a[data-pattern]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); showPattern(a.dataset.pattern); }));
   }
   function showCase(id) {
     const c = rq2.cases.find(x => x.id === id);
-    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:15px">${esc(c.name)}</div><dl>
+    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:17px">${esc(c.name)}</div><dl>
       <dt>Outcome</dt><dd>${esc(c.outcome)}</dd><dt>Organization</dt><dd>${esc(c.organization)}</dd><dt>Domain</dt><dd>${esc(c.domain)}</dd><dt>Period</dt><dd>${esc(c.period)}</dd><dt>Source grade</dt><dd>${esc(c.grade)}</dd>
       <dt>Patterns</dt><dd>${c.patterns.map(p => `<code>${p}</code>`).join(", ")}</dd></dl>
-      <p class="small"><a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/${id === "amazon" ? "amazon-product-graph" : id}.md">Case file</a></p>`;
+      <p class="small" style="margin-top:12px"><a href="https://github.com/ans9611/ontology-design-study/blob/master/docs/cases/${id === "amazon" ? "amazon-product-graph" : id}.md">Read the case file</a></p>`;
   }
   function showPattern(p) {
     const cs = rq2.matrix[p].map(id => rq2.cases.find(c => c.id === id));
-    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:15px"><code>${p}</code></div><p class="small">Observed in ${cs.length} of ${rq2.cases.length} cases.</p><table>${cs.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.outcome)}</td></tr>`).join("")}</table>`;
+    $("#rq2-detail").innerHTML = `<div style="font-weight:600;font-size:17px"><code>${p}</code></div><p class="small">Observed in ${cs.length} of ${rq2.cases.length} cases.</p><table>${cs.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.outcome)}</td></tr>`).join("")}</table>`;
   }
   renderRq2();
 
   // ---------- RQ3 ----------
-  $("#rq3-intro").textContent = `Synthetic LDBC-SNB-shaped graphs at ${rq3.scales.map(s => fmt(s, 0)).join(" / ")} persons. Three schemas of the same data: flat (place, organisation, tag folded into properties), mid (entity nodes and direct edges), normalized (every relation reified as a node). Twenty questions fixed before the schemas were written; all three schemas returned identical answers on every check.`;
+  $("#rq3-intro").textContent = `Synthetic LDBC-SNB-shaped graphs at ${rq3.scales.map(s => fmt(s, 0)).join(", ")} persons. Three schemas of the same data: flat folds place, organisation and tag into properties; mid keeps entity nodes and direct edges; normalized reifies every relation as a node. Twenty questions were fixed before the schemas were written, and all three schemas returned identical answers on every check.`;
   $("#rq3-scale").innerHTML = rq3.scales.map(s => `<option value="${s}" ${s === maxScale ? "selected" : ""}>${fmt(s, 0)}</option>`).join("");
-  $("#rq3-query").innerHTML = rq3.queries.map(q => `<option value="${q.id}" ${q.id === "Q18" ? "selected" : ""}>${q.id} · ${esc(q.question)}</option>`).join("");
+  $("#rq3-query").innerHTML = rq3.queries.map(q => `<option value="${q.id}" ${q.id === "Q18" ? "selected" : ""}>${q.id}: ${esc(q.question)}</option>`).join("");
   const getMetric = seg($("#rq3-metric"), renderRatio);
   $("#rq3-scale").addEventListener("change", () => { renderRatio(); renderTable(); });
   $("#rq3-query").addEventListener("change", renderScaling);
@@ -323,7 +410,7 @@ function init(D) {
     const pts = [];
     for (const schema of rq3.schemas) for (const q of qids) {
       const v = get(sc, schema, q), mid = get(sc, "mid", q);
-      pts.push({ x: q, y: v[m] / mid[m], series: schema, tip: `<b>${q} · ${schema}</b>${esc(rq3.queries.find(x => x.id === q).question)}<br>${m === "hops" ? `${fmt(v.hops, 0)} hops (mid ${fmt(mid.hops, 0)})` : `${fmt(v.ms, 3)} ms (mid ${fmt(mid.ms, 3)} ms)`} · ${fmt(v[m] / mid[m], 2)}× mid` });
+      pts.push({ x: q, y: v[m] / mid[m], series: schema, tip: `<b>${q}, ${schema}</b>${esc(rq3.queries.find(x => x.id === q).question)}<br>${m === "hops" ? `${fmt(v.hops, 0)} hops (mid ${fmt(mid.hops, 0)})` : `${fmt(v.ms, 3)} ms (mid ${fmt(mid.ms, 3)} ms)`}, ${fmt(v[m] / mid[m], 2)}× mid` });
     }
     dotChart($("#rq3-ratio"), qids, pts, m === "hops" ? "hop ratio to mid" : "latency ratio to mid");
   }
@@ -334,15 +421,14 @@ function init(D) {
   }
   const memLines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes })), exp: slope(rq3.scales.map(sc => [Math.log(sc), Math.log(rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes)])) }));
   lineChart($("#rq3-memory"), memLines, "MB", "persons", l => fmt(l.exp, 2));
-  $("#rq3-memory-note").textContent = `All three grow linearly (slope ≈ 1). normalized / mid = ${rq3.scales.map(sc => fmt(rq3.sizes.find(z => z.scale === sc && z.schema === "normalized").mbytes / rq3.sizes.find(z => z.scale === sc && z.schema === "mid").mbytes, 2)).join(" / ")} at ${rq3.scales.map(s => fmt(s, 0)).join(" / ")} persons.`;
+  $("#rq3-memory-note").textContent = `All three grow linearly (slope about 1). Normalized over mid is ${rq3.scales.map(sc => fmt(rq3.sizes.find(z => z.scale === sc && z.schema === "normalized").mbytes / rq3.sizes.find(z => z.scale === sc && z.schema === "mid").mbytes, 2)).join(", ")} at ${rq3.scales.map(s => fmt(s, 0)).join(", ")} persons.`;
   $("#rq3-hyp").innerHTML = `<thead><tr><th></th><th>statement</th><th>verdict</th></tr></thead><tbody>` + rq3.hypotheses.map(h => `<tr><td>${h.id}</td><td>${esc(h.statement)}</td><td><span class="chip ${chipClass(h.verdict)}"><i></i>${esc(h.verdict)}</span> <span class="small">${esc(h.note)}</span></td></tr>`).join("") + "</tbody>";
   function renderTable() {
     const sc = +$("#rq3-scale").value;
-    $("#rq3-table").innerHTML = `<thead><tr><th>query</th><th>question</th><th>kind</th>${rq3.schemas.map(s => `<th class="num">hops ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">ms ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">exp ${s}</th>`).join("")}</tr></thead><tbody>` +
+    $("#rq3-table").innerHTML = `<thead><tr><th>query</th><th>question</th><th>kind</th>${rq3.schemas.map(s => `<th class="num">hops ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">ms ${s}</th>`).join("")}${rq3.schemas.map(s => `<th class="num">slope ${s}</th>`).join("")}</tr></thead><tbody>` +
       rq3.queries.map(q => `<tr><td>${q.id}</td><td>${esc(q.question)}</td><td class="small">${esc(q.kind)}</td>${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).hops, 0)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).ms, 3)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(exponent(s, q.id), 2)}</td>`).join("")}</tr>`).join("") + "</tbody>";
   }
   renderRatio(); renderScaling(); renderTable();
-  bindTips($("#rq1-matrix"));
 }
 
 // ---------- charts (inline SVG) ----------
@@ -381,10 +467,9 @@ function dotChart(svg, cats, pts, yLabel) {
   const order = ["flat", "mid", "normalized"];
   for (const p of pts) {
     const i = cats.indexOf(p.x), off = (order.indexOf(p.series) - 1) * 9;
-    svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 5, fill: SERIES[p.series], stroke: "var(--surface)", "stroke-width": 2 }));
+    svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 5, fill: SERIES[p.series], stroke: "var(--sheet)", "stroke-width": 2 }));
     svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 9, class: "hit", "data-tip": p.tip }));
   }
-  // direct-label the extreme
   const ext = pts.reduce((a, p) => (p.y > a.y ? p : a), pts[0]);
   svg.append(svgEl("text", { x: x(cats.indexOf(ext.x)) + 12, y: y(ext.y) + 4, class: "lbl" }, `${ext.x} ${ext.series} ${fmt(ext.y, 0)}×`));
   bindTips(svg);
@@ -400,15 +485,14 @@ function lineChart(svg, lines, yLabel, xLabel, endLabel) {
   for (const t of niceLogTicks(ylo, yhi)) { if (t < ylo / 1.5 || t > yhi * 1.5) continue; const yy = Math.min(Math.max(y(t), T), H - Bt); svg.append(svgEl("line", { x1: L, x2: W - R, y1: yy, y2: yy, class: "grid" })); svg.append(svgEl("text", { x: L - 8, y: yy + 4, "text-anchor": "end", class: "tick" }, tickLabel(t))); }
   svg.append(svgEl("line", { x1: L, x2: W - R, y1: H - Bt, y2: H - Bt, class: "axis" }));
   for (const v of [...new Set(xs)]) svg.append(svgEl("text", { x: x(v), y: H - Bt + 16, "text-anchor": "middle", class: "tick" }, fmt(v, 0)));
-  svg.append(svgEl("text", { x: L, y: H - 2, class: "tick" }, `${yLabel} · ${xLabel}, log-log`));
+  svg.append(svgEl("text", { x: L, y: H - 2, class: "tick" }, `${yLabel} against ${xLabel}, log-log`));
   for (const l of lines) {
     svg.append(svgEl("path", { d: l.pts.map((p, i) => `${i ? "L" : "M"}${x(p.x)},${y(p.y)}`).join(" "), fill: "none", stroke: SERIES[l.series], "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-    for (const p of l.pts) { svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 4, fill: SERIES[l.series], stroke: "var(--surface)", "stroke-width": 2 })); svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 9, class: "hit", "data-tip": `<b>${l.series} · ${fmt(p.x, 0)} persons</b>${fmt(p.y, 3)} ${yLabel}` })); }
+    for (const p of l.pts) { svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 4, fill: SERIES[l.series], stroke: "var(--sheet)", "stroke-width": 2 })); svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 9, class: "hit", "data-tip": `<b>${l.series}, ${fmt(p.x, 0)} persons</b>${fmt(p.y, 3)} ${yLabel}` })); }
   }
-  // end labels, nudged apart
   const ends = lines.map(l => ({ l, yy: y(l.pts[l.pts.length - 1].y) })).sort((a, b) => a.yy - b.yy);
   for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < 14) ends[i].yy = ends[i - 1].yy + 14;
-  for (const e of ends) svg.append(svgEl("text", { x: W - R + 8, y: e.yy + 4, class: "lbl" }, `${e.l.series} · ${endLabel(e.l)}`));
+  for (const e of ends) svg.append(svgEl("text", { x: W - R + 8, y: e.yy + 4, class: "lbl" }, `${e.l.series} ${endLabel(e.l)}`));
   bindTips(svg);
 }
 </script>

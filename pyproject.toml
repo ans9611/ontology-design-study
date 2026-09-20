@@ -17,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "matplotlib", "jupyter"]
+engine = ["kuzu>=0.11"]          # second-engine run (ontostudy.engine_kuzu)
 
 [tool.setuptools.packages.find]
 where = ["src"]

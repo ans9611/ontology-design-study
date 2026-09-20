@@ -73,7 +73,9 @@ One dataset, LDBC SNB [8], modeled three ways:
 - **mid**: the entities users act on, links only where cardinality is bounded
 - **normalized**: every relation reified as its own node
 
-Twenty benchmark questions are fixed before the schemas are written. Each question is expressed once per schema. For scale factors 0.1, 1 and 3 the harness records static hop count, latency and peak memory (same engine, same machine, five runs, minimum reported). Hypotheses H1–H4 are pre-registered in [`docs/hypotheses.md`](docs/hypotheses.md) and not edited after the first run.
+Twenty benchmark questions are fixed before the schemas are written. Each question is expressed once per schema. At six scales (1,000 to 20,000 persons) the harness records static hop count, latency and resident size (same engine, same machine, five runs recorded, minimum reported, log-log slope with standard error). Hypotheses H1–H4 are pre-registered in [`docs/hypotheses.md`](docs/hypotheses.md) and not edited after the first run.
+
+Four follow-up runs, added after the verdicts and reported separately in [`docs/results/RESULTS.md`](docs/results/RESULTS.md), answer the objections a reviewer would raise first: flat with reverse indexes (is the penalty the layout or the missing index?), Zipf fan-in (what does a supernode do?), the six diagnostic queries on a second engine, Kùzu, in Cypher (do the constants transfer?), and a write-path benchmark (what does denormalisation cost when the world changes?). The three RQ3 schemas are also checked against Neo4j's modeling checklist in [`docs/schema-review.md`](docs/schema-review.md).
 
 The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](https://github.com/ans9611/PageRank_Empirical_Analysis), where the same measurement discipline (vary $n$, fit a log-log slope, report the minimum of repeated runs) was developed.
 
@@ -105,7 +107,7 @@ docs/
     slr/              candidate lists per string, with screening columns
     metrics-matrix.md RQ1 working table
     hypotheses.md     pre-registered hypotheses for RQ3
-    cases/            one file per case, shared template
+    cases/            one file per case, shared template; CODEBOOK.md for a second coder
 references/
     references.bib    references with DOI
 src/ontostudy/
@@ -115,7 +117,11 @@ src/ontostudy/
     graph.py          in-memory property graph with a hop counter
     schemas/          flat / mid / normalized builders behind one accessor interface
     queries/          the twenty questions, written once against the interface
-    bench.py          hop count, latency, memory per query, schema and scale
+    bench.py          hop count, latency, memory per query, schema and scale (--schemas, --skew for the follow-ups)
+    writes.py         records touched and time per update, per schema
+    engine_kuzu.py    the six diagnostic queries in Cypher on Kùzu, per schema
+    report.py         regenerates every table in docs/results/RESULTS.md from the CSVs
+    figures.py        regenerates docs/results/fig*.png from the CSVs
     site.py           collects the RQ1/RQ2/RQ3 tables into docs/site/data.json
 notebooks/
 tests/
@@ -130,7 +136,13 @@ python -m ontostudy.slr          # run the protocol's searches against OpenAlex,
 python -m ontostudy.screen ...   # record screening decisions into a candidate CSV
 python -m ontostudy.snowball     # backward/forward snowballing from the included set
 python -m ontostudy.check_refs   # verify every DOI in references.bib against Crossref
-python -m ontostudy.bench        # RQ3: three schemas x twenty queries x three scales
+python -m ontostudy.bench        # RQ3 main run: three schemas x twenty queries x six scales
+python -m ontostudy.bench --schemas flat flat_indexed mid --out docs/results/bench_indexed.csv
+python -m ontostudy.bench --skew 1 --schemas flat flat_indexed mid normalized --out docs/results/bench_skew.csv
+python -m ontostudy.writes       # write path
+pip install -e ".[engine]" && python -m ontostudy.engine_kuzu   # second engine
+python -m ontostudy.report       # regenerate the tables in RESULTS.md
+python -m ontostudy.figures      # regenerate the figures
 python -m ontostudy.site         # rebuild docs/site/data.json after any table changes
 ```
 
@@ -141,7 +153,7 @@ python -m ontostudy.site         # rebuild docs/site/data.json after any table c
 | 1–2 | search log, screening, metric matrix | done: 929 candidates screened, 188 included ([protocol](docs/protocol.md), [matrix](docs/metrics-matrix.md)) |
 | 3–5 | eight case files, cross-case pattern table | drafted, figures to verify against sources ([cases](docs/cases/)) |
 | 6–8 | generator, three schemas, twenty queries, harness | done ([src](src/ontostudy/)) |
-| 9–10 | runs at three scales, statistics | done: [results](docs/results/RESULTS.md) |
+| 9–10 | runs at six scales, statistics, four follow-up runs | done: [results](docs/results/RESULTS.md) |
 | 11–12 | write-up, triangulation | pending; data extraction from the 188 included papers is the next step |
 
 ## References

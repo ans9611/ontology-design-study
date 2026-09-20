@@ -23,6 +23,16 @@ def test_site_data_matches_the_tables():
     assert len(d["rq1"]["rows"]) == 7 and len(d["rq1"]["columns"]) == 6
     assert [c["id"] for c in d["rq2"]["cases"]] == ["google-kg", "amazon", "wikidata", "freebase", "schema-org", "gene-ontology", "snomed-ct", "cyc"]
     assert d["rq2"]["cases"][3]["outcome"] == "abandoned"
-    assert len(d["rq3"]["queries"]) == 20 and len(d["rq3"]["bench"]) == 3 * 3 * 20
+    assert len(d["rq3"]["queries"]) == 20 and len(d["rq3"]["bench"]) == len(d["rq3"]["scales"]) * 3 * 20
     assert [h["verdict"] for h in d["rq3"]["hypotheses"]] == ["supported", "supported", "refuted as stated", "partly refuted"]
     assert [g["id"] for g in d["guidelines"]] == [f"G{i}" for i in range(1, 13)]
+
+
+def test_report_renders_every_marker_from_csvs():
+    from ontostudy.report import build_blocks, render
+
+    blocks = build_blocks()
+    assert {"headline", "per-query", "sizes"} <= set(blocks)
+    text = "<!-- table:headline -->\nold\n<!-- /table -->\n\n<!-- table:nope -->\nkeep\n<!-- /table -->"
+    out = render(text, blocks)
+    assert "old" not in out and "keep" in out and "| median hop ratio" in out

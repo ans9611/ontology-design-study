@@ -251,7 +251,7 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
   <p id="rq3-intro"></p>
   <div class="legend"><span><i class="sw1"></i>flat</span><span><i class="sw2"></i>mid</span><span><i class="sw3"></i>normalized</span></div>
 
-  <h3>Each query's cost relative to the mid schema</h3>
+  <h3>What each question costs, relative to the mid schema</h3>
   <div class="controls">
     <span>Metric</span>
     <div class="seg" id="rq3-metric"><button aria-pressed="true" data-v="hops">hops</button><button aria-pressed="false" data-v="ms">latency</button></div>
@@ -259,18 +259,19 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
     <select id="rq3-scale"></select>
   </div>
   <div class="fig"><svg class="chart" id="rq3-ratio"></svg></div>
-  <p class="small" style="margin-top:8px">Log axis. 1 is the mid schema's own cost on that query.</p>
+  <p class="small" style="margin-top:8px">Log axis; the vertical rule is mid's own cost. A dot left of it is cheaper than mid, right of it dearer. Questions are ordered as in the LDBC workload.</p>
+
+  <h3>How each question grows with the graph</h3>
+  <div class="fig"><svg class="chart" id="rq3-slope"></svg></div>
+  <p class="small" style="margin-top:8px">Slope of log(latency) against log(persons). Near 0 the cost is set by the neighbourhood and does not move with n; near 1 it grows with the whole graph. Select a row to see the fitted line.</p>
 
   <div class="two">
     <div>
-      <h3>Latency against scale, one query at a time</h3>
-      <div class="controls"><select id="rq3-query" aria-label="Query"></select></div>
+      <h3 id="rq3-scaling-title">Latency against scale</h3>
       <div class="fig"><svg class="chart" id="rq3-scaling"></svg></div>
-      <p class="small" style="margin-top:8px">Log-log. The number after each schema is the fitted slope: near 0, cost is set by the neighbourhood; near 1, it grows with the whole graph.</p>
     </div>
     <div>
       <h3>Resident size against scale</h3>
-      <div class="controls"><span>Recursive <code>sys.getsizeof</code> of the built graph</span></div>
       <div class="fig"><svg class="chart" id="rq3-memory"></svg></div>
       <p class="small" style="margin-top:8px" id="rq3-memory-note"></p>
     </div>
@@ -278,7 +279,10 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
 
   <h3>Hypotheses, written before the run</h3>
   <div class="wrap"><table id="rq3-hyp"></table></div>
-  <details><summary>Table view: every query at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
+
+  <div id="rq3-followups"></div>
+
+  <details><summary>Table view: every question at the selected scale</summary><div class="wrap"><table id="rq3-table"></table></div></details>
 </section>
 
   </main>
@@ -287,7 +291,8 @@ footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; font-size: 14p
 </div>
 <div class="tip" id="tip" role="tooltip"></div>
 
-<script>
+<script type="module">
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 const $ = (s, el = document) => el.querySelector(s);
 const fmt = (x, d = 2) => Number(x).toLocaleString("en-US", { maximumFractionDigits: d });
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -357,10 +362,13 @@ function init(D) {
   $("#hero-note").textContent = `Medians at ${fmt(maxScale, 0)} persons, best of five runs, synthetic LDBC-SNB-shaped data. Above, the same relation is drawn the way each schema stores it; the coloured line is the path Q01 walks.`;
 
   // ---------- short version ----------
+  const fu = rq3.followups || {};
+  const idx = fu.indexed ? (() => { const n = Math.max(...fu.indexed.scales); const at = (sc, q) => fu.indexed.bench.find(b => b.scale === n && b.schema === sc && b.query === q);
+    return { within: qids.filter(q => at("flat_indexed", q).ms <= 1.2 * Math.min(...fu.indexed.schemas.map(x => at(x, q).ms))).length, mb: fu.indexed.sizes.find(z => z.scale === n && z.schema === "flat_indexed").mbytes - fu.indexed.sizes.find(z => z.scale === n && z.schema === "flat").mbytes }; })() : null;
   const verdict = {
-    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(maxScale, "flat", q).hops <= get(maxScale, "mid", q).hops).length} of 20 queries. No reverse index on folded entities, so ${stats.flat.steep.join(", ")} scan the graph (latency slope above 0.5). Fits when every question starts from the entity you keyed on; a property index would remove the penalty, at the cost of maintaining one.`,
-    mid: `Never the fastest, never the slowest. Within 20% of the best schema on ${stats.mid.within.length} of 20; up to ${fmt(Math.max(...qids.map(q => get(maxScale, "mid", q).ms / get(maxScale, "flat", q).ms)), 1)}× slower where flat answers from a property; one to three orders of magnitude faster on reverse lookups. Bounded cost on all twenty questions.`,
-    normalized: `One extra hop per relation, everywhere: median hop ratio ${fmt(stats.normalized.hopRatio)}, latency ${fmt(stats.normalized.msRatio, 1)}×, memory ${fmt(stats.normalized.size.mbytes / midSize, 1)}× at every scale. A constant factor, not a higher order (H3 refuted). It buys per-relation provenance and qualifiers; the price is paid on every query.`,
+    flat: `Cheapest on forward reads: at or below mid on ${qids.filter(q => get(maxScale, "flat", q).hops <= get(maxScale, "mid", q).hops).length} of 20 queries. Without a reverse index on the folded entities, ${stats.flat.steep.join(", ")} scan the graph (latency slope above 0.5).${idx ? ` Three reverse indexes costing ${fmt(idx.mb, 0)} MB remove that: with them flat is within 20% of the best schema on ${idx.within} of 20.` : ""} The price is paid on writes: a renamed city or tag is rewritten on every record that copied it.`,
+    mid: `Never the fastest, never the slowest, as long as no index is allowed. Within 20% of the best schema on ${stats.mid.within.length} of 20; up to ${fmt(Math.max(...qids.map(q => get(maxScale, "mid", q).ms / get(maxScale, "flat", q).ms)), 1)}× slower where flat answers from a property; one to three orders of magnitude faster than unindexed flat on reverse lookups. One record per fact, so a rename touches one node.`,
+    normalized: `One extra hop per relation, everywhere: median hop ratio ${fmt(stats.normalized.hopRatio)}, latency ${fmt(stats.normalized.msRatio, 1)}×, memory ${fmt(stats.normalized.size.mbytes / midSize, 1)}× at every scale in this engine. A constant factor, not a higher order (H3 refuted); on Kùzu the latency constant is larger (up to 7.6× on multi-hop joins) while the storage ratio is the same. It buys per-relation provenance and qualifiers; the price is paid on every query.`,
   };
   $("#fit-schema").innerHTML = `<thead><tr><th>schema</th><th class="num">hops, median ratio to mid</th><th class="num">latency, median ratio</th><th class="num">size at n = ${fmt(maxScale, 0)}</th><th class="num">queries within 20% of best</th><th class="num">queries with slope above 0.5</th><th>worst query against mid</th></tr></thead><tbody>` +
     rq3.schemas.map(sc => { const s = stats[sc]; return `<tr><td><span class="legend" style="margin:0"><span><i style="background:${SERIES[sc]}"></i>${sc}</span></span></td><td class="num">${fmt(s.hopRatio)}</td><td class="num">${fmt(s.msRatio)}</td><td class="num">${fmt(s.size.mbytes, 0)} MB</td><td class="num">${s.within.length} of 20</td><td class="num">${s.steep.length}${s.steep.length ? ` <span class="small">(${s.steep.join(", ")})</span>` : ""}</td><td>${sc === "mid" ? "" : `${s.worst}, ${fmt(s.worstRatio, s.worstRatio > 10 ? 0 : 1)}×`}</td></tr>`; }).join("") + "</tbody>";
@@ -416,26 +424,31 @@ function init(D) {
   renderRq2();
 
   // ---------- RQ3 ----------
+  const qtext = Object.fromEntries(rq3.queries.map(q => [q.id, q.question])); window.__qtext = qtext;
   $("#rq3-intro").textContent = `Synthetic LDBC-SNB-shaped graphs at ${rq3.scales.map(s => fmt(s, 0)).join(", ")} persons. Three schemas of the same data: flat folds place, organisation and tag into properties; mid keeps entity nodes and direct edges; normalized reifies every relation as a node. Twenty questions were fixed before the schemas were written, and all three schemas returned identical answers on every check.`;
   $("#rq3-scale").innerHTML = rq3.scales.map(s => `<option value="${s}" ${s === maxScale ? "selected" : ""}>${fmt(s, 0)}</option>`).join("");
-  $("#rq3-query").innerHTML = rq3.queries.map(q => `<option value="${q.id}" ${q.id === "Q18" ? "selected" : ""}>${q.id}: ${esc(q.question)}</option>`).join("");
   const getMetric = seg($("#rq3-metric"), renderRatio);
   $("#rq3-scale").addEventListener("change", () => { renderRatio(); renderTable(); });
-  $("#rq3-query").addEventListener("change", renderScaling);
+  let selectedQ = "Q18";
 
   function renderRatio() {
     const m = getMetric(), sc = +$("#rq3-scale").value;
-    const pts = [];
-    for (const schema of rq3.schemas) for (const q of qids) {
+    const pts = rq3.schemas.flatMap(schema => qids.map(q => {
       const v = get(sc, schema, q), mid = get(sc, "mid", q);
-      pts.push({ x: q, y: v[m] / mid[m], series: schema, tip: `<b>${q}, ${schema}</b>${esc(rq3.queries.find(x => x.id === q).question)}<br>${m === "hops" ? `${fmt(v.hops, 0)} hops (mid ${fmt(mid.hops, 0)})` : `${fmt(v.ms, 3)} ms (mid ${fmt(mid.ms, 3)} ms)`}, ${fmt(v[m] / mid[m], 2)}× mid` });
-    }
-    dotChart($("#rq3-ratio"), qids, pts, m === "hops" ? "hop ratio to mid" : "latency ratio to mid");
+      return { q, series: schema, x: v[m] / mid[m], tip: `<b>${q}, ${schema}</b>${esc(qtext[q])}<br>${m === "hops" ? `${fmt(v.hops, 0)} hops (mid ${fmt(mid.hops, 0)})` : `${fmt(v.ms, 3)} ms (mid ${fmt(mid.ms, 3)} ms)`}, ${fmt(v[m] / mid[m], 2)}× mid` };
+    }));
+    rowDots($("#rq3-ratio"), qids, pts, { log: true, ref: 1, label: m === "hops" ? "hop ratio to mid" : "latency ratio to mid", ticks: [0.25, 0.5, 1, 2, 4, 10, 100, 1000], fmtX: d => `${d >= 10 ? fmt(d, 0) : fmt(d, 2)}×` });
+  }
+  function renderSlope() {
+    const pts = rq3.schemas.flatMap(s => qids.map(q => ({ q, series: s, x: exponent(s, q), tip: `<b>${q}, ${s}</b>${esc(qtext[q])}<br>slope ${fmt(exponent(s, q), 2)}; ${rq3.scales.map(sc => `${fmt(get(sc, s, q).ms, 3)} ms at ${fmt(sc, 0)}`).join(", ")}` })));
+    rowDots($("#rq3-slope"), qids, pts, { log: false, ref: 0.5, refs: [0, 1], label: "latency slope", ticks: [0, 0.5, 1, 1.5], fmtX: d => fmt(d, 1), onSelect: q => { selectedQ = q; renderScaling(); }, selected: () => selectedQ });
   }
   function renderScaling() {
-    const q = $("#rq3-query").value;
+    const q = selectedQ;
+    $("#rq3-scaling-title").textContent = `Latency against scale: ${q}, ${qtext[q]}`;
     const lines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: get(sc, s, q).ms })), exp: exponent(s, q) }));
     lineChart($("#rq3-scaling"), lines, "ms per query", "persons", l => fmt(l.exp, 2));
+    renderSlope();
   }
   const memLines = rq3.schemas.map(s => ({ series: s, pts: rq3.scales.map(sc => ({ x: sc, y: rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes })), exp: slope(rq3.scales.map(sc => [Math.log(sc), Math.log(rq3.sizes.find(z => z.scale === sc && z.schema === s).mbytes)])) }));
   lineChart($("#rq3-memory"), memLines, "MB", "persons", l => fmt(l.exp, 2));
@@ -447,71 +460,105 @@ function init(D) {
       rq3.queries.map(q => `<tr><td>${q.id}</td><td>${esc(q.question)}</td><td class="small">${esc(q.kind)}</td>${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).hops, 0)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(get(sc, s, q.id).ms, 3)}</td>`).join("")}${rq3.schemas.map(s => `<td class="num">${fmt(exponent(s, q.id), 2)}</td>`).join("")}</tr>`).join("") + "</tbody>";
   }
   renderRatio(); renderScaling(); renderTable();
+  renderFollowups(rq3, qtext);
 }
 
-// ---------- charts (inline SVG) ----------
-const svgEl = (tag, attrs = {}, text) => { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
-const niceLogTicks = (lo, hi) => { const t = []; for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) t.push(10 ** e); return t; };
-const tickLabel = v => v >= 1000 ? fmt(v, 0) : v >= 1 ? String(v) : v.toPrecision(1).replace(/\.?0+$/, "");
+// ---------- follow-up runs: index, skew, second engine, writes ----------
+const DIAG = ["Q02", "Q11", "Q13", "Q17", "Q18", "Q19"];
+const RUN_TEXT = {
+  indexed: ["Flat with reverse indexes", "Same flat schema plus three dictionaries (city, employer, tag) built after load. The index lookup is charged one hop per result, like a reverse edge."],
+  skew: ["Heavy-tailed fan-in", "Cities, employers and tags drawn from a Zipf distribution (exponent 1) so a few carry most of the persons and messages; query parameters drawn in proportion, so the head is asked about as often as it is populated."],
+  kuzu: ["Second engine: Kùzu", "The same data loaded into an embedded graph database three ways, the six diagnostic questions written in Cypher once per schema, engine execution time best of five. Kùzu has no secondary property indexes, so flat's reverse lookups scan here too."],
+};
+function renderFollowups(rq3, qtext) {
+  const host = $("#rq3-followups"); const parts = [];
+  const slopeOf = (run, s, q) => slope(run.scales.map(n => [Math.log(n), Math.log(run.bench.find(b => b.scale === n && b.schema === s && b.query === q).ms)]));
+  for (const [tag, run] of Object.entries(rq3.followups || {})) {
+    const [title, text] = RUN_TEXT[tag] || [tag, ""]; const n = Math.max(...run.scales);
+    const at = (s, q) => run.bench.find(b => b.scale === n && b.schema === s && b.query === q);
+    const hasHops = "hops" in run.bench[0];
+    const sizes = run.sizes.filter(z => z.scale === n);
+    const rows = DIAG.filter(q => run.bench.some(b => b.query === q)).map(q => `<tr><td>${q}</td><td class="small">${esc(qtext[q])}</td>${run.schemas.map(s => `<td class="num">${hasHops ? fmt(at(s, q).hops, 0) : fmt(at(s, q).ms, 3)}</td>`).join("")}${run.schemas.map(s => `<td class="num">${fmt(slopeOf(run, s, q), 2)}</td>`).join("")}</tr>`).join("");
+    parts.push(`<h3>${esc(title)}</h3><p class="small" style="color:var(--ink-2)">${esc(text)} Persons: ${run.scales.map(x => fmt(x, 0)).join(", ")}.${sizes.length ? ` Size at ${fmt(n, 0)}: ${sizes.map(z => `${z.schema} ${fmt(z.mbytes, 0)} MB`).join(", ")}.` : ""}</p>
+      <div class="wrap"><table><thead><tr><th>query</th><th></th>${run.schemas.map(s => `<th class="num">${hasHops ? "hops" : "ms"} ${s}</th>`).join("")}${run.schemas.map(s => `<th class="num">slope ${s}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`);
+  }
+  if (rq3.writes && rq3.writes.length) {
+    const n = Math.max(...rq3.writes.map(w => w.scale)); const W = rq3.writes.filter(w => w.scale === n);
+    const schemas = [...new Set(W.map(w => w.schema))], updates = [...new Set(W.map(w => w.update))];
+    const at = (s, u) => W.find(w => w.schema === s && w.update === u);
+    parts.push(`<h3>The write path</h3><p class="small" style="color:var(--ink-2)">Records touched by one update at ${fmt(n, 0)} persons: property writes plus edge insertions and deletions. Flat pays here for what it saved on reads: a renamed city or tag is rewritten on every record that copied it.</p>
+      <div class="wrap"><table><thead><tr><th>update</th>${schemas.map(s => `<th class="num">${s} records</th>`).join("")}${schemas.map(s => `<th class="num">${s} µs</th>`).join("")}</tr></thead><tbody>${updates.map(u => `<tr><td>${u.replace(/_/g, " ")}</td>${schemas.map(s => `<td class="num">${fmt(at(s, u).records, 0)}</td>`).join("")}${schemas.map(s => `<td class="num">${fmt(at(s, u).us, 1)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+  }
+  host.innerHTML = parts.length ? `<h3 style="margin-top:48px">Follow-up runs</h3><p>Each of these answers one objection to the main run. They are reported separately because the main run's hypotheses were registered before they existed.</p>` + parts.join("") : "";
+}
+
+// ---------- charts (D3) ----------
+const SERIES_ORDER = ["flat", "mid", "normalized"];
+const seriesColor = s => SERIES[s] || "var(--ink-2)";
+function axisStyle(g) { g.select(".domain").attr("stroke", "var(--rule)"); g.selectAll(".tick line").attr("stroke", "var(--grid)"); g.selectAll(".tick text").attr("fill", "var(--muted)").attr("font-size", 11).attr("font-family", "inherit"); }
+function d3tips(sel) { sel.on("mouseenter", (e, d) => showTip(e, d.tip)).on("mousemove", moveTip).on("mouseleave", hideTip); }
 
 function barChart(svg, rows, max) {
   const W = 720, rowH = 30, L = 300, R = 150, T = 8, H = T + rows.length * rowH + 8;
-  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const x = v => L + (W - L - R) * v / max;
-  for (let v = 0; v <= max; v++) { svg.append(svgEl("line", { x1: x(v), x2: x(v), y1: T, y2: H - 8, class: v ? "grid" : "axis" })); svg.append(svgEl("text", { x: x(v), y: H - 0, "text-anchor": "middle", class: "tick" }, v)); }
-  rows.forEach((r, i) => {
-    const y = T + i * rowH + 5, bw = x(r.value) - x(0);
-    svg.append(svgEl("text", { x: L - 10, y: y + 14, "text-anchor": "end" }, r.label));
-    const bar = (x0, w, fill) => svgEl("path", { d: `M${x0},${y} h${Math.max(w - 4, 0)} a4,4 0 0 1 4,4 v12 a4,4 0 0 1 -4,4 h${-Math.max(w - 4, 0)} z`, fill });
-    if (bw > 0) svg.append(bar(x(0), bw, "var(--s1)"));
-    if (r.extra) svg.append(bar(x(r.value) + (bw > 0 ? 2 : 0), x(r.extra) - x(0) - (bw > 0 ? 2 : 0), "var(--seq-1)"));
-    svg.append(svgEl("text", { x: x(r.value + (r.extra || 0)) + 6, y: y + 14, class: "lbl" }, r.extra ? `${r.value} (+${r.extra} named only)` : `${r.value}`));
-    svg.append(svgEl("rect", { x: 0, y: T + i * rowH, width: W, height: rowH, class: "hit", "data-tip": `<b>${esc(r.label)}</b>${r.value} of ${max} frameworks measure it${r.extra ? `; ${r.extra} name${r.extra > 1 ? "" : "s"} it without measuring` : ""}` }));
-  });
-  bindTips(svg);
+  const root = d3.select(svg).attr("viewBox", `0 0 ${W} ${H}`); root.selectAll("*").remove();
+  const x = d3.scaleLinear().domain([0, max]).range([L, W - R]);
+  root.append("g").attr("transform", `translate(0,${H - 8})`).call(d3.axisTop(x).ticks(max).tickSize(H - T - 8).tickFormat(d3.format("d"))).call(axisStyle).select(".domain").remove();
+  const g = root.selectAll("g.row").data(rows).join("g").attr("class", "row").attr("transform", (d, i) => `translate(0,${T + i * rowH})`);
+  g.append("text").attr("x", L - 10).attr("y", 19).attr("text-anchor", "end").text(d => d.label);
+  g.filter(d => d.value > 0).append("rect").attr("x", x(0)).attr("y", 5).attr("height", 20).attr("width", d => x(d.value) - x(0)).attr("rx", 4).attr("fill", "var(--s1)");
+  g.filter(d => d.extra > 0).append("rect").attr("x", d => x(d.value) + (d.value ? 2 : 0)).attr("y", 5).attr("height", 20).attr("width", d => x(d.extra) - x(0) - (d.value ? 2 : 0)).attr("rx", 4).attr("fill", "var(--seq-1)");
+  g.append("text").attr("class", "lbl").attr("x", d => x(d.value + (d.extra || 0)) + 6).attr("y", 19).text(d => d.extra ? `${d.value} (+${d.extra} named only)` : d.value);
+  g.append("rect").attr("class", "hit").attr("x", 0).attr("width", W).attr("height", rowH).each(function (d) { d.tip = `<b>${esc(d.label)}</b>${d.value} of ${max} frameworks measure it${d.extra ? `; ${d.extra} name${d.extra > 1 ? "" : "s"} it without measuring` : ""}`; }).call(d3tips);
 }
 
-function dotChart(svg, cats, pts, yLabel) {
-  const W = 1000, H = 300, L = 56, R = 16, T = 12, Bt = 36;
-  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const ys = pts.map(p => p.y), lo = Math.min(...ys, 0.5), hi = Math.max(...ys, 4);
-  const y = v => T + (H - T - Bt) * (1 - (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)));
-  const x = i => L + (W - L - R) * (i + 0.5) / cats.length;
-  for (const t of niceLogTicks(lo, hi)) { if (t < lo || t > hi) continue; svg.append(svgEl("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), class: "grid" })); svg.append(svgEl("text", { x: L - 8, y: y(t) + 4, "text-anchor": "end", class: "tick" }, tickLabel(t))); }
-  svg.append(svgEl("line", { x1: L, x2: W - R, y1: y(1), y2: y(1), class: "axis" }));
-  svg.append(svgEl("text", { x: L - 8, y: y(1) + 4, "text-anchor": "end", class: "tick" }, "1"));
-  cats.forEach((c, i) => svg.append(svgEl("text", { x: x(i), y: H - 14, "text-anchor": "middle", class: "tick" }, c)));
-  svg.append(svgEl("text", { x: L, y: T + 4, class: "tick" }, yLabel));
-  const order = ["flat", "mid", "normalized"];
-  for (const p of pts) {
-    const i = cats.indexOf(p.x), off = (order.indexOf(p.series) - 1) * 9;
-    svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 5, fill: SERIES[p.series], stroke: "var(--sheet)", "stroke-width": 2 }));
-    svg.append(svgEl("circle", { cx: x(i) + off, cy: y(Math.max(p.y, lo)), r: 9, class: "hit", "data-tip": p.tip }));
-  }
-  const ext = pts.reduce((a, p) => (p.y > a.y ? p : a), pts[0]);
-  svg.append(svgEl("text", { x: x(cats.indexOf(ext.x)) + 12, y: y(ext.y) + 4, class: "lbl" }, `${ext.x} ${ext.series} ${fmt(ext.y, 0)}×`));
-  bindTips(svg);
+// One row per question, one dot per schema on a shared x axis. opts: log, ref (emphasised rule), refs (other rules), ticks, fmtX, label, onSelect, selected
+function rowDots(svg, cats, pts, opts) {
+  const W = 1000, rowH = 24, L = 330, R = 24, T = 26, H = T + cats.length * rowH + 30;
+  const root = d3.select(svg).attr("viewBox", `0 0 ${W} ${H}`); root.selectAll("*").remove();
+  const xs = pts.map(p => p.x);
+  const x = (opts.log ? d3.scaleLog() : d3.scaleLinear()).domain(opts.log ? [Math.min(0.2, ...xs), Math.max(4, ...xs)] : [Math.min(-0.1, ...xs), Math.max(1.5, ...xs)]).range([L, W - R]).nice();
+  const y = d3.scalePoint().domain(cats).range([T + rowH / 2, T + cats.length * rowH - rowH / 2]);
+  root.append("g").attr("transform", `translate(0,${T + cats.length * rowH})`).call(d3.axisBottom(x).tickValues(opts.ticks.filter(t => t >= x.domain()[0] && t <= x.domain()[1])).tickSize(-(cats.length * rowH)).tickFormat(opts.fmtX)).call(axisStyle).select(".domain").remove();
+  root.append("text").attr("class", "tick").attr("x", L).attr("y", T - 10).text(opts.label);
+  const rows = root.selectAll("g.row").data(cats).join("g").attr("class", "row").attr("transform", d => `translate(0,${y(d) - rowH / 2})`);
+  rows.append("rect").attr("x", 0).attr("width", W).attr("height", rowH).attr("fill", d => opts.selected && opts.selected() === d ? "color-mix(in srgb, var(--ink) 6%, transparent)" : "transparent").style("cursor", opts.onSelect ? "pointer" : null).on("click", (e, d) => opts.onSelect && opts.onSelect(d));
+  rows.append("text").attr("x", 14).attr("y", rowH / 2 + 4).attr("class", "lbl").text(d => d);
+  rows.append("text").attr("x", 52).attr("y", rowH / 2 + 4).attr("fill", "var(--ink-2)").text(d => { const t = (window.__qtext || {})[d] || ""; return t.length > 44 ? t.slice(0, 43) + "…" : t; });
+  rows.append("line").attr("x1", L).attr("x2", W - R).attr("y1", rowH).attr("y2", rowH).attr("stroke", "var(--rule-soft)");
+  // connector from the lowest to the highest dot in a row, so the spread reads as one mark
+  const byRow = d3.group(pts, p => p.q);
+  rows.append("line").attr("y1", rowH / 2).attr("y2", rowH / 2).attr("x1", d => x(Math.max(x.domain()[0], d3.min(byRow.get(d), p => p.x)))).attr("x2", d => x(Math.min(x.domain()[1], d3.max(byRow.get(d), p => p.x)))).attr("stroke", "var(--rule)").attr("stroke-width", 1);
+  for (const r of [...(opts.refs || []), opts.ref]) if (r >= x.domain()[0] && r <= x.domain()[1]) root.append("line").attr("x1", x(r)).attr("x2", x(r)).attr("y1", T).attr("y2", T + cats.length * rowH).attr("stroke", r === opts.ref ? "var(--ink)" : "var(--rule)").attr("stroke-width", 1);
+  const dots = root.selectAll("g.dot").data(pts).join("g").attr("class", "dot").attr("transform", p => `translate(${x(Math.min(Math.max(p.x, x.domain()[0]), x.domain()[1]))},${y(p.q)})`);
+  dots.append("circle").attr("r", 5).attr("fill", p => seriesColor(p.series)).attr("stroke", "var(--sheet)").attr("stroke-width", 2);
+  dots.append("circle").attr("r", 10).attr("class", "hit").call(d3tips);
+  // direct-label the single most extreme value
+  const ext = pts.reduce((a, p) => (Math.abs(Math.log(opts.log ? p.x : Math.exp(p.x))) > Math.abs(Math.log(opts.log ? a.x : Math.exp(a.x))) ? p : a), pts[0]);
+  const rowMax = x(Math.min(x.domain()[1], d3.max(byRow.get(ext.q), p => p.x))), rowMin = x(Math.max(x.domain()[0], d3.min(byRow.get(ext.q), p => p.x)));
+  const right = rowMax < W - R - 120;
+  root.append("text").attr("class", "lbl").attr("x", right ? rowMax + 12 : rowMin - 12).attr("y", y(ext.q) + 4).attr("text-anchor", right ? "start" : "end").text(`${ext.series} ${opts.fmtX(ext.x)}`);
 }
 
 function lineChart(svg, lines, yLabel, xLabel, endLabel) {
-  const W = 520, H = 300, L = 60, R = 120, T = 12, Bt = 40;
-  svg.innerHTML = ""; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const all = lines.flatMap(l => l.pts), xs = all.map(p => p.x), ys = all.map(p => p.y);
-  const xlo = Math.min(...xs), xhi = Math.max(...xs), ylo = Math.min(...ys), yhi = Math.max(...ys);
-  const x = v => L + (W - L - R) * (Math.log10(v) - Math.log10(xlo)) / (Math.log10(xhi) - Math.log10(xlo));
-  const y = v => T + (H - T - Bt) * (1 - (Math.log10(v) - Math.log10(ylo)) / (Math.log10(yhi) - Math.log10(ylo) || 1));
-  for (const t of niceLogTicks(ylo, yhi)) { if (t < ylo / 1.5 || t > yhi * 1.5) continue; const yy = Math.min(Math.max(y(t), T), H - Bt); svg.append(svgEl("line", { x1: L, x2: W - R, y1: yy, y2: yy, class: "grid" })); svg.append(svgEl("text", { x: L - 8, y: yy + 4, "text-anchor": "end", class: "tick" }, tickLabel(t))); }
-  svg.append(svgEl("line", { x1: L, x2: W - R, y1: H - Bt, y2: H - Bt, class: "axis" }));
-  for (const v of [...new Set(xs)]) svg.append(svgEl("text", { x: x(v), y: H - Bt + 16, "text-anchor": "middle", class: "tick" }, fmt(v, 0)));
-  svg.append(svgEl("text", { x: L, y: H - 2, class: "tick" }, `${yLabel} against ${xLabel}, log-log`));
-  for (const l of lines) {
-    svg.append(svgEl("path", { d: l.pts.map((p, i) => `${i ? "L" : "M"}${x(p.x)},${y(p.y)}`).join(" "), fill: "none", stroke: SERIES[l.series], "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-    for (const p of l.pts) { svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 4, fill: SERIES[l.series], stroke: "var(--sheet)", "stroke-width": 2 })); svg.append(svgEl("circle", { cx: x(p.x), cy: y(p.y), r: 9, class: "hit", "data-tip": `<b>${l.series}, ${fmt(p.x, 0)} persons</b>${fmt(p.y, 3)} ${yLabel}` })); }
-  }
+  const W = 520, H = 300, L = 60, R = 120, T = 16, Bt = 44;
+  const root = d3.select(svg).attr("viewBox", `0 0 ${W} ${H}`); root.selectAll("*").remove();
+  const all = lines.flatMap(l => l.pts);
+  const x = d3.scaleLog().domain(d3.extent(all, p => p.x)).range([L, W - R]);
+  const y = d3.scaleLog().domain(d3.extent(all, p => p.y)).range([H - Bt, T]).nice();
+  const [ylo, yhi] = y.domain(), decades = Math.log10(yhi / ylo);
+  const yt = d3.range(Math.floor(Math.log10(ylo)), Math.ceil(Math.log10(yhi)) + 1).flatMap(e => (decades < 2 ? [1, 2, 5] : [1]).map(m => m * 10 ** e)).filter(v => v >= ylo && v <= yhi);
+  root.append("g").attr("transform", `translate(${L},0)`).call(d3.axisLeft(y).tickValues(yt).tickFormat(d3.format("~g")).tickSize(-(W - L - R))).call(axisStyle).select(".domain").remove();
+  root.append("g").attr("transform", `translate(0,${H - Bt})`).call(d3.axisBottom(x).tickValues(lines[0].pts.map(p => p.x)).tickFormat(d3.format(",")).tickSize(4)).call(axisStyle);
+  root.append("text").attr("class", "tick").attr("x", L).attr("y", H - 4).text(`${yLabel} against ${xLabel}, log-log`);
+  const line = d3.line().x(p => x(p.x)).y(p => y(p.y));
+  const g = root.selectAll("g.series").data(lines).join("g").attr("class", "series");
+  g.append("path").attr("d", l => line(l.pts)).attr("fill", "none").attr("stroke", l => seriesColor(l.series)).attr("stroke-width", 2).attr("stroke-linejoin", "round").attr("stroke-linecap", "round");
+  const dots = g.selectAll("g.pt").data(l => l.pts.map(p => ({ ...p, series: l.series, tip: `<b>${l.series}, ${fmt(p.x, 0)} persons</b>${fmt(p.y, 3)} ${yLabel}` }))).join("g").attr("class", "pt").attr("transform", p => `translate(${x(p.x)},${y(p.y)})`);
+  dots.append("circle").attr("r", 4).attr("fill", p => seriesColor(p.series)).attr("stroke", "var(--sheet)").attr("stroke-width", 2);
+  dots.append("circle").attr("r", 9).attr("class", "hit").call(d3tips);
   const ends = lines.map(l => ({ l, yy: y(l.pts[l.pts.length - 1].y) })).sort((a, b) => a.yy - b.yy);
   for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < 14) ends[i].yy = ends[i - 1].yy + 14;
-  for (const e of ends) svg.append(svgEl("text", { x: W - R + 8, y: e.yy + 4, class: "lbl" }, `${e.l.series} ${endLabel(e.l)}`));
-  bindTips(svg);
+  root.selectAll("text.end").data(ends).join("text").attr("class", "lbl end").attr("x", W - R + 8).attr("y", e => e.yy + 4).text(e => `${e.l.series} ${endLabel(e.l)}`);
 }
 </script>
 </body>

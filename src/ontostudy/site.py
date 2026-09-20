@@ -66,39 +66,64 @@ def rq2() -> dict:
     return {"cases": cases, "patterns": list(matrix), "matrix": matrix}
 
 
+def load_run(name: str) -> dict | None:
+    """One benchmark run (bench*.csv + sizes*.csv) as plain rows; None if absent."""
+    path = DOCS / "results" / name
+    if not path.exists():
+        return None
+    with open(path) as f:
+        bench = [
+            {"scale": int(r["scale"]), "schema": r["schema"], "query": r["query"],
+             **({"hops": int(r["hops"]), "prop_reads": int(r["prop_reads"])} if "hops" in r else {}),
+             "ms": round(float(r["seconds"]) * 1000, 4), "correct": r["correct"] == "True",
+             **({"runs_ms": [round(float(x) * 1000, 4) for x in r["runs"].split(";")]} if r.get("runs") else {})}
+            for r in csv.DictReader(f)
+        ]
+    sizes_path = DOCS / "results" / name.replace("bench", "sizes")
+    sizes = []
+    if sizes_path.exists():
+        with open(sizes_path) as f:
+            sizes = [{k: (float(v) if k in ("build_seconds", "mbytes") else int(v) if k in ("scale", "nodes", "edges") else v) for k, v in r.items()}
+                     for r in csv.DictReader(f)]
+    return {
+        "scales": sorted({b["scale"] for b in bench}),
+        "schemas": list(dict.fromkeys(b["schema"] for b in bench)),
+        "bench": bench,
+        "sizes": sizes,
+    }
+
+
 def rq3() -> dict:
     questions = [
         {"id": r[0], "question": r[1], "kind": r[2]}
         for r in md_tables((ROOT / "src/ontostudy/queries/QUESTIONS.md").read_text())[0][1:]
     ]
-    with open(DOCS / "results" / "bench.csv") as f:
-        bench = [
-            {"scale": int(r["scale"]), "schema": r["schema"], "query": r["query"],
-             "hops": int(r["hops"]), "prop_reads": int(r["prop_reads"]),
-             "ms": round(float(r["seconds"]) * 1000, 4), "correct": r["correct"] == "True"}
-            for r in csv.DictReader(f)
-        ]
-    with open(DOCS / "results" / "sizes.csv") as f:
-        sizes = [
-            {"scale": int(r["scale"]), "schema": r["schema"], "build_seconds": float(r["build_seconds"]),
-             "nodes": int(r["nodes"]), "edges": int(r["edges"]), "mbytes": float(r["mbytes"])}
-            for r in csv.DictReader(f)
-        ]
+    main = load_run("bench.csv")
+    followups = {k: v for k, v in ((tag, load_run(name)) for tag, name in
+                 (("indexed", "bench_indexed.csv"), ("skew", "bench_skew.csv"), ("kuzu", "bench_kuzu.csv"))) if v}
+    writes_path = DOCS / "results" / "writes.csv"
+    writes = []
+    if writes_path.exists():
+        with open(writes_path) as f:
+            writes = [{"scale": int(r["scale"]), "schema": r["schema"], "update": r["update"],
+                       "records": int(r["records"]), "us": round(float(r["seconds"]) * 1e6, 2)} for r in csv.DictReader(f)]
     results = (DOCS / "results" / "RESULTS.md").read_text()
     hyp_table = next(t for t in md_tables(results) if t[0][:1] == [""] and t[1][0].startswith("H"))
     hypotheses = []
     for hid, statement, verdict in hyp_table[1:]:
         m = re.match(r"\*\*(.+?)\*\*:?\s*(.*)", verdict)
         hypotheses.append({"id": hid, "statement": statement, "verdict": m.group(1), "note": m.group(2)})
-    run = re.search(r"Run on (\d{4}-\d{2}-\d{2})", results).group(1)
+    run = re.search(r"[Rr]un on (\d{4}-\d{2}-\d{2})", results).group(1)
     return {
         "run_date": run,
-        "scales": sorted({b["scale"] for b in bench}),
-        "schemas": ["flat", "mid", "normalized"],
+        "scales": main["scales"],
+        "schemas": main["schemas"],
         "queries": questions,
-        "bench": bench,
-        "sizes": sizes,
+        "bench": main["bench"],
+        "sizes": main["sizes"],
         "hypotheses": hypotheses,
+        "followups": followups,
+        "writes": writes,
     }
 
 

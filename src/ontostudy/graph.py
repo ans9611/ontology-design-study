@@ -21,6 +21,7 @@ class Graph:
         self.by_type: dict[str, list[int]] = defaultdict(list)
         self.hops = 0          # edge traversals since reset
         self.prop_reads = 0    # property reads since reset
+        self.indexes: dict[str, dict] = {}   # secondary indexes a schema chooses to maintain; counted in nbytes
 
     # --- construction
     def add_node(self, nid: int, ntype: str, **props: Any) -> int:
@@ -73,4 +74,4 @@ class Graph:
                 s += sum(sz(x) for x in o)
             return s
 
-        return sz(self.node_type) + sz(self.props) + sz(self.out) + sz(self.inn) + sz(self.by_type)
+        return sz(self.node_type) + sz(self.props) + sz(self.out) + sz(self.inn) + sz(self.by_type) + sz(self.indexes)

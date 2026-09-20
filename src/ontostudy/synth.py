@@ -10,6 +10,11 @@ the same shape as SNB: a preferential-attachment friendship graph, posts per
 person proportional to degree, comments as reply trees.
 
 Dated note (docs/hypotheses.md) records why this replaces LDBC Datagen.
+
+`skew` > 0 draws each person's city, employers and each message's tags from a
+Zipf distribution over the entities (weight 1 / rank**skew) instead of
+uniformly, so a few cities, companies and tags carry most of the fan-in. The
+default 0 reproduces the main run exactly.
 """
 
 from __future__ import annotations
@@ -37,7 +42,7 @@ class Dataset:
     countries: list[dict] = field(default_factory=list)    # id, name
 
 
-def generate(n_persons: int, seed: int = 0) -> Dataset:
+def generate(n_persons: int, seed: int = 0, skew: float = 0.0) -> Dataset:
     rng = random.Random(seed)
     D = Dataset(n_persons, seed)
     nid = [0]
@@ -45,6 +50,18 @@ def generate(n_persons: int, seed: int = 0) -> Dataset:
     def new() -> int:
         nid[0] += 1
         return nid[0]
+
+    def pick(pool, k=1):
+        """k distinct items, uniform when skew == 0, Zipf by list position otherwise."""
+        if not skew:
+            return rng.sample(pool, k)
+        w = [1 / (i + 1) ** skew for i in range(len(pool))]
+        out = []
+        while len(out) < k:
+            x = rng.choices(pool, w)[0]
+            if x not in out:
+                out.append(x)
+        return out
 
     # places
     n_countries = max(5, n_persons // 400)
@@ -76,7 +93,7 @@ def generate(n_persons: int, seed: int = 0) -> Dataset:
     # persons
     for i in range(n_persons):
         D.persons.append({"id": new(), "firstName": f"P{i}", "birthdayMonth": rng.randint(1, 12),
-                          "cityId": rng.choice(D.cities)["id"]})
+                          "cityId": pick(D.cities)[0]["id"]})
     pid = [p["id"] for p in D.persons]
     city_country = {c["id"]: c["countryId"] for c in D.cities}
 
@@ -99,7 +116,7 @@ def generate(n_persons: int, seed: int = 0) -> Dataset:
 
     # work
     for p in D.persons:
-        for o in rng.sample(companies, rng.randint(1, 2)):
+        for o in pick(companies, rng.randint(1, 2)):
             D.work.append((p["id"], o["id"], rng.randint(2000, 2020)))
 
     # forums and memberships
@@ -123,14 +140,14 @@ def generate(n_persons: int, seed: int = 0) -> Dataset:
             continue
         for _ in range(1 + deg[p["id"]] // 3):
             post = {"id": new(), "creator": p["id"], "forum": rng.choice(forums), "date": rng.randint(20180101, 20221231),
-                    "tags": [t["id"] for t in rng.sample(D.tags, rng.randint(1, 3))]}
+                    "tags": [t["id"] for t in pick(D.tags, rng.randint(1, 3))]}
             D.posts.append(post)
     all_msgs = [po["id"] for po in D.posts]
     for po in D.posts:
         parent = po["id"]
         for _ in range(rng.randint(0, 4)):
             c = {"id": new(), "creator": rng.choice(pid), "replyOf": parent, "date": po["date"] + rng.randint(0, 100),
-                 "tags": [t["id"] for t in rng.sample(D.tags, rng.randint(0, 2))]}
+                 "tags": [t["id"] for t in pick(D.tags, rng.randint(0, 2))]}
             D.comments.append(c); all_msgs.append(c["id"])
             if rng.random() < 0.5:
                 parent = c["id"]

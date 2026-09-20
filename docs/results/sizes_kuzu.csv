@@ -1,0 +1,10 @@
+scale,schema,build_seconds,mbytes
+1000,flat,0.176,8.0
+1000,mid,0.413,15.3
+1000,normalized,0.866,36.5
+3000,flat,0.219,9.8
+3000,mid,0.458,18.5
+3000,normalized,0.99,45.4
+10000,flat,0.445,16.4
+10000,mid,0.628,27.9
+10000,normalized,1.378,71.1

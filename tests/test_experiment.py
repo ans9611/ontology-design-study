@@ -2,7 +2,7 @@ import pytest
 
 from ontostudy.bench import make_args
 from ontostudy.queries import QUERIES
-from ontostudy.schemas import SCHEMAS
+from ontostudy.schemas import SCHEMAS, VARIANTS
 from ontostudy.synth import generate
 import random
 
@@ -40,3 +40,24 @@ def test_flat_reverse_lookup_scans(data):
         S.G.reset(); S.persons_in_city(city)
     assert schemas["flat"].G.hops >= len(D.persons)
     assert schemas["mid"].G.hops < len(D.persons)
+
+
+def test_flat_indexed_agrees_and_answers_reverse_lookups_without_a_scan(data):
+    D, schemas, args = data
+    S = VARIANTS["flat_indexed"](D)
+    for qid, fn in QUERIES.items():
+        assert [fn(S, a) for a in args] == [fn(schemas["mid"], a) for a in args], qid
+    S.G.reset(); S.persons_in_city(D.cities[0]["name"])
+    assert S.G.hops < len(D.persons)
+    assert S.G.nbytes() > schemas["flat"].G.nbytes()
+
+
+def test_skew_concentrates_fan_in_and_keeps_answers_consistent():
+    D0, D1 = generate(300, seed=1), generate(300, seed=1, skew=1.0)
+    top = lambda D: max(sum(p["cityId"] == c["id"] for p in D.persons) for c in D.cities)
+    assert top(D1) > 2 * top(D0)
+    schemas = {n: c(D1) for n, c in {**SCHEMAS, **VARIANTS}.items()}
+    args = make_args(D1, random.Random(1), 3, weighted=True)
+    for qid, fn in QUERIES.items():
+        answers = [[fn(S, a) for a in args] for S in schemas.values()]
+        assert all(x == answers[0] for x in answers), qid

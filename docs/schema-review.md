@@ -79,10 +79,10 @@ Provenance: `[official]` is stated in Neo4j documentation, `[field]` is a commun
 | Direction of an effect | yes, for every finding above | yes |
 | Size of the effect | no; "supernodes degrade traversal" has no number | yes: 2.03× per reification, 768× for an unindexed reverse lookup |
 | Scale dependence | no | yes: slope per query, and the fact that the flat penalty is invisible at 1,000 persons |
-| Supernodes | yes, with a detection query and mitigations | **no**: the generator caps fan-in. At 10,000 persons the highest-degree node is a `Person` with 570 edges; `City` and `Organisation` medians are about 100 and 200. A real `City` node would carry millions of edges, and mid's reverse lookups would not stay at slope 0 |
-| Constraints and indexes | yes | no; the engine has neither |
+| Supernodes | yes, with a detection query and mitigations | **not in the main run**: the generator caps fan-in. At 10,000 persons the highest-degree node is a `Person` with 570 edges; `City` and `Organisation` medians are about 100 and 200. The Zipf follow-up (RESULTS, "Heavy-tailed fan-in") was added for this: with the largest city at 1,950 persons and the largest tag on 19,691 messages, mid's reverse lookups no longer stay at slope 0 |
+| Constraints and indexes | yes | the Python engine has neither; the indexed follow-up adds three dictionaries and the Kùzu run has primary-key indexes only |
 
-The last two rows are additions for the threats section of RESULTS and for the next run: a generator with a heavy-tailed entity fan-in (a few cities holding most persons) and a flat variant with property indexes.
+Both rows led to follow-up runs, reported in RESULTS: a generator with heavy-tailed entity fan-in, a flat variant with reverse indexes, the six diagnostic queries on Kùzu, and a write-path benchmark.
 
 ## Bearing on the guidelines
 

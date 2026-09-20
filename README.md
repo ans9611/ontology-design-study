@@ -2,7 +2,7 @@
 
 **Structural design choices in enterprise ontologies and their cost: a literature review, multiple-case study, and controlled experiment.**
 
-Yechan Moon · started September 2026 · status: protocol stage
+Yechan Moon · started September 2026 · status: review screened, experiment run, write-up pending
 
 ---
 
@@ -93,6 +93,7 @@ The centrality analysis reuses `PPRMatrix` from [PageRank_Empirical_Analysis](ht
 
 ```
 docs/
+    results/          RQ3 results, figures and raw CSVs
     protocol.md       SLR protocol
     search-log.csv    every search run, dated
     slr/              candidate lists per string, with screening columns
@@ -104,10 +105,11 @@ references/
 src/ontostudy/
     slr.py            OpenAlex search runner for the review protocol
     check_refs.py     Crossref check of references.bib
-    schemas/          flat / mid / normalized models
-    queries/          twenty benchmark questions, one version per schema
-    loader.py         LDBC SNB loader
-    bench.py          hop count, latency, memory per query and scale factor
+    synth.py          LDBC-SNB-shaped synthetic data generator
+    graph.py          in-memory property graph with a hop counter
+    schemas/          flat / mid / normalized builders behind one accessor interface
+    queries/          the twenty questions, written once against the interface
+    bench.py          hop count, latency, memory per query, schema and scale
 notebooks/
 tests/
 ```
@@ -118,18 +120,21 @@ pip install -e ".[dev]"
 pytest
 
 python -m ontostudy.slr          # run the protocol's searches against OpenAlex, log hits, write candidates
+python -m ontostudy.screen ...   # record screening decisions into a candidate CSV
+python -m ontostudy.snowball     # backward/forward snowballing from the included set
 python -m ontostudy.check_refs   # verify every DOI in references.bib against Crossref
+python -m ontostudy.bench        # RQ3: three schemas x twenty queries x three scales
 ```
 
 ## 8. Timeline
 
-| weeks | deliverable |
-|---|---|
-| 1–2 | search log complete, 40–60 papers screened, metric matrix |
-| 3–5 | eight case files complete, cross-case pattern table |
-| 6–8 | loader, three schemas, twenty queries, harness |
-| 9–10 | runs at three scale factors, statistics |
-| 11–12 | write-up, triangulation across the three strands |
+| weeks | deliverable | status |
+|---|---|---|
+| 1–2 | search log, screening, metric matrix | done: 929 candidates screened, 188 included ([protocol](docs/protocol.md), [matrix](docs/metrics-matrix.md)) |
+| 3–5 | eight case files, cross-case pattern table | drafted, figures to verify against sources ([cases](docs/cases/)) |
+| 6–8 | generator, three schemas, twenty queries, harness | done ([src](src/ontostudy/)) |
+| 9–10 | runs at three scales, statistics | done: [results](docs/results/RESULTS.md) |
+| 11–12 | write-up, triangulation | pending; data extraction from the 188 included papers is the next step |
 
 ## References
 

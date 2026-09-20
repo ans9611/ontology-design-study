@@ -21,3 +21,7 @@ Written before any experiment is run. Do not edit after the first benchmark; add
 ## Notes
 
 (dated entries only)
+
+**2026-09-20.** LDBC Datagen requires a Spark/Hadoop installation and produces multi-GB outputs; instead a deterministic generator with the same entity and relation types and the same degree shape was written (`ontostudy.synth`). The twenty questions were kept as specified. Scale factors are expressed as persons (1,000 / 3,000 / 10,000) rather than LDBC SF 0.1 / 1 / 3. Engine is an in-memory property graph with a hop counter rather than a database server. None of the four hypotheses was changed.
+
+**2026-09-20, after the run.** Verdicts recorded in results/RESULTS.md: H1 supported, H2 supported in the direction tested, H3 refuted as stated (constant factor, not higher order), H4 partly refuted (60%, not 80%).

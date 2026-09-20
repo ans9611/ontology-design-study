@@ -17,7 +17,7 @@ Yechan Moon · started September 2026 · status: review screened, experiment run
 | finding | number | strand |
 |---|---|---|
 | Reifying a relation costs a constant factor on every query that crosses it | 2.03× hops, 2.3× latency, 2.5× memory over the mid schema, the same at every scale (H1 supported, H3 refuted) | RQ3, measured |
-| Folding an entity into a property with no index turns reverse lookups into scans | Q18 on flat reads 768× the records mid does; latency exponent 0.94 | RQ3, measured |
+| Folding an entity into a property with no index turns reverse lookups into scans | Q18 on flat reads 768× the records mid does; latency exponent 1.09 | RQ3, measured |
 | A small index removes that penalty entirely | three reverse indexes cost 2 MB on 308 MB; flat is then within 20% of the best on 20 of 20 questions | RQ3, follow-up |
 | Copying values wins reads and loses writes in proportion to fan-in | renaming a city rewrites 95 person records on flat and 1 node on mid | RQ3, write path |
 | No ontology quality framework measures operational cost | 0 of 7 frameworks; one names it and scores it from structural proxies | RQ1, literature |

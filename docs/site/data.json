@@ -11665,7 +11665,6 @@
       "label": "P0",
       "props": {
        "country": "Country2",
-       "city": "City2_1",
        "employers": [
         [
          "Company3_0",
@@ -11677,7 +11676,8 @@
          "Country1",
          2006
         ]
-       ]
+       ],
+       "city": "City2_1"
       }
      },
      {
@@ -11687,7 +11687,6 @@
       "label": "P5",
       "props": {
        "country": "Country2",
-       "city": "City2_1",
        "employers": [
         [
          "Company2_2",
@@ -11699,7 +11698,8 @@
          "Country4",
          2017
         ]
-       ]
+       ],
+       "city": "City2_1"
       }
      },
      {
@@ -11709,14 +11709,14 @@
       "label": "P6",
       "props": {
        "country": "Country0",
-       "city": "City0_2",
        "employers": [
         [
          "Company5_1",
          "Country4",
          2002
         ]
-       ]
+       ],
+       "city": "City0_2"
       }
      },
      {
@@ -12836,5 +12836,142 @@
     ]
    }
   }
- }
+ },
+ "references": [
+  {
+   "n": 1,
+   "text": "T. R. Gruber. A translation approach to portable ontology specifications. *Knowledge Acquisition*, 5(2):199–220, 1993.",
+   "doi": "10.1006/knac.1993.1008"
+  },
+  {
+   "n": 2,
+   "text": "M. Uschold and M. Gruninger. Ontologies: principles, methods and applications. *The Knowledge Engineering Review*, 11(2):93–136, 1996.",
+   "doi": "10.1017/S0269888900007797"
+  },
+  {
+   "n": 3,
+   "text": "M. Fernández-López, A. Gómez-Pérez, and N. Juristo. METHONTOLOGY: From ontological art towards ontological engineering. *AAAI Spring Symposium on Ontological Engineering*, 1997.",
+   "doi": null
+  },
+  {
+   "n": 4,
+   "text": "N. F. Noy and D. L. McGuinness. Ontology Development 101: A guide to creating your first ontology. Stanford KSL Technical Report KSL-01-05, 2001.",
+   "doi": null
+  },
+  {
+   "n": 5,
+   "text": "S. Tartir, I. B. Arpinar, M. Moore, A. P. Sheth, and B. Aleman-Meza. OntoQA: Metric-based ontology quality analysis. *IEEE Workshop on Knowledge Acquisition from Distributed, Autonomous, Semantically Heterogeneous Data and Knowledge Sources*, 2005.",
+   "doi": null
+  },
+  {
+   "n": 6,
+   "text": "A. Duque-Ramos, J. T. Fernández-Breis, R. Stevens, and N. Aussenac-Gilles. OQuaRE: A SQuaRE-based approach for evaluating the quality of ontologies. *Journal of Research and Practice in Information Technology*, 43(2):159–176, 2011.",
+   "doi": null
+  },
+  {
+   "n": 7,
+   "text": "D. Vrandečić. Ontology evaluation. In S. Staab and R. Studer (eds.), *Handbook on Ontologies*, 2nd ed., Springer, 2009.",
+   "doi": "10.1007/978-3-540-92673-3_13"
+  },
+  {
+   "n": 8,
+   "text": "O. Erling et al. The LDBC Social Network Benchmark: Interactive workload. *Proc. ACM SIGMOD*, 619–630, 2015.",
+   "doi": "10.1145/2723372.2742786"
+  },
+  {
+   "n": 9,
+   "text": "J. Pérez, M. Arenas, and C. Gutierrez. Semantics and complexity of SPARQL. *ACM Transactions on Database Systems*, 34(3):1–45, 2009.",
+   "doi": "10.1145/1567274.1567278"
+  },
+  {
+   "n": 10,
+   "text": "R. Angles and C. Gutierrez. Survey of graph database models. *ACM Computing Surveys*, 40(1):1–39, 2008.",
+   "doi": "10.1145/1322432.1322433"
+  },
+  {
+   "n": 11,
+   "text": "T. Pellissier Tanon, D. Vrandečić, S. Schaffert, T. Steiner, and L. Pintscher. From Freebase to Wikidata: The great migration. *Proc. WWW*, 1419–1428, 2016.",
+   "doi": "10.1145/2872427.2874809"
+  },
+  {
+   "n": 12,
+   "text": "M. C. Suárez-Figueroa, A. Gómez-Pérez, E. Motta, and A. Gangemi (eds.). *Ontology Engineering in a Networked World*. Springer, 2012.",
+   "doi": "10.1007/978-3-642-24794-1"
+  },
+  {
+   "n": 13,
+   "text": "N. Guarino and C. A. Welty. An overview of OntoClean. In *Handbook on Ontologies*, Springer, 151–171, 2004.",
+   "doi": "10.1007/978-3-540-24750-0_8"
+  },
+  {
+   "n": 14,
+   "text": "H. Paulheim. Knowledge graph refinement: A survey of approaches and evaluation methods. *Semantic Web*, 8(3):489–508, 2017.",
+   "doi": "10.3233/SW-160218"
+  },
+  {
+   "n": 15,
+   "text": "N. Noy, Y. Gao, A. Jain, A. Narayanan, A. Patterson, and J. Taylor. Industry-scale knowledge graphs: Lessons and challenges. *Communications of the ACM*, 62(8):36–43, 2019.",
+   "doi": "10.1145/3331166"
+  },
+  {
+   "n": 16,
+   "text": "D. Vrandečić and M. Krötzsch. Wikidata: A free collaborative knowledgebase. *Communications of the ACM*, 57(10):78–85, 2014.",
+   "doi": "10.1145/2629489"
+  },
+  {
+   "n": 17,
+   "text": "R. V. Guha, D. Brickley, and S. Macbeth. Schema.org: Evolution of structured data on the web. *Communications of the ACM*, 59(2):44–51, 2016.",
+   "doi": "10.1145/2844544"
+  },
+  {
+   "n": 18,
+   "text": "M. Ashburner et al. Gene Ontology: Tool for the unification of biology. *Nature Genetics*, 25(1):25–29, 2000.",
+   "doi": "10.1038/75556"
+  },
+  {
+   "n": 19,
+   "text": "D. B. Lenat. CYC: A large-scale investment in knowledge infrastructure. *Communications of the ACM*, 38(11):33–38, 1995.",
+   "doi": "10.1145/219717.219745"
+  },
+  {
+   "n": 20,
+   "text": "A. Hogan et al. Knowledge graphs. *ACM Computing Surveys*, 54(4):1–37, 2021.",
+   "doi": "10.1145/3447772"
+  },
+  {
+   "n": 21,
+   "text": "A. Bonifati, G. Fletcher, H. Voigt, and N. Yakovets. *Querying Graphs*. Morgan & Claypool, 2018.",
+   "doi": "10.2200/S00873ED1V01Y201808DTM051"
+  },
+  {
+   "n": 22,
+   "text": "B. Kitchenham and S. Charters. Guidelines for performing systematic literature reviews in software engineering. EBSE Technical Report EBSE-2007-01, 2007.",
+   "doi": null
+  },
+  {
+   "n": 23,
+   "text": "R. K. Yin. *Case Study Research and Applications: Design and Methods*, 6th ed. SAGE, 2018.",
+   "doi": null
+  },
+  {
+   "n": 24,
+   "text": "P. Runeson and M. Höst. Guidelines for conducting and reporting case study research in software engineering. *Empirical Software Engineering*, 14(2):131–164, 2009.",
+   "doi": "10.1007/s10664-008-9102-8"
+  },
+  {
+   "n": 25,
+   "text": "Y. Guo, Z. Pan, and J. Heflin. LUBM: A benchmark for OWL knowledge base systems. *Journal of Web Semantics*, 3(2–3):158–182, 2005.",
+   "doi": "10.1016/j.websem.2005.06.005"
+  },
+  {
+   "n": 26,
+   "text": "M. Schmidt, T. Hornung, G. Lausen, and C. Pinkel. SP²Bench: A SPARQL performance benchmark. *Proc. ICDE*, 222–233, 2009.",
+   "doi": "10.1109/ICDE.2009.28"
+  },
+  {
+   "n": 27,
+   "text": "C. Bizer and A. Schultz. The Berlin SPARQL benchmark. *International Journal on Semantic Web and Information Systems*, 5(2):1–24, 2009.",
+   "doi": "10.4018/jswis.2009040101"
+  }
+ ]
 }

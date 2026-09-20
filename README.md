@@ -4,7 +4,46 @@
 
 Yechan Moon · started September 2026 · status: review screened, experiment run, write-up pending
 
-**Interactive summary: <https://ans9611.github.io/ontology-design-study/>** — the three schemas drawn as graphs, a workload-mix calculator, metric coverage (RQ1), the eight-case pattern catalogue (RQ2) and the benchmark with its follow-up runs (RQ3), all computed in the page from the tables in this repository.
+**Interactive summary: <https://ans9611.github.io/ontology-design-study/>** — a plain-language summary, the findings with their numbers, a glossary, the three schemas drawn as graphs, a workload-mix calculator, metric coverage (RQ1), the eight-case pattern catalogue (RQ2), the benchmark with its follow-up runs (RQ3), and the reference list, all computed in the page from the tables in this repository.
+
+---
+
+## Start here
+
+**In one paragraph.** An ontology is the shared vocabulary an organisation uses to describe its data. The choices made while designing it, such as whether a relation becomes a node of its own or whether a place is a node or a text field, are rarely checked against what they will cost once the graph is queried at scale. This study measures that cost three ways: a systematic literature review of what quality metrics measure (RQ1), a multiple-case study of eight industry knowledge graphs, two of them abandoned (RQ2), and a controlled experiment that models one dataset at three normalization depths and measures how the cost of twenty questions grows with graph size (RQ3).
+
+**What was found** (benchmark numbers at 10,000 persons; full tables in [`docs/results/RESULTS.md`](docs/results/RESULTS.md)):
+
+| finding | number | strand |
+|---|---|---|
+| Reifying a relation costs a constant factor on every query that crosses it | 2.03× hops, 2.3× latency, 2.5× memory over the mid schema, the same at every scale (H1 supported, H3 refuted) | RQ3, measured |
+| Folding an entity into a property with no index turns reverse lookups into scans | Q18 on flat reads 768× the records mid does; latency exponent 0.94 | RQ3, measured |
+| A small index removes that penalty entirely | three reverse indexes cost 2 MB on 308 MB; flat is then within 20% of the best on 20 of 20 questions | RQ3, follow-up |
+| Copying values wins reads and loses writes in proportion to fan-in | renaming a city rewrites 95 person records on flat and 1 node on mid | RQ3, write path |
+| No ontology quality framework measures operational cost | 0 of 7 frameworks; one names it and scores it from structural proxies | RQ1, literature |
+| The graphs that lasted recorded provenance per statement | seen in 3 sustained cases and neither non-sustained one; an association, not a cause | RQ2, association |
+
+**How to read this repository.**
+
+| if you want | read |
+|---|---|
+| the findings in five minutes | the [site](https://ans9611.github.io/ontology-design-study/), then [`docs/guidelines.md`](docs/guidelines.md) |
+| the study as a paper | this README from [Abstract](#abstract) on, then [`docs/results/RESULTS.md`](docs/results/RESULTS.md) |
+| the method in detail | [`docs/protocol.md`](docs/protocol.md) (review), [`docs/cases/`](docs/cases/) with its [`CODEBOOK.md`](docs/cases/CODEBOOK.md) (cases), [`docs/hypotheses.md`](docs/hypotheses.md) (experiment, pre-registered) |
+| to reproduce or extend the experiment | [section 7](#7-repository-layout) below, then [`src/ontostudy/schemas/`](src/ontostudy/schemas/) and [`src/ontostudy/queries/`](src/ontostudy/queries/) |
+| an index of every document | [`docs/README.md`](docs/README.md) |
+
+**How to cite.**
+
+```bibtex
+@misc{moon2026ontology,
+  author = {Yechan Moon},
+  title  = {Structural design choices in enterprise ontologies and their cost: a literature review, multiple-case study, and controlled experiment},
+  year   = {2026},
+  url    = {https://github.com/ans9611/ontology-design-study},
+  note   = {Interactive summary at https://ans9611.github.io/ontology-design-study/}
+}
+```
 
 ---
 

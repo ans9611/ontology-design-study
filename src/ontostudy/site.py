@@ -3,7 +3,7 @@
     python -m ontostudy.site            # writes docs/site/data.json
 
 Reads docs/metrics-matrix.md (RQ1), docs/cases/ (RQ2), docs/results/*.csv and
-src/ontostudy/queries/QUESTIONS.md (RQ3), and docs/guidelines.md. Nothing is typed in here by hand; if a
+src/ontostudy/queries/QUESTIONS.md (RQ3), docs/guidelines.md, and the reference list in README.md. Nothing is typed in here by hand; if a
 table changes, rerun this.
 """
 from __future__ import annotations
@@ -202,8 +202,18 @@ def guidelines() -> list[dict]:
     return [{"id": r[0], "guideline": r[1], "evidence": r[2], "strength": r[3]} for r in rows]
 
 
+def references() -> list[dict]:
+    """The numbered list under "## References" in README.md, the numbering every [n] in the docs uses."""
+    text = (ROOT / "README.md").read_text().split("\n## References\n", 1)[1]
+    out = []
+    for m in re.finditer(r"^\[(\d+)\] (.+)$", text, flags=re.M):
+        doi = re.search(r"doi:(\S+)", m.group(2))
+        out.append({"n": int(m.group(1)), "text": re.sub(r"\s*doi:\S+$", "", m.group(2)), "doi": doi.group(1) if doi else None})
+    return out
+
+
 def build() -> dict:
-    return {"rq1": rq1(), "rq2": rq2(), "rq3": rq3(), "guidelines": guidelines(), "schemas": schema_graphs()}
+    return {"rq1": rq1(), "rq2": rq2(), "rq3": rq3(), "guidelines": guidelines(), "schemas": schema_graphs(), "references": references()}
 
 
 if __name__ == "__main__":
